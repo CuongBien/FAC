@@ -1,0 +1,23 @@
+Students must perform the following tasks and submit reports (presenting orally with slides and providing a written MS Word document) in this order:
+1. Signal sets to be used:
+Student groups shall use the signals in the "TinHieuHuanLuyen" (Training Signals) folder to experiment and determine the optimal algorithm parameters (frame length, frame shift, and V/UV classification threshold), and use the signals in the "TinHieuKiemThu" (Testing Signals) folder to report the final results regarding the algorithm's performance.
+2. Manual signal analysis:
+Each student must measure the fundamental period T0 (accurate to 0.1 milliseconds) of a signal segment by manually measuring a specific cycle of the waveform. Calculate the reciprocal of T0 to obtain an estimate of the fundamental frequency F0 (in Hz) in the time domain.
+Hint: Use the WaveSurfer software (right-click on the waveform graph 🡪 Create Pitch Contour pane).
+3. Automatic signal analysis:
+Study the theory and implement two automatic time-domain F0 estimation algorithms using either the autocorrelation function or the Average Magnitude Difference Function (AMDF).
+Note: The F0 range for adults is 70 to 400 Hz (use this range to constrain the F0 search space and avoid "spurious" F0 values ​​caused by signal frames that appear periodic but do not represent actual speech). Reference material: any reputable article.
+4. Requirements:
+Each student in the group must implement and demonstrate one of the two algorithms mentioned above, subject to the following requirements:
+Generate plots showing the results of the autocorrelation function (ACF) or AMDF for two signal frames (selected at will for illustration) and clearly explain how the function facilitates F0 estimation:
+1 frame containing periodic (voiced) speech 🡪 F0 = ? (Hz)
+1 frame containing non-periodic (unvoiced) speech 🡪 F0 undefined.
+Pay attention to analyzing the impact of algorithm parameters on the results:
+Threshold for classifying frames as periodic/non-periodic.
+Frame length (20 ms vs. 30 ms).
+Training data plays a role in determining the algorithm's optimal parameters:
+To determine a reliable V/U (voiced/unvoiced) threshold based on data, students must examine all voiced frames in the training set (using timestamps from *.lab files) and analyze the statistical distribution of the amplitude of the highest/lowest local peak/dip of the normalized ACF/AMDF (meanV=?, stdV=?). Perform the same analysis for unvoiced frames to obtain (meanU=?, stdU=?). Use these two distributions to find a threshold T that separates them (assuming a normal distribution).
+Without a statistical basis, one would have to rely on trial and error (arbitrarily choosing a threshold value), which is unconvincing and unlikely to yield correct results across various signals.
+Alternatively, students may apply the binary search algorithm from [2] or the histogram-based algorithm from [5] to determine the discrimination threshold.
+The performance of the proposed algorithm must be verified and reported using a test signal dataset. To streamline the grading process, each student must run a script that sets up their specific task, processes four test signal files, and generates four figures displaying the input and output (one figure per signal file) in a single execution for the instructor to review.
+The reference results for each *.wav signal file are stored in the corresponding *.lab file; the *.lab file format is described in the README file. Students must use this reference data to quantitatively evaluate the algorithm's accuracy by writing a script to calculate the mean (F0mean) and standard deviation (F0std) of the F0 values ​​derived from the *.wav file. Subsequently, they must write a script to calculate the deviation of these values ​​from the F0mean and F0std values ​​found in the corresponding *.lab file. To provide a visual assessment of the algorithm's accuracy, students must plot the F0 contour for each signal, aligned with the signal's timeline.
