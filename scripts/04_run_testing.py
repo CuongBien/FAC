@@ -28,6 +28,47 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 from src.core.pitch_detector import PitchDetector
 from src.analysis.evaluation import evaluate_against_ground_truth
 from src.visualization.plotter import plot_signal_and_f0_contour
+from src.plugins import (
+    PluginPitchDetector,
+    HysteresisPlugin,
+    EnergyExtensionPlugin,
+    BandpassFilterPlugin,
+)
+
+
+def build_detector_with_plugins(
+    plugins_arg: str,
+    base_detector: PitchDetector,
+    threshold: float,
+):
+    """Build a detector instance, optionally wrapped with selected plugins."""
+    if not plugins_arg or plugins_arg.lower() in ("none", "no", "false", "0"):
+        return base_detector, []
+
+    plugins_list = []
+    p_lower = plugins_arg.lower().strip()
+
+    if p_lower == "all":
+        plugins_list = [
+            BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
+            HysteresisPlugin(t_high=threshold, t_low=0.40),
+            EnergyExtensionPlugin(threshold_discount=0.20),
+        ]
+    else:
+        parts = [p.strip() for p in p_lower.split(",")]
+        for p in parts:
+            if p in ("bandpass", "filter", "bp"):
+                plugins_list.append(BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0))
+            elif p in ("hysteresis", "hys", "schmitt"):
+                plugins_list.append(HysteresisPlugin(t_high=threshold, t_low=0.40))
+            elif p in ("energy", "energy_ext", "edge"):
+                plugins_list.append(EnergyExtensionPlugin(threshold_discount=0.20))
+
+    if not plugins_list:
+        return base_detector, []
+
+    plugin_detector = PluginPitchDetector(base_detector=base_detector, plugins=plugins_list)
+    return plugin_detector, [p.name for p in plugins_list]
 
 
 def run_testing(
@@ -38,6 +79,7 @@ def run_testing(
     hop_duration_ms: float = 10.0,
     f0_min: float = 70.0,
     f0_max: float = 400.0,
+    plugins: str = "none",
     output_dir_fig: str = "outputs/figures",
     output_json: str = "outputs/reports/test_results.json",
     output_csv: str = "outputs/reports/test_summary.csv",
@@ -52,8 +94,8 @@ def run_testing(
         except Exception:
             pass
 
-    # 2. Khởi tạo bộ nhận diện PitchDetector với tham số tối ưu
-    detector = PitchDetector(
+    # 2. Khởi tạo bộ nhận diện PitchDetector (Baseline)
+    base_detector = PitchDetector(
         method="acf",
         frame_duration_ms=frame_duration_ms,
         hop_duration_ms=hop_duration_ms,
@@ -64,6 +106,11 @@ def run_testing(
         use_median_filter=True,
         median_size=3,
     )
+
+    # 3. Cắm các plugin nếu người dùng yêu cầu
+    detector, applied_plugin_names = build_detector_with_plugins(plugins, base_detector, threshold)
+    is_enhanced = len(applied_plugin_names) > 0
+    plugin_desc = f" | Plugins: [{', '.join(applied_plugin_names)}]" if is_enhanced else " | Mode: Baseline (No plugins)"
 
     wav_files = sorted(glob.glob(os.path.join(test_dir, "*.wav")))
     if not wav_files:
@@ -76,7 +123,7 @@ def run_testing(
 
     print("=" * 105)
     print(f"KIỂM THỬ THUẬT TOÁN ACF TRÊN TẬP TÍN HIỆU KIỂM THỬ ({test_dir})")
-    print(f"Tham số: FrameLen={frame_duration_ms}ms, HopLen={hop_duration_ms}ms, Range=[{f0_min:.0f}, {f0_max:.0f}]Hz, Threshold T={threshold:.4f}")
+    print(f"Tham số: FrameLen={frame_duration_ms}ms, HopLen={hop_duration_ms}ms, Range=[{f0_min:.0f}, {f0_max:.0f}]Hz, Threshold T={threshold:.4f}{plugin_desc}")
     print("=" * 105)
     header = f"{'Tên file':<16} | {'Ref F0mean':<10} | {'Pred F0mean':<11} | {'|ΔF0| (Hz)':<10} | {'Lệch %':<7} | {'Ref std':<8} | {'Pred std':<8} | {'|Δstd|':<7} | {'V/UV Acc':<8} | {'F1-Score':<8}"
     print(header)
@@ -108,8 +155,10 @@ def run_testing(
         print(row)
 
         # 5. Xuất hình vẽ cho từng file kiểm thử (1 hình / 1 file)
-        fig_path = os.path.join(output_dir_fig, f"04_test_{file_id}.png")
+        fig_name = f"04_test_enhanced_{file_id}.png" if is_enhanced else f"04_test_{file_id}.png"
+        fig_path = os.path.join(output_dir_fig, fig_name)
         time_sig = np.arange(len(res["signal"])) / res["sample_rate"]
+        title_suffix = f" [Enhanced: {', '.join(applied_plugin_names)}]" if is_enhanced else " [Baseline]"
         plot_signal_and_f0_contour(
             time_sig=time_sig,
             signal=res["signal"],
@@ -120,7 +169,7 @@ def run_testing(
             f0_std=eval_res["pred_f0_std"],
             ref_f0_mean=eval_res["ref_f0_mean"],
             ref_f0_std=eval_res["ref_f0_std"],
-            title=f"Đường bao tần số F0 ước lượng bằng ACF - {base_name} (Fs={res['sample_rate']}Hz)",
+            title=f"Đường bao tần số F0 ước lượng bằng ACF{title_suffix} - {base_name} (Fs={res['sample_rate']}Hz)",
             save_path=fig_path,
         )
 
@@ -190,6 +239,7 @@ if __name__ == "__main__":
     parser.add_argument("--threshold", type=float, default=0.462, help="Ngưỡng dự phòng nếu không có file JSON")
     parser.add_argument("--frame_len", type=float, default=30.0, help="Độ dài khung (ms)")
     parser.add_argument("--hop_len", type=float, default=10.0, help="Độ dịch khung (ms)")
+    parser.add_argument("--plugins", type=str, default="none", help="Plugins: 'none', 'all', 'bandpass', 'hysteresis', 'energy_ext' (or comma-separated).")
     parser.add_argument("--out_fig_dir", type=str, default="outputs/figures", help="Thư mục lưu hình")
     parser.add_argument("--out_json", type=str, default="outputs/reports/test_results.json", help="File JSON kết quả")
     parser.add_argument("--out_csv", type=str, default="outputs/reports/test_summary.csv", help="File CSV kết quả")
@@ -201,6 +251,7 @@ if __name__ == "__main__":
         default_threshold=args.threshold,
         frame_duration_ms=args.frame_len,
         hop_duration_ms=args.hop_len,
+        plugins=args.plugins,
         output_dir_fig=args.out_fig_dir,
         output_json=args.out_json,
         output_csv=args.out_csv,
