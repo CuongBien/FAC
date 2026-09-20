@@ -12,6 +12,7 @@ import glob
 import json
 import os
 import sys
+from typing import Optional
 import numpy as np
 
 # Ensure UTF-8 output on Windows console
