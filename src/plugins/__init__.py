@@ -3,10 +3,12 @@ from .base import BasePlugin
 from .plugin_detector import PluginPitchDetector
 from .hysteresis import HysteresisPlugin
 from .energy_extension import EnergyExtensionPlugin
+from .bandpass_filter import BandpassFilterPlugin
 
 __all__ = [
     "BasePlugin",
     "PluginPitchDetector",
     "HysteresisPlugin",
     "EnergyExtensionPlugin",
+    "BandpassFilterPlugin",
 ]
