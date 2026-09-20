@@ -47,20 +47,22 @@ def build_detector_with_plugins(
 
     plugins_list = []
     p_lower = plugins_arg.lower().strip()
+    parts = [p.strip() for p in p_lower.split(",")]
+    has_bandpass = (p_lower == "all") or any(p in ("bandpass", "filter", "bp") for p in parts)
+    t_low = 0.42 if has_bandpass else 0.40
 
     if p_lower == "all":
         plugins_list = [
             BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
-            HysteresisPlugin(t_high=threshold, t_low=0.40),
+            HysteresisPlugin(t_high=threshold, t_low=t_low),
             EnergyExtensionPlugin(threshold_discount=0.20),
         ]
     else:
-        parts = [p.strip() for p in p_lower.split(",")]
         for p in parts:
             if p in ("bandpass", "filter", "bp"):
                 plugins_list.append(BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0))
             elif p in ("hysteresis", "hys", "schmitt"):
-                plugins_list.append(HysteresisPlugin(t_high=threshold, t_low=0.40))
+                plugins_list.append(HysteresisPlugin(t_high=threshold, t_low=t_low))
             elif p in ("energy", "energy_ext", "edge"):
                 plugins_list.append(EnergyExtensionPlugin(threshold_discount=0.20))
 
@@ -73,8 +75,8 @@ def build_detector_with_plugins(
 
 def run_testing(
     test_dir: str = "TinHieuKiemThu",
-    threshold_file: str = "outputs/reports/threshold_acf.json",
-    default_threshold: float = 0.462,
+    threshold_file: Optional[str] = None,
+    default_threshold: Optional[float] = None,
     frame_duration_ms: float = 30.0,
     hop_duration_ms: float = 10.0,
     f0_min: float = 70.0,
@@ -84,13 +86,31 @@ def run_testing(
     output_json: str = "outputs/reports/test_results.json",
     output_csv: str = "outputs/reports/test_summary.csv",
 ):
-    # 1. Tải ngưỡng tối ưu T từ báo cáo huấn luyện (nếu có)
-    threshold = default_threshold
+    # 1. Tự động chọn file ngưỡng tương ứng với chế độ tiền xử lý
+    p_lower = (plugins or "").lower().strip()
+    parts = [p.strip() for p in p_lower.split(",")]
+    has_bandpass = (p_lower == "all") or any(p in ("bandpass", "filter", "bp") for p in parts)
+
+    if threshold_file is None:
+        if has_bandpass:
+            threshold_file = "outputs/reports/threshold_acf_bandpassprefilter.json"
+            fallback_t = 0.5124
+        else:
+            threshold_file = "outputs/reports/threshold_acf.json"
+            fallback_t = 0.4620
+    else:
+        fallback_t = 0.5124 if has_bandpass else 0.4620
+
+    if default_threshold is not None:
+        threshold = default_threshold
+    else:
+        threshold = fallback_t
+
     if os.path.exists(threshold_file):
         try:
             with open(threshold_file, "r", encoding="utf-8") as f:
                 t_data = json.load(f)
-                threshold = float(t_data.get("threshold_T", default_threshold))
+                threshold = float(t_data.get("threshold_T", threshold))
         except Exception:
             pass
 
@@ -235,8 +255,8 @@ def run_testing(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run pitch detection and evaluation on test signals.")
     parser.add_argument("--test_dir", type=str, default="TinHieuKiemThu", help="Thư mục tín hiệu kiểm thử")
-    parser.add_argument("--threshold_file", type=str, default="outputs/reports/threshold_acf.json", help="File JSON chứa ngưỡng T")
-    parser.add_argument("--threshold", type=float, default=0.462, help="Ngưỡng dự phòng nếu không có file JSON")
+    parser.add_argument("--threshold_file", type=str, default=None, help="File JSON chứa ngưỡng T (mặc định tự chọn theo plugins)")
+    parser.add_argument("--threshold", type=float, default=None, help="Ngưỡng dự phòng nếu không có file JSON")
     parser.add_argument("--frame_len", type=float, default=30.0, help="Độ dài khung (ms)")
     parser.add_argument("--hop_len", type=float, default=10.0, help="Độ dịch khung (ms)")
     parser.add_argument("--plugins", type=str, default="none", help="Plugins: 'none', 'all', 'bandpass', 'hysteresis', 'energy_ext' (or comma-separated).")

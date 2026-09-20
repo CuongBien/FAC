@@ -44,35 +44,71 @@ def run_all_combinations(
 ):
     files = ["phone_F2", "phone_M2", "studio_F2", "studio_M2"]
 
-    # Định nghĩa toàn bộ 8 tổ hợp (2^3)
+    # 1. Tải ngưỡng tối ưu tương ứng: Baseline (chưa lọc) vs Bandpass (đã lọc)
+    t_base = 0.4620
+    t_bp = 0.5124
+    if os.path.exists("outputs/reports/threshold_acf.json"):
+        try:
+            with open("outputs/reports/threshold_acf.json", "r", encoding="utf-8") as f:
+                t_base = float(json.load(f).get("threshold_T", 0.4620))
+        except Exception:
+            pass
+
+    if os.path.exists("outputs/reports/threshold_acf_bandpassprefilter.json"):
+        try:
+            with open("outputs/reports/threshold_acf_bandpassprefilter.json", "r", encoding="utf-8") as f:
+                t_bp = float(json.load(f).get("threshold_T", 0.5124))
+        except Exception:
+            pass
+
+    # Bộ nhận diện cơ sở cho nhóm chưa lọc và nhóm đã lọc
+    base_raw = PitchDetector(threshold=t_base)
+    base_filtered = PitchDetector(threshold=t_bp)
+
+    # Định nghĩa toàn bộ 8 tổ hợp (2^3) theo đúng phân phối ngưỡng
     configs = {
-        "1. Baseline (Gốc)": PitchDetector(threshold=0.462),
-        "2. [Hysteresis]": PluginPitchDetector(plugins=[
-            HysteresisPlugin(t_high=0.462, t_low=0.40),
-        ]),
-        "3. [Energy Ext]": PluginPitchDetector(plugins=[
-            EnergyExtensionPlugin(threshold_discount=0.20),
-        ]),
-        "4. [Bandpass Filter]": PluginPitchDetector(plugins=[
-            BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
-        ]),
-        "5. [Hysteresis + Energy Ext]": PluginPitchDetector(plugins=[
-            HysteresisPlugin(t_high=0.462, t_low=0.40),
-            EnergyExtensionPlugin(threshold_discount=0.20),
-        ]),
-        "6. [Bandpass + Hysteresis]": PluginPitchDetector(plugins=[
-            BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
-            HysteresisPlugin(t_high=0.462, t_low=0.40),
-        ]),
-        "7. [Bandpass + Energy Ext]": PluginPitchDetector(plugins=[
-            BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
-            EnergyExtensionPlugin(threshold_discount=0.20),
-        ]),
-        "8. [Cả 3 Plugins]": PluginPitchDetector(plugins=[
-            BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
-            HysteresisPlugin(t_high=0.462, t_low=0.40),
-            EnergyExtensionPlugin(threshold_discount=0.20),
-        ]),
+        "1. Baseline (Gốc)": PitchDetector(threshold=t_base),
+        "2. [Hysteresis]": PluginPitchDetector(
+            base_detector=PitchDetector(threshold=t_base),
+            plugins=[HysteresisPlugin(t_high=t_base, t_low=0.40)],
+        ),
+        "3. [Energy Ext]": PluginPitchDetector(
+            base_detector=PitchDetector(threshold=t_base),
+            plugins=[EnergyExtensionPlugin(threshold_discount=0.20)],
+        ),
+        "4. [Bandpass Filter]": PluginPitchDetector(
+            base_detector=PitchDetector(threshold=t_bp),
+            plugins=[BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0)],
+        ),
+        "5. [Hysteresis + Energy Ext]": PluginPitchDetector(
+            base_detector=PitchDetector(threshold=t_base),
+            plugins=[
+                HysteresisPlugin(t_high=t_base, t_low=0.40),
+                EnergyExtensionPlugin(threshold_discount=0.20),
+            ],
+        ),
+        "6. [Bandpass + Hysteresis]": PluginPitchDetector(
+            base_detector=PitchDetector(threshold=t_bp),
+            plugins=[
+                BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
+                HysteresisPlugin(t_high=t_bp, t_low=0.42),
+            ],
+        ),
+        "7. [Bandpass + Energy Ext]": PluginPitchDetector(
+            base_detector=PitchDetector(threshold=t_bp),
+            plugins=[
+                BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
+                EnergyExtensionPlugin(threshold_discount=0.20),
+            ],
+        ),
+        "8. [Cả 3 Plugins]": PluginPitchDetector(
+            base_detector=PitchDetector(threshold=t_bp),
+            plugins=[
+                BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
+                HysteresisPlugin(t_high=t_bp, t_low=0.42),
+                EnergyExtensionPlugin(threshold_discount=0.20),
+            ],
+        ),
     }
 
     print("=" * 125)
