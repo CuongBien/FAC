@@ -1,0 +1,82 @@
+{
+  "params": {
+    "method": "acf",
+    "frame_duration_ms": 30.0,
+    "hop_duration_ms": 10.0,
+    "threshold_T": 0.5124,
+    "f0_min": 70.0,
+    "f0_max": 400.0
+  },
+  "average_metrics": {
+    "mean_abs_error_f0": 2.67,
+    "mean_rel_error_pct": 1.9,
+    "mean_v_uv_accuracy": 85.27,
+    "mean_voiced_f1": 92.36
+  },
+  "files": [
+    {
+      "file": "phone_F2.wav",
+      "sample_rate": 16000,
+      "duration": 4.8,
+      "ref_f0_mean": 145.0,
+      "pred_f0_mean": 150.74,
+      "abs_error_mean": 5.74,
+      "rel_error_mean_pct": 3.96,
+      "ref_f0_std": 33.7,
+      "pred_f0_std": 31.2,
+      "abs_error_std": 2.5,
+      "rel_error_std_pct": 7.43,
+      "accuracy": 78.87,
+      "voiced_f1": 88.02,
+      "figure_path": "outputs/figures\\04_test_enhanced_phone_F2.png"
+    },
+    {
+      "file": "phone_M2.wav",
+      "sample_rate": 16000,
+      "duration": 2.8,
+      "ref_f0_mean": 129.0,
+      "pred_f0_mean": 132.77,
+      "abs_error_mean": 3.77,
+      "rel_error_mean_pct": 2.93,
+      "ref_f0_std": 18.6,
+      "pred_f0_std": 13.8,
+      "abs_error_std": 4.8,
+      "rel_error_std_pct": 25.79,
+      "accuracy": 80.58,
+      "voiced_f1": 92.0,
+      "figure_path": "outputs/figures\\04_test_enhanced_phone_M2.png"
+    },
+    {
+      "file": "studio_F2.wav",
+      "sample_rate": 44100,
+      "duration": 3.149,
+      "ref_f0_mean": 200.0,
+      "pred_f0_mean": 200.21,
+      "abs_error_mean": 0.21,
+      "rel_error_mean_pct": 0.11,
+      "ref_f0_std": 46.1,
+      "pred_f0_std": 43.66,
+      "abs_error_std": 2.44,
+      "rel_error_std_pct": 5.29,
+      "accuracy": 92.63,
+      "voiced_f1": 96.32,
+      "figure_path": "outputs/figures\\04_test_enhanced_studio_F2.png"
+    },
+    {
+      "file": "studio_M2.wav",
+      "sample_rate": 44100,
+      "duration": 2.382,
+      "ref_f0_mean": 155.0,
+      "pred_f0_mean": 155.95,
+      "abs_error_mean": 0.95,
+      "rel_error_mean_pct": 0.61,
+      "ref_f0_std": 30.8,
+      "pred_f0_std": 30.11,
+      "abs_error_std": 0.69,
+      "rel_error_std_pct": 2.22,
+      "accuracy": 88.98,
+      "voiced_f1": 93.12,
+      "figure_path": "outputs/figures\\04_test_enhanced_studio_M2.png"
+    }
+  ]
+}

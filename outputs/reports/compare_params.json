@@ -1,0 +1,28 @@
+{
+  "file": "phone_M1.wav",
+  "threshold": 0.462,
+  "frame_20ms": {
+    "num_frames": 415,
+    "num_voiced": 165,
+    "num_unvoiced": 97,
+    "num_silence": 153,
+    "f0_mean": 136.55,
+    "f0_std": 35.41,
+    "abs_error_mean": 14.55,
+    "rel_error_mean_pct": 11.93,
+    "accuracy": 71.08,
+    "f1_score": 80.2
+  },
+  "frame_30ms": {
+    "num_frames": 414,
+    "num_voiced": 191,
+    "num_unvoiced": 77,
+    "num_silence": 146,
+    "f0_mean": 129.06,
+    "f0_std": 26.4,
+    "abs_error_mean": 7.06,
+    "rel_error_mean_pct": 5.79,
+    "accuracy": 78.5,
+    "f1_score": 87.36
+  }
+}

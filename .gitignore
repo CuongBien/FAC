@@ -12,10 +12,10 @@ env/
 venv/
 ENV/
 
-# Output artifacts
-outputs/figures/*.png
-outputs/reports/*.csv
-outputs/reports/*.json
+# Output artifacts (Tracked for GitHub README display)
+!outputs/figures/*.png
+!outputs/reports/*.csv
+!outputs/reports/*.json
 !outputs/figures/.gitkeep
 !outputs/reports/.gitkeep
 
