@@ -1,7 +1,7 @@
 """Statistical distribution extraction and optimal threshold calculation (Gaussian threshold / histogram)."""
 import glob
 import os
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
 from src.core.audio import load_wav, frame_signal
@@ -16,6 +16,7 @@ def extract_training_distributions(
     hop_duration_ms: float = 10.0,
     f0_min: float = 70.0,
     f0_max: float = 400.0,
+    plugins: Optional[List[Any]] = None,
 ) -> Dict:
     """Analyze all voiced and unvoiced frames in the training dataset using *.lab timestamps.
 
@@ -26,6 +27,7 @@ def extract_training_distributions(
         hop_duration_ms: Frame shift in milliseconds.
         f0_min: Minimum pitch search frequency in Hz.
         f0_max: Maximum pitch search frequency in Hz.
+        plugins: Optional list of plugins (e.g. BandpassFilterPlugin) applied before framing.
 
     Returns:
         dict: {
@@ -54,6 +56,12 @@ def extract_training_distributions(
             continue
 
         sr, signal, _ = load_wav(wav_path)
+
+        if plugins:
+            for p in plugins:
+                if hasattr(p, "pre_process_signal"):
+                    signal = p.pre_process_signal(signal, sr)
+
         lab_data = parse_lab_file(lab_path)
 
         frames, frame_times = frame_signal(

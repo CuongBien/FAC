@@ -19,6 +19,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from src.analysis.threshold import extract_training_distributions, find_gaussian_threshold
 from src.visualization.plotter import plot_distributions_and_threshold
+from src.plugins.bandpass_filter import BandpassFilterPlugin
 
 
 def run_training(
@@ -28,9 +29,27 @@ def run_training(
     hop_duration_ms: float = 10.0,
     f0_min: float = 70.0,
     f0_max: float = 400.0,
+    plugins: str = "none",
     output_fig: str = "outputs/figures/02_threshold_distribution.png",
     output_json: str = "outputs/reports/threshold_acf.json",
 ):
+    # Cấu hình plugin tiền xử lý (nếu có)
+    plugin_instances = []
+    plugin_names = []
+    if plugins and plugins.lower() not in ("none", "no", "false", "0"):
+        parts = [p.strip().lower() for p in plugins.split(",")]
+        for p in parts:
+            if p in ("bandpass", "bp", "filter", "all"):
+                bp = BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0)
+                plugin_instances.append(bp)
+                plugin_names.append(bp.name)
+
+        # Điều chỉnh tên file mặc định nếu có plugin
+        if output_fig == "outputs/figures/02_threshold_distribution.png":
+            output_fig = f"outputs/figures/02_threshold_distribution_{'_'.join(plugin_names).lower()}.png"
+        if output_json == "outputs/reports/threshold_acf.json":
+            output_json = f"outputs/reports/threshold_acf_{'_'.join(plugin_names).lower()}.json"
+
     # 1. Trích xuất phân bố từ tập huấn luyện
     stats = extract_training_distributions(
         training_dir=train_dir,
@@ -39,6 +58,7 @@ def run_training(
         hop_duration_ms=hop_duration_ms,
         f0_min=f0_min,
         f0_max=f0_max,
+        plugins=plugin_instances if plugin_instances else None,
     )
 
     mean_v, std_v = stats["mean_v"], stats["std_v"]
@@ -49,8 +69,9 @@ def run_training(
     threshold = find_gaussian_threshold(mean_v, std_v, mean_u, std_u)
 
     # 3. In kết quả kỹ thuật gọn gàng
+    plugin_str = f" | Pre-filter: [{', '.join(plugin_names)}]" if plugin_names else " | Mode: Baseline (Unfiltered)"
     print(f"Dataset: {train_dir} ({len(stats['files_processed'])} files: {', '.join(stats['files_processed'])})")
-    print(f"Params: Method={method.upper()}, FrameLen={frame_duration_ms}ms, HopLen={hop_duration_ms}ms, Range=[{f0_min:.0f}, {f0_max:.0f}]Hz")
+    print(f"Params: Method={method.upper()}, FrameLen={frame_duration_ms}ms, HopLen={hop_duration_ms}ms, Range=[{f0_min:.0f}, {f0_max:.0f}]Hz{plugin_str}")
     print(f"Voiced   (V) : N={n_v:4d} frames, mean_V={mean_v:.4f}, std_V={std_v:.4f}")
     print(f"Unvoiced (UV): N={n_u:4d} frames, mean_U={mean_u:.4f}, std_U={std_u:.4f}")
     print(f"Optimal Threshold T = {threshold:.4f}")
@@ -76,6 +97,7 @@ def run_training(
         "hop_duration_ms": hop_duration_ms,
         "f0_min": f0_min,
         "f0_max": f0_max,
+        "plugins": plugin_names,
         "files_processed": stats["files_processed"],
         "num_voiced_frames": n_v,
         "num_unvoiced_frames": n_u,
@@ -102,6 +124,7 @@ if __name__ == "__main__":
     parser.add_argument("--hop_len", type=float, default=10.0, help="Độ dịch khung (ms)")
     parser.add_argument("--f0_min", type=float, default=70.0, help="F0 tối thiểu (Hz)")
     parser.add_argument("--f0_max", type=float, default=400.0, help="F0 tối đa (Hz)")
+    parser.add_argument("--plugins", type=str, default="none", help="Plugins áp dụng lúc train (vd: bandpass)")
     parser.add_argument("--out_fig", type=str, default="outputs/figures/02_threshold_distribution.png", help="Đường dẫn lưu ảnh")
     parser.add_argument("--out_json", type=str, default="outputs/reports/threshold_acf.json", help="Đường dẫn lưu JSON")
 
@@ -113,6 +136,7 @@ if __name__ == "__main__":
         hop_duration_ms=args.hop_len,
         f0_min=args.f0_min,
         f0_max=args.f0_max,
+        plugins=args.plugins,
         output_fig=args.out_fig,
         output_json=args.out_json,
     )
