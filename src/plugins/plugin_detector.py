@@ -79,6 +79,8 @@ class PluginPitchDetector:
         peak_values = np.zeros(num_frames, dtype=np.float64)
         lags = np.zeros(num_frames, dtype=int)
 
+        candidate_f0 = np.zeros(num_frames, dtype=np.float64)
+
         # 4. Frame-by-frame decision with plugin hook
         for i in range(num_frames):
             is_silence = ste[i] < ste_thresh
@@ -93,6 +95,7 @@ class PluginPitchDetector:
             if is_silence:
                 labels[i] = "sil"
                 f0_raw[i] = 0.0
+                candidate_f0[i] = 0.0
                 # Notify plugins of silence frame
                 for p in self.plugins:
                     p.adjust_frame_decision(i, 0.0, 0.0, False, context)
@@ -108,6 +111,7 @@ class PluginPitchDetector:
             )
             peak_values[i] = peak_val
             lags[i] = lag
+            candidate_f0[i] = f0_val
 
             # Baseline decision
             is_voiced = peak_val >= self.base_detector.threshold
@@ -143,10 +147,13 @@ class PluginPitchDetector:
             "frame_times": frame_times,
             "f0_contour": f0_contour,
             "f0_raw": f0_raw,
+            "candidate_f0": candidate_f0,
             "labels": labels,
             "peak_values": peak_values,
             "lags": lags,
             "ste": ste,
+            "ste_thresh": ste_thresh,
+            "threshold": self.base_detector.threshold,
             "num_frames": num_frames,
             "applied_plugins": [p.name for p in self.plugins],
         }
