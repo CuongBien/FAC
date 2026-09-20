@@ -231,3 +231,99 @@ def plot_distributions_and_threshold(
 
     plt.close(fig)
     return fig
+
+
+def plot_parameter_comparison(
+    time_sig: np.ndarray,
+    signal: np.ndarray,
+    results_20ms: dict,
+    results_30ms: dict,
+    eval_20ms: dict,
+    eval_30ms: dict,
+    wav_name: str = "",
+    save_path: Optional[str] = None,
+    title: str = "Khảo sát ảnh hưởng của độ dài khung (Frame Length: 20 ms vs 30 ms)",
+):
+    """Plot comprehensive 3-panel comparison between 20ms and 30ms frame lengths:
+
+    1. Waveform.
+    2. Overlaid F0 contours (20ms vs 30ms) with Ground Truth reference.
+    3. Bar chart of key metrics (Mean error, Voiced frame count, Classification Accuracy).
+    """
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(14, 11), gridspec_kw={"height_ratios": [1, 1.3, 1]})
+    fig.suptitle(f"{title}\nFile: {wav_name}", fontsize=14, fontweight="bold")
+
+    # 1. Waveform
+    ax1.plot(time_sig, signal, color="#444444", linewidth=0.8, label="Dạng sóng tín hiệu")
+    ax1.set_title("1. Dạng sóng tín hiệu (Waveform)", fontsize=11, fontweight="bold")
+    ax1.set_ylabel("Biên độ")
+    ax1.grid(True, linestyle="--", alpha=0.5)
+    ax1.legend(loc="upper right")
+
+    # 2. Overlaid F0 contours
+    t_20 = results_20ms["frame_times"]
+    f0_20 = np.where(results_20ms["f0_contour"] > 0, results_20ms["f0_contour"], np.nan)
+
+    t_30 = results_30ms["frame_times"]
+    f0_30 = np.where(results_30ms["f0_contour"] > 0, results_30ms["f0_contour"], np.nan)
+
+    ref_mean = eval_30ms.get("ref_f0_mean", 0.0)
+
+    ax2.plot(t_20, f0_20, "o--", color="#ff7f0e", markersize=4, linewidth=1.2, alpha=0.8,
+             label=f"Khung 20 ms (F0mean={eval_20ms['pred_f0_mean']} Hz, Err={eval_20ms['abs_error_mean']} Hz)")
+    ax2.plot(t_30, f0_30, "s-", color="#1f77b4", markersize=4, linewidth=1.5, alpha=0.9,
+             label=f"Khung 30 ms (F0mean={eval_30ms['pred_f0_mean']} Hz, Err={eval_30ms['abs_error_mean']} Hz)")
+
+    if ref_mean > 0:
+        ax2.axhline(ref_mean, color="green", linestyle=":", linewidth=2.0, label=f"Ground Truth F0mean = {ref_mean} Hz")
+
+    ax2.set_title("2. So sánh đường bao tần số F0 (F0 Contours)", fontsize=11, fontweight="bold")
+    ax2.set_ylabel("F0 (Hz)")
+    ax2.set_ylim(50, 420)
+    ax2.grid(True, linestyle="--", alpha=0.5)
+    ax2.legend(loc="upper right", frameon=True)
+
+    # 3. Bar chart of comparison metrics
+    labels_bar = ["Sai số F0mean (|ΔF0| Hz)", "Sai số F0std (|Δstd| Hz)", "Số khung Voiced phát hiện", "Độ chính xác V/UV (%)"]
+    vals_20 = [
+        eval_20ms["abs_error_mean"],
+        eval_20ms["abs_error_std"],
+        results_20ms["num_voiced"],
+        eval_20ms["classification_accuracy"],
+    ]
+    vals_30 = [
+        eval_30ms["abs_error_mean"],
+        eval_30ms["abs_error_std"],
+        results_30ms["num_voiced"],
+        eval_30ms["classification_accuracy"],
+    ]
+
+    x = np.arange(len(labels_bar))
+    width = 0.35
+
+    rects1 = ax3.bar(x - width / 2, vals_20, width, label="Khung 20 ms", color="#ff7f0e", alpha=0.85, edgecolor="gray")
+    rects2 = ax3.bar(x + width / 2, vals_30, width, label="Khung 30 ms", color="#1f77b4", alpha=0.85, edgecolor="gray")
+
+    ax3.set_title("3. Bảng số liệu đối sánh định lượng", fontsize=11, fontweight="bold")
+    ax3.set_xticks(x)
+    ax3.set_xticklabels(labels_bar, fontsize=10)
+    ax3.grid(True, axis="y", linestyle="--", alpha=0.5)
+    ax3.legend(loc="upper right")
+
+    # Value labels on bars
+    for r in rects1:
+        h = r.get_height()
+        ax3.annotate(f"{h:.1f}", xy=(r.get_x() + r.get_width() / 2, h), xytext=(0, 3),
+                     textcoords="offset points", ha="center", va="bottom", fontsize=9)
+    for r in rects2:
+        h = r.get_height()
+        ax3.annotate(f"{h:.1f}", xy=(r.get_x() + r.get_width() / 2, h), xytext=(0, 3),
+                     textcoords="offset points", ha="center", va="bottom", fontsize=9)
+
+    plt.tight_layout()
+    if save_path:
+        os.makedirs(os.path.dirname(os.path.abspath(save_path)), exist_ok=True)
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+
+    plt.close(fig)
+    return fig
