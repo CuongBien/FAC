@@ -168,3 +168,66 @@ def plot_signal_and_f0_contour(
 
     plt.close(fig)
     return fig
+
+
+def plot_distributions_and_threshold(
+    values_v: np.ndarray,
+    values_u: np.ndarray,
+    mean_v: float,
+    std_v: float,
+    mean_u: float,
+    std_u: float,
+    threshold: float,
+    method: str = "ACF",
+    save_path: Optional[str] = None,
+    title: str = "Phân bố biên độ cực trị Voiced/Unvoiced và Ngưỡng phân tách tối ưu T",
+):
+    """Plot histograms and fitted Gaussian curves for Voiced and Unvoiced frames, marking threshold T."""
+    fig, ax = plt.subplots(figsize=(11, 6))
+
+    # Range of values
+    all_vals = np.concatenate([values_v, values_u])
+    x_min = max(-0.2, float(np.min(all_vals)) - 0.1)
+    x_max = min(1.2, float(np.max(all_vals)) + 0.1)
+    x_grid = np.linspace(x_min, x_max, 500)
+
+    # Gaussian PDF formula: 1 / (std * sqrt(2*pi)) * exp(-0.5 * ((x - mean)/std)^2)
+    pdf_v = (1.0 / (std_v * np.sqrt(2.0 * np.pi))) * np.exp(-0.5 * ((x_grid - mean_v) / std_v) ** 2)
+    pdf_u = (1.0 / (std_u * np.sqrt(2.0 * np.pi))) * np.exp(-0.5 * ((x_grid - mean_u) / std_u) ** 2)
+
+    # Histograms (density=True to match PDF scale)
+    bins = np.linspace(x_min, x_max, 35)
+    ax.hist(values_u, bins=bins, density=True, alpha=0.45, color="#ff7f0e", edgecolor="white", label=f"Vô thanh UV (N={len(values_u)})")
+    ax.hist(values_v, bins=bins, density=True, alpha=0.45, color="#2ca02c", edgecolor="white", label=f"Hữu thanh V (N={len(values_v)})")
+
+    # Fitted Gaussian lines
+    ax.plot(x_grid, pdf_u, color="#d95f02", linewidth=2.5, linestyle="-", label=f"Gaussian UV: μ={mean_u:.3f}, σ={std_u:.3f}")
+    ax.plot(x_grid, pdf_v, color="#1b9e77", linewidth=2.5, linestyle="-", label=f"Gaussian V: μ={mean_v:.3f}, σ={std_v:.3f}")
+
+    # Threshold line
+    ax.axvline(threshold, color="red", linestyle="--", linewidth=2.2, label=f"Ngưỡng tối ưu T = {threshold:.3f}")
+
+    ax.set_title(title, fontsize=13, fontweight="bold")
+    ax.set_xlabel(f"Biên độ đỉnh cực đại chuẩn hóa của {method.upper()} [R(τ*)/R(0)]", fontsize=11)
+    ax.set_ylabel("Mật độ xác suất (Probability Density)", fontsize=11)
+    ax.set_xlim(x_min, x_max)
+    ax.grid(True, linestyle="--", alpha=0.6)
+    ax.legend(loc="upper right", frameon=True, fontsize=10)
+
+    # Annotation box for summary
+    summary_text = (
+        f"Thuật toán: {method.upper()}\n"
+        f"Khung Hữu thanh: μ_V = {mean_v:.3f}, σ_V = {std_v:.3f}\n"
+        f"Khung Vô thanh : μ_U = {mean_u:.3f}, σ_U = {std_u:.3f}\n"
+        f"Ngưỡng phân tách T = {threshold:.3f}"
+    )
+    ax.text(0.03, 0.92, summary_text, transform=ax.transAxes, fontsize=10,
+            verticalalignment="top", bbox=dict(boxstyle="round,pad=0.5", facecolor="white", alpha=0.85, edgecolor="gray"))
+
+    plt.tight_layout()
+    if save_path:
+        os.makedirs(os.path.dirname(os.path.abspath(save_path)), exist_ok=True)
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+
+    plt.close(fig)
+    return fig

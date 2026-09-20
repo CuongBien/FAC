@@ -1,6 +1,9 @@
-"""Module for audio processing: loading WAV files, framing, windowing, and energy calculation."""
+import warnings
 import numpy as np
 from scipy.io import wavfile
+
+# Suppress metadata chunk warnings in WAV headers
+warnings.filterwarnings("ignore", category=wavfile.WavFileWarning)
 
 
 def load_wav(filepath: str):

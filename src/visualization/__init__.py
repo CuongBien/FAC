@@ -2,6 +2,7 @@
 from .plotter import (
     plot_signal_and_f0_contour,
     plot_frame_acf_comparison,
+    plot_distributions_and_threshold,
 )
 
 # Alias for generic frame analysis
@@ -11,4 +12,5 @@ __all__ = [
     "plot_signal_and_f0_contour",
     "plot_frame_acf_comparison",
     "plot_frame_analysis",
+    "plot_distributions_and_threshold",
 ]
