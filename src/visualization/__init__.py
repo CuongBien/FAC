@@ -4,6 +4,7 @@ from .plotter import (
     plot_frame_acf_comparison,
     plot_distributions_and_threshold,
     plot_parameter_comparison,
+    plot_plugin_contour_comparison,
 )
 
 # Alias for generic frame analysis
@@ -15,4 +16,5 @@ __all__ = [
     "plot_frame_analysis",
     "plot_distributions_and_threshold",
     "plot_parameter_comparison",
+    "plot_plugin_contour_comparison",
 ]

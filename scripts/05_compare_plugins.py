@@ -109,6 +109,43 @@ def run_plugin_comparison(
 
     print("=" * 115)
 
+    # 2. Xuất biểu đồ trực quan đối sánh Baseline vs Enhanced (Combined Plugins) cho cả 4 file
+    fig_dir = "outputs/figures"
+    os.makedirs(fig_dir, exist_ok=True)
+    detector_base = configs["1. Baseline (Gốc)"]
+    detector_enhanced = configs["5. Kết hợp cả 3 Plugins"]
+
+    print("\nĐang xuất biểu đồ trực quan đối sánh Baseline vs Plugins...")
+    generated_figs = []
+    for f_id in files:
+        wav_path = os.path.join(test_dir, f"{f_id}.wav")
+        lab_path = os.path.join(test_dir, f"{f_id}.lab")
+
+        res_base = detector_base.process_file(wav_path)
+        res_enh = detector_enhanced.process_file(wav_path)
+
+        ev_base = evaluate_against_ground_truth(res_base, lab_path)
+        ev_enh = evaluate_against_ground_truth(res_enh, lab_path)
+
+        fig_path = os.path.join(fig_dir, f"05_compare_plugin_{f_id}.png")
+        time_sig = np.arange(len(res_base["signal"])) / res_base["sample_rate"]
+
+        from src.visualization.plotter import plot_plugin_contour_comparison
+        plot_plugin_contour_comparison(
+            time_sig=time_sig,
+            signal=res_base["signal"],
+            time_f0=res_base["frame_times"],
+            f0_baseline=res_base["f0_contour"],
+            f0_enhanced=res_enh["f0_contour"],
+            eval_baseline=ev_base,
+            eval_enhanced=ev_enh,
+            ground_truth_segments=ev_base["gt_segments"],
+            file_name=f"{f_id}.wav",
+            plugin_names_str="Bandpass + Hysteresis + EnergyExt",
+            save_path=fig_path,
+        )
+        generated_figs.append(fig_path)
+
     # Lưu JSON
     os.makedirs(os.path.dirname(os.path.abspath(output_json)), exist_ok=True)
     with open(output_json, "w", encoding="utf-8") as f:
@@ -121,6 +158,9 @@ def run_plugin_comparison(
         for rec in summary_records:
             f.write(f"{rec['config_name']},{rec['files']['phone_F2']['abs_error_mean']},{rec['files']['phone_M2']['abs_error_mean']},{rec['files']['studio_F2']['abs_error_mean']},{rec['files']['studio_M2']['abs_error_mean']},{rec['average_error_hz']},{rec['average_accuracy_pct']},{rec['average_voiced_f1_pct']}\n")
     print(f"Saved: {output_csv}")
+    print(f"Generated {len(generated_figs)} comparison figures in: {fig_dir}/")
+    for fp in generated_figs:
+        print(f"  - {fp}")
 
 
 if __name__ == "__main__":

@@ -330,3 +330,84 @@ def plot_parameter_comparison(
 
     plt.close(fig)
     return fig
+
+
+def plot_plugin_contour_comparison(
+    time_sig: np.ndarray,
+    signal: np.ndarray,
+    time_f0: np.ndarray,
+    f0_baseline: np.ndarray,
+    f0_enhanced: np.ndarray,
+    eval_baseline: dict,
+    eval_enhanced: dict,
+    ground_truth_segments: Optional[list] = None,
+    file_name: str = "",
+    plugin_names_str: str = "Combined Plugins",
+    save_path: Optional[str] = None,
+):
+    """Plot a 3-panel comparison between Baseline and Plugin-enhanced F0 contours."""
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(14, 10), sharex=True)
+    fig.suptitle(f"So sánh đường bao F0: Baseline vs. Cải tiến Plugin ({file_name})", fontsize=14, fontweight="bold")
+
+    # 1. Waveform
+    ax1.plot(time_sig, signal, color="#444444", linewidth=0.8, label="Dạng sóng tín hiệu")
+    ax1.set_ylabel("Biên độ")
+    ax1.set_title("1. Dạng sóng tín hiệu (Waveform)", fontsize=11, fontweight="bold")
+    ax1.grid(True, linestyle="--", alpha=0.5)
+
+    # Shading ground truth segments
+    if ground_truth_segments:
+        color_map = {
+            "v": ("#2ca02c", 0.15, "Hữu thanh (V)"),
+            "uv": ("#ff7f0e", 0.15, "Vô thanh (UV)"),
+            "sil": ("#7f7f7f", 0.10, "Khoảng lặng (Sil)"),
+        }
+        used_labels = set()
+        for start, end, lbl in ground_truth_segments:
+            if lbl in color_map:
+                c, alpha, name = color_map[lbl]
+                lbl_name = name if lbl not in used_labels else ""
+                ax1.axvspan(start, end, color=c, alpha=alpha, label=lbl_name)
+                ax2.axvspan(start, end, color=c, alpha=alpha)
+                ax3.axvspan(start, end, color=c, alpha=alpha)
+                used_labels.add(lbl)
+    ax1.legend(loc="upper right")
+
+    ref_mean = eval_baseline.get("ref_f0_mean", 0.0)
+
+    # 2. Baseline F0 contour
+    f0_base_v = np.where(f0_baseline > 0, f0_baseline, np.nan)
+    ax2.plot(time_f0, f0_base_v, ".-", color="#d62728", markersize=5, linewidth=1.3, label="Baseline F0 (ACF gốc)")
+    if ref_mean > 0:
+        ax2.axhline(ref_mean, color="black", linestyle=":", linewidth=1.5, label=f"Ground Truth = {ref_mean:.1f} Hz")
+    ax2.set_ylabel("F0 (Hz)")
+    ax2.set_ylim(50, 420)
+    ax2.set_title(
+        f"2. Baseline (Chưa dùng Plugin) -> F0mean = {eval_baseline['pred_f0_mean']:.1f} Hz (Sai số: {eval_baseline['abs_error_mean']:.2f} Hz | F1: {eval_baseline['voiced_f1']:.1f}%)",
+        fontsize=11, fontweight="bold", color="#d62728",
+    )
+    ax2.grid(True, linestyle="--", alpha=0.5)
+    ax2.legend(loc="upper right")
+
+    # 3. Enhanced F0 contour
+    f0_enh_v = np.where(f0_enhanced > 0, f0_enhanced, np.nan)
+    ax3.plot(time_f0, f0_enh_v, ".-", color="#1f77b4", markersize=5, linewidth=1.5, label=f"Enhanced F0 ({plugin_names_str})")
+    if ref_mean > 0:
+        ax3.axhline(ref_mean, color="black", linestyle=":", linewidth=1.5, label=f"Ground Truth = {ref_mean:.1f} Hz")
+    ax3.set_xlabel("Thời gian (giây)", fontsize=11)
+    ax3.set_ylabel("F0 (Hz)")
+    ax3.set_ylim(50, 420)
+    ax3.set_title(
+        f"3. Enhanced (Áp dụng {plugin_names_str}) -> F0mean = {eval_enhanced['pred_f0_mean']:.1f} Hz (Sai số: {eval_enhanced['abs_error_mean']:.2f} Hz | F1: {eval_enhanced['voiced_f1']:.1f}%)",
+        fontsize=11, fontweight="bold", color="#1f77b4",
+    )
+    ax3.grid(True, linestyle="--", alpha=0.5)
+    ax3.legend(loc="upper right")
+
+    plt.tight_layout()
+    if save_path:
+        os.makedirs(os.path.dirname(os.path.abspath(save_path)), exist_ok=True)
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+
+    plt.close(fig)
+    return fig
