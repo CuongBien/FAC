@@ -144,15 +144,18 @@ def plot_signal_and_f0_contour(
     f0_voiced = np.where(f0_contour > 0, f0_contour, np.nan)
     ax2.plot(time_f0, f0_voiced, "b.-", markersize=5, linewidth=1.5, label="F0 ước lượng (Hz)")
 
+    if ref_f0_mean is not None and ref_f0_mean > 0:
+        ax2.axhline(ref_f0_mean, color="red", linestyle="--", linewidth=1.5, label=f"Ground Truth F0mean = {ref_f0_mean:.1f} Hz")
+
     stats_str = ""
     if f0_mean is not None:
-        stats_str += f"F0mean = {f0_mean:.1f} Hz, F0std = {f0_std:.1f} Hz"
+        stats_str += f"F0mean ước lượng = {f0_mean:.1f} Hz, F0std = {f0_std:.1f} Hz"
     if ref_f0_mean is not None:
-        stats_str += f"\n(Tham chiếu Lab: F0mean = {ref_f0_mean:.1f} Hz, F0std = {ref_f0_std:.1f} Hz)"
+        stats_str += f"\nTham chiếu Lab   = {ref_f0_mean:.1f} Hz, F0std = {ref_f0_std:.1f} Hz"
 
     if stats_str:
-        ax2.text(0.02, 0.90, stats_str, transform=ax2.transAxes,
-                 fontsize=10, bbox=dict(boxstyle="round,pad=0.5", facecolor="white", alpha=0.8, edgecolor="gray"))
+        ax2.text(0.02, 0.88, stats_str, transform=ax2.transAxes,
+                 fontsize=10, bbox=dict(boxstyle="round,pad=0.5", facecolor="white", alpha=0.85, edgecolor="gray"))
 
     ax2.set_xlabel("Thời gian (giây)", fontsize=11)
     ax2.set_ylabel("Tần số F0 (Hz)", fontsize=11)
