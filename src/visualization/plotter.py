@@ -411,3 +411,60 @@ def plot_plugin_contour_comparison(
 
     plt.close(fig)
     return fig
+
+
+def plot_combinations_ranking(
+    summary_records: list,
+    save_path: Optional[str] = None,
+    title: str = "Đánh giá toàn bộ 8 tổ hợp Plugins trên tập Kiểm thử",
+):
+    """Plot horizontal bar charts comparing Mean Absolute Error and F1-Score across all plugin combinations."""
+    names = [rec["config_name"] for rec in summary_records]
+    errs = [rec["average_error_hz"] for rec in summary_records]
+    f1s = [rec["average_voiced_f1_pct"] for rec in summary_records]
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))
+    fig.suptitle(title, fontsize=15, fontweight="bold")
+
+    y_pos = np.arange(len(names))
+
+    # Panel 1: Error (Lower is better)
+    min_err = min(errs)
+    colors_err = ["#2ca02c" if e == min_err else "#1f77b4" for e in errs]
+    bars1 = ax1.barh(y_pos, errs, color=colors_err, alpha=0.85, edgecolor="gray")
+    ax1.set_yticks(y_pos)
+    ax1.set_yticklabels(names, fontsize=10)
+    ax1.invert_yaxis()  # top-down
+    ax1.set_xlabel("Sai số trung bình |ΔF0| (Hz) - [Thấp hơn là tốt hơn]", fontsize=11, fontweight="bold")
+    ax1.set_title("1. So sánh Sai số tuyệt đối trung bình (|ΔF0|)", fontsize=12, fontweight="bold")
+    ax1.grid(True, axis="x", linestyle="--", alpha=0.5)
+
+    for bar in bars1:
+        w = bar.get_width()
+        ax1.annotate(f"{w:.2f} Hz", xy=(w, bar.get_y() + bar.get_height() / 2),
+                     xytext=(5, 0), textcoords="offset points", va="center", fontsize=9, fontweight="bold")
+
+    # Panel 2: F1-Score (Higher is better)
+    max_f1 = max(f1s)
+    colors_f1 = ["#2ca02c" if f == max_f1 else "#ff7f0e" for f in f1s]
+    bars2 = ax2.barh(y_pos, f1s, color=colors_f1, alpha=0.85, edgecolor="gray")
+    ax2.set_yticks(y_pos)
+    ax2.set_yticklabels([])  # hide duplicate labels
+    ax2.invert_yaxis()
+    ax2.set_xlim(85, 95)
+    ax2.set_xlabel("Voiced F1-Score (%) - [Cao hơn là tốt hơn]", fontsize=11, fontweight="bold")
+    ax2.set_title("2. So sánh Voiced F1-Score (%)", fontsize=12, fontweight="bold")
+    ax2.grid(True, axis="x", linestyle="--", alpha=0.5)
+
+    for bar in bars2:
+        w = bar.get_width()
+        ax2.annotate(f"{w:.2f}%", xy=(w, bar.get_y() + bar.get_height() / 2),
+                     xytext=(5, 0), textcoords="offset points", va="center", fontsize=9, fontweight="bold")
+
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    if save_path:
+        os.makedirs(os.path.dirname(os.path.abspath(save_path)), exist_ok=True)
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+
+    plt.close(fig)
+    return fig

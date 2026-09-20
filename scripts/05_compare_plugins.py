@@ -1,9 +1,12 @@
-"""Script 05: Đối sánh hiệu quả của từng Plugin và các tổ hợp cải tiến:
+"""Script 05: Đánh giá và đối sánh TOÀN BỘ 8 TỔ HỢP PLUGINS trên tập kiểm thử TinHieuKiemThu:
 1. Baseline (Không dùng plugin)
-2. Plugin 1 (HysteresisPlugin - Ngưỡng trễ kép)
-3. Plugin 2 (EnergyExtensionPlugin - Bù trễ biên theo năng lượng)
-4. Plugin 3 (BandpassFilterPlugin - Lọc thông dải 70-900 Hz)
-5. Kết hợp cả 3 Plugins
+2. Plugin 1 (Hysteresis)
+3. Plugin 2 (Energy Extension)
+4. Plugin 3 (Bandpass Filter)
+5. Tổ hợp [Hysteresis + Energy Extension]
+6. Tổ hợp [Bandpass + Hysteresis]
+7. Tổ hợp [Bandpass + Energy Extension]
+8. Tổ hợp [Cả 3 Plugins: Bandpass + Hysteresis + Energy Extension]
 """
 import argparse
 import json
@@ -30,33 +33,54 @@ from src.plugins import (
     BandpassFilterPlugin,
 )
 from src.analysis.evaluation import evaluate_against_ground_truth
+from src.visualization.plotter import plot_plugin_contour_comparison, plot_combinations_ranking
 
 
-def run_plugin_comparison(
+def run_all_combinations(
     test_dir: str = "TinHieuKiemThu",
     output_json: str = "outputs/reports/compare_plugins.json",
     output_csv: str = "outputs/reports/compare_plugins.csv",
+    output_ranking_fig: str = "outputs/figures/05_all_combinations_ranking.png",
 ):
     files = ["phone_F2", "phone_M2", "studio_F2", "studio_M2"]
 
+    # Định nghĩa toàn bộ 8 tổ hợp (2^3)
     configs = {
         "1. Baseline (Gốc)": PitchDetector(threshold=0.462),
-        "2. Plugin 1 (Hysteresis)": PluginPitchDetector(plugins=[HysteresisPlugin(t_high=0.462, t_low=0.40)]),
-        "3. Plugin 2 (Energy Extension)": PluginPitchDetector(plugins=[EnergyExtensionPlugin(threshold_discount=0.20)]),
-        "4. Plugin 3 (Bandpass Filter)": PluginPitchDetector(plugins=[BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0)]),
-        "5. Kết hợp cả 3 Plugins": PluginPitchDetector(plugins=[
+        "2. [Hysteresis]": PluginPitchDetector(plugins=[
+            HysteresisPlugin(t_high=0.462, t_low=0.40),
+        ]),
+        "3. [Energy Ext]": PluginPitchDetector(plugins=[
+            EnergyExtensionPlugin(threshold_discount=0.20),
+        ]),
+        "4. [Bandpass Filter]": PluginPitchDetector(plugins=[
+            BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
+        ]),
+        "5. [Hysteresis + Energy Ext]": PluginPitchDetector(plugins=[
+            HysteresisPlugin(t_high=0.462, t_low=0.40),
+            EnergyExtensionPlugin(threshold_discount=0.20),
+        ]),
+        "6. [Bandpass + Hysteresis]": PluginPitchDetector(plugins=[
+            BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
+            HysteresisPlugin(t_high=0.462, t_low=0.40),
+        ]),
+        "7. [Bandpass + Energy Ext]": PluginPitchDetector(plugins=[
+            BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
+            EnergyExtensionPlugin(threshold_discount=0.20),
+        ]),
+        "8. [Cả 3 Plugins]": PluginPitchDetector(plugins=[
             BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
             HysteresisPlugin(t_high=0.462, t_low=0.40),
             EnergyExtensionPlugin(threshold_discount=0.20),
         ]),
     }
 
-    print("=" * 115)
-    print("                 BẢNG ĐỐI SÁNH CÁC GIẢI PHÁP PLUGIN TRÊN TẬP KIỂM THỬ")
-    print("=" * 115)
-    header = f"{'Cấu hình':<32} | {'phone_F2 (|Δ|)':<16} | {'phone_M2 (|Δ|)':<16} | {'studio_F2 (|Δ|)':<16} | {'studio_M2 (|Δ|)':<16} | {'Sai số TB':<10} | {'F1 TB':<8}"
+    print("=" * 125)
+    print("                 BẢNG ĐỐI SÁNH TOÀN BỘ 8 TỔ HỢP PLUGINS TRÊN TẬP KIỂM THỬ")
+    print("=" * 125)
+    header = f"{'Cấu hình':<32} | {'phone_F2 (|Δ|)':<16} | {'phone_M2 (|Δ|)':<16} | {'studio_F2 (|Δ|)':<16} | {'studio_M2 (|Δ|)':<16} | {'Sai số TB':<10} | {'F1 TB':<8} | {'Acc TB':<8}"
     print(header)
-    print("-" * 115)
+    print("-" * 125)
 
     summary_records = []
 
@@ -95,7 +119,8 @@ def run_plugin_comparison(
             f"{file_metrics['studio_F2']['abs_error_mean']:5.2f}Hz ({file_metrics['studio_F2']['rel_error_mean_pct']:4.1f}%) | "
             f"{file_metrics['studio_M2']['abs_error_mean']:5.2f}Hz ({file_metrics['studio_M2']['rel_error_mean_pct']:4.1f}%) | "
             f"{avg_err:5.2f} Hz    | "
-            f"{avg_f1:5.2f}%"
+            f"{avg_f1:5.2f}% | "
+            f"{avg_acc:5.2f}%"
         )
         print(row)
 
@@ -107,71 +132,78 @@ def run_plugin_comparison(
             "files": file_metrics,
         })
 
-    print("=" * 115)
+    print("=" * 125)
 
-    # 2. Xuất biểu đồ trực quan đối sánh Baseline vs Enhanced (Combined Plugins) cho cả 4 file
+    # Tìm tổ hợp tốt nhất
+    best_err_cfg = min(summary_records, key=lambda x: x["average_error_hz"])
+    best_f1_cfg = max(summary_records, key=lambda x: x["average_voiced_f1_pct"])
+
+    print(f"[*] Cấu hình có SAI SỐ THẤP NHẤT: {best_err_cfg['config_name']} (Sai số TB: {best_err_cfg['average_error_hz']} Hz)")
+    print(f"[*] Cấu hình có F1-SCORE CAO NHẤT : {best_f1_cfg['config_name']} (F1 TB: {best_f1_cfg['average_voiced_f1_pct']}%, Acc: {best_f1_cfg['average_accuracy_pct']}%)")
+    print("-" * 125)
+
+    # 1. Vẽ biểu đồ xếp hạng toàn bộ 8 tổ hợp
+    plot_combinations_ranking(summary_records, save_path=output_ranking_fig)
+    print(f"Saved ranking figure: {output_ranking_fig}")
+
+    # 2. Xuất biểu đồ trực quan đối sánh Baseline vs Tổ hợp tốt nhất (Cả 3 Plugins)
     fig_dir = "outputs/figures"
-    os.makedirs(fig_dir, exist_ok=True)
     detector_base = configs["1. Baseline (Gốc)"]
-    detector_enhanced = configs["5. Kết hợp cả 3 Plugins"]
+    detector_best = configs["8. [Cả 3 Plugins]"]
 
-    print("\nĐang xuất biểu đồ trực quan đối sánh Baseline vs Plugins...")
-    generated_figs = []
+    print("\nĐang xuất 4 biểu đồ đối sánh trực quan (Baseline vs. Best Combination)...")
     for f_id in files:
         wav_path = os.path.join(test_dir, f"{f_id}.wav")
         lab_path = os.path.join(test_dir, f"{f_id}.lab")
 
         res_base = detector_base.process_file(wav_path)
-        res_enh = detector_enhanced.process_file(wav_path)
+        res_best = detector_best.process_file(wav_path)
 
         ev_base = evaluate_against_ground_truth(res_base, lab_path)
-        ev_enh = evaluate_against_ground_truth(res_enh, lab_path)
+        ev_best = evaluate_against_ground_truth(res_best, lab_path)
 
         fig_path = os.path.join(fig_dir, f"05_compare_plugin_{f_id}.png")
         time_sig = np.arange(len(res_base["signal"])) / res_base["sample_rate"]
 
-        from src.visualization.plotter import plot_plugin_contour_comparison
         plot_plugin_contour_comparison(
             time_sig=time_sig,
             signal=res_base["signal"],
             time_f0=res_base["frame_times"],
             f0_baseline=res_base["f0_contour"],
-            f0_enhanced=res_enh["f0_contour"],
+            f0_enhanced=res_best["f0_contour"],
             eval_baseline=ev_base,
-            eval_enhanced=ev_enh,
+            eval_enhanced=ev_best,
             ground_truth_segments=ev_base["gt_segments"],
             file_name=f"{f_id}.wav",
             plugin_names_str="Bandpass + Hysteresis + EnergyExt",
             save_path=fig_path,
         )
-        generated_figs.append(fig_path)
 
     # Lưu JSON
     os.makedirs(os.path.dirname(os.path.abspath(output_json)), exist_ok=True)
     with open(output_json, "w", encoding="utf-8") as f:
         json.dump(summary_records, f, indent=2, ensure_ascii=False)
-    print(f"Saved: {output_json}")
+    print(f"Saved report: {output_json}")
 
     # Lưu CSV
     with open(output_csv, "w", encoding="utf-8") as f:
         f.write("Config,phone_F2_Err,phone_M2_Err,studio_F2_Err,studio_M2_Err,Avg_Err_Hz,Avg_Accuracy_Pct,Avg_F1_Pct\n")
         for rec in summary_records:
             f.write(f"{rec['config_name']},{rec['files']['phone_F2']['abs_error_mean']},{rec['files']['phone_M2']['abs_error_mean']},{rec['files']['studio_F2']['abs_error_mean']},{rec['files']['studio_M2']['abs_error_mean']},{rec['average_error_hz']},{rec['average_accuracy_pct']},{rec['average_voiced_f1_pct']}\n")
-    print(f"Saved: {output_csv}")
-    print(f"Generated {len(generated_figs)} comparison figures in: {fig_dir}/")
-    for fp in generated_figs:
-        print(f"  - {fp}")
+    print(f"Saved report: {output_csv}")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Compare all plugin configurations.")
+    parser = argparse.ArgumentParser(description="Evaluate all 8 plugin combinations.")
     parser.add_argument("--test_dir", type=str, default="TinHieuKiemThu", help="Test directory")
     parser.add_argument("--out_json", type=str, default="outputs/reports/compare_plugins.json", help="JSON output")
     parser.add_argument("--out_csv", type=str, default="outputs/reports/compare_plugins.csv", help="CSV output")
+    parser.add_argument("--out_fig", type=str, default="outputs/figures/05_all_combinations_ranking.png", help="Ranking plot")
 
     args = parser.parse_args()
-    run_plugin_comparison(
+    run_all_combinations(
         test_dir=args.test_dir,
         output_json=args.out_json,
         output_csv=args.out_csv,
+        output_ranking_fig=args.out_fig,
     )

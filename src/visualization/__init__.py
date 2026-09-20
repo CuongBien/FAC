@@ -5,6 +5,7 @@ from .plotter import (
     plot_distributions_and_threshold,
     plot_parameter_comparison,
     plot_plugin_contour_comparison,
+    plot_combinations_ranking,
 )
 
 # Alias for generic frame analysis
@@ -17,4 +18,5 @@ __all__ = [
     "plot_distributions_and_threshold",
     "plot_parameter_comparison",
     "plot_plugin_contour_comparison",
+    "plot_combinations_ranking",
 ]
