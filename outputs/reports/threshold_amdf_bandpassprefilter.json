@@ -1,0 +1,23 @@
+{
+  "method": "amdf",
+  "frame_duration_ms": 25.0,
+  "hop_duration_ms": 10.0,
+  "f0_min": 70.0,
+  "f0_max": 400.0,
+  "plugins": [
+    "BandpassPreFilter"
+  ],
+  "files_processed": [
+    "phone_F1.wav",
+    "phone_M1.wav",
+    "studio_F1.wav",
+    "studio_M1.wav"
+  ],
+  "num_voiced_frames": 614,
+  "num_unvoiced_frames": 180,
+  "mean_v": 0.1872,
+  "std_v": 0.1428,
+  "mean_u": 0.5455,
+  "std_u": 0.1207,
+  "threshold_T": 0.3734
+}

@@ -1,4 +1,4 @@
-"""Script 02: Trích xuất phân bố thống kê của đỉnh cực đại ACF trên tập Huấn luyện (TinHieuHuanLuyen).
+"""Script 02: Trích xuất phân bố thống kê của cực trị ACF / AMDF trên tập Huấn luyện (TinHieuHuanLuyen).
 Tính (meanV, stdV), (meanU, stdU) và xác định ngưỡng tối ưu T phân tách Voiced / Unvoiced (Gaussian).
 """
 import argparse
@@ -30,9 +30,11 @@ def run_training(
     f0_min: float = 70.0,
     f0_max: float = 400.0,
     plugins: str = "none",
-    output_fig: str = "outputs/figures/02_threshold_distribution.png",
-    output_json: str = "outputs/reports/threshold_acf.json",
+    output_fig: str = None,
+    output_json: str = None,
 ):
+    method = method.lower()
+
     # Cấu hình plugin tiền xử lý (nếu có)
     plugin_instances = []
     plugin_names = []
@@ -44,11 +46,16 @@ def run_training(
                 plugin_instances.append(bp)
                 plugin_names.append(bp.name)
 
-        # Điều chỉnh tên file mặc định nếu có plugin
-        if output_fig == "outputs/figures/02_threshold_distribution.png":
-            output_fig = f"outputs/figures/02_threshold_distribution_{'_'.join(plugin_names).lower()}.png"
-        if output_json == "outputs/reports/threshold_acf.json":
-            output_json = f"outputs/reports/threshold_acf_{'_'.join(plugin_names).lower()}.json"
+    # Đặt tên file mặc định dựa theo method và plugins
+    suffix = f"_{'_'.join(plugin_names).lower()}" if plugin_names else ""
+    if output_fig is None:
+        if method == "amdf":
+            output_fig = f"outputs/figures/02_threshold_distribution_amdf{suffix}.png"
+        else:
+            output_fig = f"outputs/figures/02_threshold_distribution{suffix}.png"
+
+    if output_json is None:
+        output_json = f"outputs/reports/threshold_{method}{suffix}.json"
 
     # 1. Trích xuất phân bố từ tập huấn luyện
     stats = extract_training_distributions(
@@ -119,14 +126,14 @@ def run_training(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train Voiced/Unvoiced threshold using training set.")
     parser.add_argument("--train_dir", type=str, default="TinHieuHuanLuyen", help="Thư mục tập huấn luyện")
-    parser.add_argument("--method", type=str, default="acf", choices=["acf"], help="Thuật toán")
+    parser.add_argument("--method", type=str, default="acf", choices=["acf", "amdf"], help="Thuật toán (acf hoặc amdf)")
     parser.add_argument("--frame_len", type=float, default=25.0, help="Độ dài khung (ms)")
     parser.add_argument("--hop_len", type=float, default=10.0, help="Độ dịch khung (ms)")
     parser.add_argument("--f0_min", type=float, default=70.0, help="F0 tối thiểu (Hz)")
     parser.add_argument("--f0_max", type=float, default=400.0, help="F0 tối đa (Hz)")
     parser.add_argument("--plugins", type=str, default="none", help="Plugins áp dụng lúc train (vd: bandpass)")
-    parser.add_argument("--out_fig", type=str, default="outputs/figures/02_threshold_distribution.png", help="Đường dẫn lưu ảnh")
-    parser.add_argument("--out_json", type=str, default="outputs/reports/threshold_acf.json", help="Đường dẫn lưu JSON")
+    parser.add_argument("--out_fig", type=str, default=None, help="Đường dẫn lưu ảnh (mặc định tự chọn)")
+    parser.add_argument("--out_json", type=str, default=None, help="Đường dẫn lưu JSON (mặc định tự chọn)")
 
     args = parser.parse_args()
     run_training(

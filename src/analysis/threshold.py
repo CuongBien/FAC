@@ -7,6 +7,7 @@ import numpy as np
 from src.core.audio import load_wav, frame_signal
 from src.core.lab_parser import parse_lab_file, get_frame_labels
 from src.core.acf import find_f0_acf
+from src.core.amdf import find_f0_amdf
 
 
 def extract_training_distributions(
@@ -71,13 +72,19 @@ def extract_training_distributions(
 
         for frame, label in zip(frames, labels):
             if label == "v":
-                if method == "acf":
+                if method.lower() == "acf":
                     _, peak_val, _ = find_f0_acf(frame, sr, f0_min=f0_min, f0_max=f0_max, mode="normalized")
                     all_values_v.append(peak_val)
+                elif method.lower() == "amdf":
+                    _, dip_val, _ = find_f0_amdf(frame, sr, f0_min=f0_min, f0_max=f0_max, mode="normalized")
+                    all_values_v.append(dip_val)
             elif label == "uv":
-                if method == "acf":
+                if method.lower() == "acf":
                     _, peak_val, _ = find_f0_acf(frame, sr, f0_min=f0_min, f0_max=f0_max, mode="normalized")
                     all_values_u.append(peak_val)
+                elif method.lower() == "amdf":
+                    _, dip_val, _ = find_f0_amdf(frame, sr, f0_min=f0_min, f0_max=f0_max, mode="normalized")
+                    all_values_u.append(dip_val)
 
         processed_files.append(os.path.basename(wav_path))
 
