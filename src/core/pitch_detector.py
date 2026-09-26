@@ -5,6 +5,7 @@ from scipy.ndimage import median_filter
 
 from src.core.audio import load_wav, frame_signal, compute_ste
 from src.core.acf import find_f0_acf
+from src.core.amdf import find_f0_amdf
 
 
 class PitchDetector:
@@ -17,17 +18,20 @@ class PitchDetector:
         hop_duration_ms: float = 10.0,
         f0_min: float = 70.0,
         f0_max: float = 400.0,
-        threshold: float = 0.4408,
+        threshold: Optional[float] = None,
         ste_silence_ratio: float = 0.008,
         use_median_filter: bool = True,
         median_size: int = 3,
     ):
-        self.method = method
+        self.method = method.lower()
         self.frame_duration_ms = frame_duration_ms
         self.hop_duration_ms = hop_duration_ms
         self.f0_min = f0_min
         self.f0_max = f0_max
-        self.threshold = threshold
+        if threshold is None:
+            self.threshold = 0.35 if self.method == "amdf" else 0.4408
+        else:
+            self.threshold = threshold
         self.ste_silence_ratio = ste_silence_ratio
         self.use_median_filter = use_median_filter
         self.median_size = median_size
@@ -90,6 +94,24 @@ class PitchDetector:
                 lags[i] = lag
 
                 if peak_val >= self.threshold:
+                    labels[i] = "v"
+                    f0_raw[i] = f0_val
+                else:
+                    labels[i] = "uv"
+                    f0_raw[i] = 0.0
+            elif self.method == "amdf":
+                f0_val, dip_val, lag = find_f0_amdf(
+                    frames[i],
+                    sample_rate,
+                    f0_min=self.f0_min,
+                    f0_max=self.f0_max,
+                    mode="normalized",
+                )
+                peak_values[i] = dip_val
+                lags[i] = lag
+
+                # In AMDF: Periodic (Voiced) frames have a deep dip <= threshold
+                if dip_val <= self.threshold:
                     labels[i] = "v"
                     f0_raw[i] = f0_val
                 else:

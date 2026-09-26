@@ -1,18 +1,13 @@
-"""Script 04: Xử lý toàn bộ 4 file tín hiệu kiểm thử trong TinHieuKiemThu trong 1 lần chạy duy nhất:
-1. phone_F2.wav
-2. phone_M2.wav
-3. studio_F2.wav
-4. studio_M2.wav
-
-Tính toán F0mean, F0std, độ lệch tuyệt đối và phần trăm sai số so với *.lab.
-Xuất 4 hình ảnh (mỗi file 1 hình gồm waveform + F0 contour đồng bộ thời gian) sẵn sàng trình chiếu cho giảng viên.
+"""Script 04: Chạy kiểm thử tự động toàn bộ 4 file kiểm thử (TinHieuKiemThu) trong 1 lệnh duy nhất.
+Tạo 4 biểu đồ hình ảnh đối sánh và xuất bảng đánh giá định lượng F0mean, F0std, V/UV Accuracy.
+Hỗ trợ cả 2 thuật toán: ACF và AMDF.
 """
 import argparse
 import glob
 import json
 import os
 import sys
-from typing import Optional
+from typing import Optional, List, Tuple
 import numpy as np
 
 # Ensure UTF-8 output on Windows console
@@ -41,41 +36,49 @@ def build_detector_with_plugins(
     plugins_arg: str,
     base_detector: PitchDetector,
     threshold: float,
-):
-    """Build a detector instance, optionally wrapped with selected plugins."""
+) -> Tuple[PitchDetector, List[str]]:
+    """Build detector configured with requested plugins."""
     if not plugins_arg or plugins_arg.lower() in ("none", "no", "false", "0"):
         return base_detector, []
 
-    plugins_list = []
-    p_lower = plugins_arg.lower().strip()
-    parts = [p.strip() for p in p_lower.split(",")]
-    has_bandpass = (p_lower == "all") or any(p in ("bandpass", "filter", "bp") for p in parts)
-    t_low = 0.42 if has_bandpass else 0.40
+    parts = [p.strip().lower() for p in plugins_arg.split(",")]
+    plugin_instances = []
+    applied_names = []
 
-    if p_lower == "all":
-        plugins_list = [
-            BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
-            HysteresisPlugin(t_high=threshold, t_low=t_low),
-            EnergyExtensionPlugin(threshold_discount=0.20),
-        ]
-    else:
-        for p in parts:
-            if p in ("bandpass", "filter", "bp"):
-                plugins_list.append(BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0))
-            elif p in ("hysteresis", "hys", "schmitt"):
-                plugins_list.append(HysteresisPlugin(t_high=threshold, t_low=t_low))
-            elif p in ("energy", "energy_ext", "edge"):
-                plugins_list.append(EnergyExtensionPlugin(threshold_discount=0.20))
+    # Bandpass filter plugin
+    if "all" in parts or any(p in ("bandpass", "filter", "bp") for p in parts):
+        bp = BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0)
+        plugin_instances.append(bp)
+        applied_names.append(bp.name)
 
-    if not plugins_list:
+    # Hysteresis thresholding plugin
+    if "all" in parts or any(p in ("hysteresis", "schmitt", "hyst") for p in parts):
+        if base_detector.method == "amdf":
+            t_low = threshold * 0.90
+            t_high = threshold
+        else:
+            t_low = 0.40 if threshold < 0.50 else 0.42
+            t_high = threshold
+        hyst = HysteresisPlugin(t_high=t_high, t_low=t_low)
+        plugin_instances.append(hyst)
+        applied_names.append(hyst.name)
+
+    # Energy extension plugin
+    if "all" in parts or any(p in ("energy", "ste", "energy_ext", "ext") for p in parts):
+        ste_ext = EnergyExtensionPlugin(threshold_discount=0.20)
+        plugin_instances.append(ste_ext)
+        applied_names.append(ste_ext.name)
+
+    if not plugin_instances:
         return base_detector, []
 
-    plugin_detector = PluginPitchDetector(base_detector=base_detector, plugins=plugins_list)
-    return plugin_detector, [p.name for p in plugins_list]
+    detector = PluginPitchDetector(base_detector=base_detector, plugins=plugin_instances)
+    return detector, applied_names
 
 
 def run_testing(
     test_dir: str = "TinHieuKiemThu",
+    method: str = "acf",
     threshold_file: Optional[str] = None,
     default_threshold: Optional[float] = None,
     frame_duration_ms: float = 25.0,
@@ -84,23 +87,35 @@ def run_testing(
     f0_max: float = 400.0,
     plugins: str = "none",
     output_dir_fig: str = "outputs/figures",
-    output_json: str = "outputs/reports/test_results.json",
-    output_csv: str = "outputs/reports/test_summary.csv",
+    output_json: Optional[str] = None,
+    output_csv: Optional[str] = None,
 ):
-    # 1. Tự động chọn file ngưỡng tương ứng với chế độ tiền xử lý
+    method = method.lower()
     p_lower = (plugins or "").lower().strip()
     parts = [p.strip() for p in p_lower.split(",")]
     has_bandpass = (p_lower == "all") or any(p in ("bandpass", "filter", "bp") for p in parts)
 
+    # 1. Tự động chọn file ngưỡng tương ứng
     if threshold_file is None:
-        if has_bandpass:
-            threshold_file = "outputs/reports/threshold_acf_bandpassprefilter.json"
-            fallback_t = 0.4892
+        if method == "amdf":
+            if has_bandpass:
+                threshold_file = "outputs/reports/threshold_amdf_bandpassprefilter.json"
+                fallback_t = 0.3734
+            else:
+                threshold_file = "outputs/reports/threshold_amdf.json"
+                fallback_t = 0.4380
         else:
-            threshold_file = "outputs/reports/threshold_acf.json"
-            fallback_t = 0.4408
+            if has_bandpass:
+                threshold_file = "outputs/reports/threshold_acf_bandpassprefilter.json"
+                fallback_t = 0.4892
+            else:
+                threshold_file = "outputs/reports/threshold_acf.json"
+                fallback_t = 0.4408
     else:
-        fallback_t = 0.4892 if has_bandpass else 0.4408
+        if method == "amdf":
+            fallback_t = 0.3734 if has_bandpass else 0.4380
+        else:
+            fallback_t = 0.4892 if has_bandpass else 0.4408
 
     if default_threshold is not None:
         threshold = default_threshold
@@ -115,9 +130,15 @@ def run_testing(
         except Exception:
             pass
 
-    # 2. Khởi tạo bộ nhận diện PitchDetector (Baseline)
+    # Tự động chọn file xuất nếu chưa truyền
+    if output_json is None:
+        output_json = f"outputs/reports/test_results_{method}.json" if method != "acf" else "outputs/reports/test_results.json"
+    if output_csv is None:
+        output_csv = f"outputs/reports/test_summary_{method}.csv" if method != "acf" else "outputs/reports/test_summary.csv"
+
+    # 2. Khởi tạo bộ nhận diện PitchDetector
     base_detector = PitchDetector(
-        method="acf",
+        method=method,
         frame_duration_ms=frame_duration_ms,
         hop_duration_ms=hop_duration_ms,
         f0_min=f0_min,
@@ -143,8 +164,8 @@ def run_testing(
     results_all = []
 
     print("=" * 105)
-    print(f"KIỂM THỬ THUẬT TOÁN ACF TRÊN TẬP TÍN HIỆU KIỂM THỬ ({test_dir})")
-    print(f"Tham số: FrameLen={frame_duration_ms}ms, HopLen={hop_duration_ms}ms, Range=[{f0_min:.0f}, {f0_max:.0f}]Hz, Threshold T={threshold:.4f}{plugin_desc}")
+    print(f"KIỂM THỬ THUẬT TOÁN {method.upper()} TRÊN TẬP TÍN HIỆU KIỂM THỬ ({test_dir})")
+    print(f"Tham số: Method={method.upper()}, FrameLen={frame_duration_ms}ms, HopLen={hop_duration_ms}ms, Range=[{f0_min:.0f}, {f0_max:.0f}]Hz, Threshold T={threshold:.4f}{plugin_desc}")
     print("=" * 105)
     header = f"{'Tên file':<16} | {'Ref F0mean':<10} | {'Pred F0mean':<11} | {'|ΔF0| (Hz)':<10} | {'Lệch %':<7} | {'Ref std':<8} | {'Pred std':<8} | {'|Δstd|':<7} | {'V/UV Acc':<8} | {'F1-Score':<8}"
     print(header)
@@ -155,10 +176,10 @@ def run_testing(
         file_id = os.path.splitext(base_name)[0]
         lab_path = os.path.splitext(wav_path)[0] + ".lab"
 
-        # 3. Xử lý nhận diện F0
+        # 4. Chạy dự đoán cao độ
         res = detector.process_file(wav_path)
 
-        # 4. Đánh giá sai số so với *.lab
+        # Đánh giá sai số so với ground truth *.lab
         eval_res = evaluate_against_ground_truth(res, lab_path)
 
         row = (
@@ -166,7 +187,7 @@ def run_testing(
             f"{eval_res['ref_f0_mean']:<10.2f} | "
             f"{eval_res['pred_f0_mean']:<11.2f} | "
             f"{eval_res['abs_error_mean']:<10.2f} | "
-            f"{eval_res['rel_error_mean_pct']:<6.2f}% | "
+            f"{eval_res['rel_error_mean_pct']:<5.2f}% | "
             f"{eval_res['ref_f0_std']:<8.2f} | "
             f"{eval_res['pred_f0_std']:<8.2f} | "
             f"{eval_res['abs_error_std']:<7.2f} | "
@@ -176,7 +197,11 @@ def run_testing(
         print(row)
 
         # 5. Xuất hình vẽ cho từng file kiểm thử (1 hình / 1 file)
-        fig_name = f"04_test_enhanced_{file_id}.png" if is_enhanced else f"04_test_{file_id}.png"
+        prefix = f"04_test_enhanced_{method}_" if is_enhanced else (f"04_test_{method}_" if method != "acf" else "04_test_")
+        if is_enhanced and method == "acf":
+            prefix = "04_test_enhanced_"
+
+        fig_name = f"{prefix}{file_id}.png"
         fig_path = os.path.join(output_dir_fig, fig_name)
         time_sig = np.arange(len(res["signal"])) / res["sample_rate"]
         title_suffix = f" [Enhanced: {', '.join(applied_plugin_names)}]" if is_enhanced else " [Baseline]"
@@ -190,7 +215,7 @@ def run_testing(
             f0_std=eval_res["pred_f0_std"],
             ref_f0_mean=eval_res["ref_f0_mean"],
             ref_f0_std=eval_res["ref_f0_std"],
-            title=f"Đường bao tần số F0 ước lượng bằng ACF{title_suffix} - {base_name} (Fs={res['sample_rate']}Hz)",
+            title=f"Đường bao tần số F0 ước lượng bằng {method.upper()}{title_suffix} - {base_name} (Fs={res['sample_rate']}Hz)",
             save_path=fig_path,
         )
 
@@ -224,7 +249,7 @@ def run_testing(
     # 7. Lưu kết quả ra file JSON
     summary_data = {
         "params": {
-            "method": "acf",
+            "method": method,
             "frame_duration_ms": frame_duration_ms,
             "hop_duration_ms": hop_duration_ms,
             "threshold_T": threshold,
@@ -256,18 +281,20 @@ def run_testing(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run pitch detection and evaluation on test signals.")
     parser.add_argument("--test_dir", type=str, default="TinHieuKiemThu", help="Thư mục tín hiệu kiểm thử")
-    parser.add_argument("--threshold_file", type=str, default=None, help="File JSON chứa ngưỡng T (mặc định tự chọn theo plugins)")
+    parser.add_argument("--method", type=str, default="acf", choices=["acf", "amdf"], help="Thuật toán (acf hoặc amdf)")
+    parser.add_argument("--threshold_file", type=str, default=None, help="File JSON chứa ngưỡng T (mặc định tự chọn)")
     parser.add_argument("--threshold", type=float, default=None, help="Ngưỡng dự phòng nếu không có file JSON")
     parser.add_argument("--frame_len", type=float, default=25.0, help="Độ dài khung (ms)")
     parser.add_argument("--hop_len", type=float, default=10.0, help="Độ dịch khung (ms)")
-    parser.add_argument("--plugins", type=str, default="none", help="Plugins: 'none', 'all', 'bandpass', 'hysteresis', 'energy_ext' (or comma-separated).")
+    parser.add_argument("--plugins", type=str, default="none", help="Plugins: 'none', 'all', 'bandpass', 'hysteresis', 'energy_ext'.")
     parser.add_argument("--out_fig_dir", type=str, default="outputs/figures", help="Thư mục lưu hình")
-    parser.add_argument("--out_json", type=str, default="outputs/reports/test_results.json", help="File JSON kết quả")
-    parser.add_argument("--out_csv", type=str, default="outputs/reports/test_summary.csv", help="File CSV kết quả")
+    parser.add_argument("--out_json", type=str, default=None, help="File JSON kết quả (mặc định tự chọn theo method)")
+    parser.add_argument("--out_csv", type=str, default=None, help="File CSV kết quả (mặc định tự chọn theo method)")
 
     args = parser.parse_args()
     run_testing(
         test_dir=args.test_dir,
+        method=args.method,
         threshold_file=args.threshold_file,
         default_threshold=args.threshold,
         frame_duration_ms=args.frame_len,
