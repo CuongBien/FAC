@@ -25,7 +25,7 @@ from src.plugins.bandpass_filter import BandpassFilterPlugin
 def run_training(
     train_dir: str = "TinHieuHuanLuyen",
     method: str = "acf",
-    frame_duration_ms: float = 30.0,
+    frame_duration_ms: float = 25.0,
     hop_duration_ms: float = 10.0,
     f0_min: float = 70.0,
     f0_max: float = 400.0,
@@ -120,7 +120,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train Voiced/Unvoiced threshold using training set.")
     parser.add_argument("--train_dir", type=str, default="TinHieuHuanLuyen", help="Thư mục tập huấn luyện")
     parser.add_argument("--method", type=str, default="acf", choices=["acf"], help="Thuật toán")
-    parser.add_argument("--frame_len", type=float, default=30.0, help="Độ dài khung (ms)")
+    parser.add_argument("--frame_len", type=float, default=25.0, help="Độ dài khung (ms)")
     parser.add_argument("--hop_len", type=float, default=10.0, help="Độ dịch khung (ms)")
     parser.add_argument("--f0_min", type=float, default=70.0, help="F0 tối thiểu (Hz)")
     parser.add_argument("--f0_max", type=float, default=400.0, help="F0 tối đa (Hz)")

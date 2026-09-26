@@ -78,7 +78,7 @@ def run_testing(
     test_dir: str = "TinHieuKiemThu",
     threshold_file: Optional[str] = None,
     default_threshold: Optional[float] = None,
-    frame_duration_ms: float = 30.0,
+    frame_duration_ms: float = 25.0,
     hop_duration_ms: float = 10.0,
     f0_min: float = 70.0,
     f0_max: float = 400.0,
@@ -95,12 +95,12 @@ def run_testing(
     if threshold_file is None:
         if has_bandpass:
             threshold_file = "outputs/reports/threshold_acf_bandpassprefilter.json"
-            fallback_t = 0.5124
+            fallback_t = 0.4892
         else:
             threshold_file = "outputs/reports/threshold_acf.json"
-            fallback_t = 0.4620
+            fallback_t = 0.4408
     else:
-        fallback_t = 0.5124 if has_bandpass else 0.4620
+        fallback_t = 0.4892 if has_bandpass else 0.4408
 
     if default_threshold is not None:
         threshold = default_threshold
@@ -258,7 +258,7 @@ if __name__ == "__main__":
     parser.add_argument("--test_dir", type=str, default="TinHieuKiemThu", help="Thư mục tín hiệu kiểm thử")
     parser.add_argument("--threshold_file", type=str, default=None, help="File JSON chứa ngưỡng T (mặc định tự chọn theo plugins)")
     parser.add_argument("--threshold", type=float, default=None, help="Ngưỡng dự phòng nếu không có file JSON")
-    parser.add_argument("--frame_len", type=float, default=30.0, help="Độ dài khung (ms)")
+    parser.add_argument("--frame_len", type=float, default=25.0, help="Độ dài khung (ms)")
     parser.add_argument("--hop_len", type=float, default=10.0, help="Độ dịch khung (ms)")
     parser.add_argument("--plugins", type=str, default="none", help="Plugins: 'none', 'all', 'bandpass', 'hysteresis', 'energy_ext' (or comma-separated).")
     parser.add_argument("--out_fig_dir", type=str, default="outputs/figures", help="Thư mục lưu hình")

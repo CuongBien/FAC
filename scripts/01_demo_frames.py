@@ -27,7 +27,7 @@ from src.visualization.plotter import plot_frame_acf_comparison
 def run_demo(
     wav_path: str = "TinHieuHuanLuyen/phone_F1.wav",
     lab_path: str = "TinHieuHuanLuyen/phone_F1.lab",
-    frame_duration_ms: float = 30.0,
+    frame_duration_ms: float = 25.0,
     hop_duration_ms: float = 10.0,
     f0_min: float = 70.0,
     f0_max: float = 400.0,
@@ -104,7 +104,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Demo ACF on Voiced and Unvoiced frames.")
     parser.add_argument("--wav", type=str, default="TinHieuHuanLuyen/phone_F1.wav", help="Đường dẫn file .wav")
     parser.add_argument("--lab", type=str, default="TinHieuHuanLuyen/phone_F1.lab", help="Đường dẫn file .lab")
-    parser.add_argument("--frame_len", type=float, default=30.0, help="Độ dài khung (ms)")
+    parser.add_argument("--frame_len", type=float, default=25.0, help="Độ dài khung (ms)")
     parser.add_argument("--hop_len", type=float, default=10.0, help="Độ dịch khung (ms)")
     parser.add_argument("--f0_min", type=float, default=70.0, help="F0 tối thiểu (Hz)")
     parser.add_argument("--f0_max", type=float, default=400.0, help="F0 tối đa (Hz)")

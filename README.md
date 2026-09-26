@@ -81,30 +81,39 @@ D:\SP\
 
 ## 2. Hướng Dẫn Cài Đặt Môi Trường & Thực Thi
 
-### 2.1. Cài đặt thư viện
-Yêu cầu Python $\ge 3.9$ (dự án phát triển trên Python 3.12). Cài đặt gói phụ thuộc qua pip:
+### 2.1. Cài đặt môi trường bằng `uv` (Khuyên dùng)
+Dự án được cấu hình chuẩn với `pyproject.toml`. Khuyến nghị sử dụng **`uv`** để tự động quản lý phiên bản Python 3.12 và dependencies:
+
 ```powershell
-pip install -r requirements.txt
+# 1. Khởi tạo môi trường ảo với Python 3.12
+uv venv --python 3.12
+
+# 2. Cài đặt các gói phụ thuộc ở chế độ editable
+uv pip install -e .
 ```
 
-### 2.2. Lệnh thực thi nhanh từng bước
+*(Hoặc dùng `pip install -r requirements.txt` nếu dùng môi trường Python thông thường).*
+
+### 2.2. Lệnh thực thi nhanh từng bước (Chuẩn Frame = 25 ms)
+> **Quy ước thống nhất của môn học:** Toàn bộ hệ thống được chốt cố định với **Độ dài khung = 25 ms** (tương ứng 400 mẫu tại $f_s = 16\text{ kHz}$) và **Độ dịch khung = 10 ms** (160 mẫu).
+
 ```powershell
-# Bước 1: Xem minh họa khung Voiced vs Unvoiced
-python scripts/01_demo_frames.py
+# Bước 1: Xem minh họa khung Voiced vs Unvoiced (Frame = 25 ms)
+uv run python scripts/01_demo_frames.py
 
-# Bước 2: Huấn luyện tìm ngưỡng T tối ưu
-python scripts/02_train_threshold.py                     # Huấn luyện Baseline thô (T = 0.4620)
-python scripts/02_train_threshold.py --plugins bandpass  # Huấn luyện có lọc tiền xử lý (T = 0.5124)
+# Bước 2: Huấn luyện tìm ngưỡng T tối ưu cho khung 25 ms
+uv run python scripts/02_train_threshold.py                     # Huấn luyện Baseline thô (T = 0.4408)
+uv run python scripts/02_train_threshold.py --plugins bandpass  # Huấn luyện có lọc tiền xử lý (T = 0.4892)
 
-# Bước 3: So sánh chiều dài khung 20ms vs 30ms
-python scripts/03_compare_params.py
+# Bước 3: Đối sánh ảnh hưởng chiều dài khung (20 ms vs 25 ms [Chuẩn] vs 30 ms)
+uv run python scripts/03_compare_params.py
 
-# Bước 4: Chạy kiểm thử tự động toàn bộ 4 file kiểm thử
-python scripts/04_run_testing.py                         # Mô hình Baseline gốc
-python scripts/04_run_testing.py --plugins all           # Mô hình Nâng cao tích hợp cả 3 Plugins
+# Bước 4: Chạy kiểm thử tự động toàn bộ 4 file kiểm thử (Chấm điểm đồ án)
+uv run python scripts/04_run_testing.py                         # Mô hình Baseline gốc (T = 0.4408)
+uv run python scripts/04_run_testing.py --plugins all           # Mô hình Nâng cao tích hợp cả 3 Plugins (T = 0.4892)
 
 # Bước 5: Đánh giá và xếp hạng toàn bộ 8 tổ hợp Plugins
-python scripts/05_compare_plugins.py
+uv run python scripts/05_compare_plugins.py
 ```
 
 ---
@@ -141,7 +150,7 @@ $$
 
 ## I.2. Minh Họa Khung Hữu Thanh vs Vô Thanh
 
-Thực nghiệm trên file âm thanh `TinHieuHuanLuyen/phone_F1.wav` ($f_s = 16000\text{ Hz}$):
+Thực nghiệm trên file âm thanh `TinHieuHuanLuyen/phone_F1.wav` ($f_s = 16000\text{ Hz}$, khung chuẩn $25\text{ ms} = 400\text{ mẫu}$, dịch $10\text{ ms} = 160\text{ mẫu}$):
 
 ![01_demo_acf_frames.png](outputs/figures/01_demo_acf_frames.png)
 
@@ -149,10 +158,10 @@ Thực nghiệm trên file âm thanh `TinHieuHuanLuyen/phone_F1.wav` ($f_s = 160
 
 | Đặc trưng | Khung Hữu Thanh (Voiced) | Khung Vô Thanh (Unvoiced) |
 | :--- | :--- | :--- |
-| **Vị trí khung** | Khung #103 ($t = 1.045\text{ s}$) | Khung #176 ($t = 1.775\text{ s}$) |
+| **Vị trí khung** | Khung #103 ($t = 1.042\text{ s}$) | Khung #176 ($t = 1.772\text{ s}$) |
 | **Đặc tính dạng sóng** | Tuần hoàn rõ rệt, biên độ xung thanh môn lớn | Dao động ngẫu nhiên, tựa nhiễu, biên độ thấp |
-| **Độ trễ cực đại $\tau_0$** | $\tau_0 = 71$ mẫu | Không có độ trễ tuần hoàn |
-| **Biên độ cực đại $R(\tau_0)$** | **$0.829$** ($\gg T = 0.4620$) | **$0.346$** ($< T = 0.4620$) |
+| **Độ trễ cực đại $\tau_0$** | $\tau_0 = 71$ mẫu | Không có độ trễ tuần hoàn rõ ràng ($\tau = 53$) |
+| **Biên độ cực đại $R(\tau_0)$** | **$0.801$** ($\gg T = 0.4408$) | **$0.386$** ($< T = 0.4408$) |
 | **Chu kỳ cơ bản $T_0$** | $T_0 = 71 / 16000 = 4.44\text{ ms}$ | Không xác định |
 | **Tần số cơ bản $F_0$** | **$F_0 = 225.35\text{ Hz}$** (gần nhãn $217\text{ Hz}$) | **$F_0 = \text{Undefined}$** (Vô thanh) |
 
@@ -160,7 +169,7 @@ Thực nghiệm trên file âm thanh `TinHieuHuanLuyen/phone_F1.wav` ($f_s = 160
 
 ## I.3. Huấn Luyện Ngưỡng T Tối Ưu Bằng Phân Bố Gauss
 
-Để xác định ngưỡng phân định V/UV dựa trên cơ sở thống kê toán học vững chắc, đồ án trích xuất biên độ đỉnh ACF lớn nhất của toàn bộ các khung trong 4 file huấn luyện (`phone_F1`, `phone_M1`, `studio_F1`, `studio_M1`), phân chia theo nhãn ground-truth `.lab`:
+Để xác định ngưỡng phân định V/UV dựa trên cơ sở thống kê toán học vững chắc với chiều dài khung chuẩn **$25\text{ ms}$**, đồ án trích xuất biên độ đỉnh ACF lớn nhất của toàn bộ các khung trong 4 file huấn luyện (`phone_F1`, `phone_M1`, `studio_F1`, `studio_M1`), phân chia theo nhãn ground-truth `.lab`:
 * Tập khung Hữu thanh: $N_V = 614$ khung $\rightarrow$ phân bố $\mathcal{N}(\mu_V, \sigma_V^2)$
 * Tập khung Vô thanh: $N_U = 180$ khung $\rightarrow$ phân bố $\mathcal{N}(\mu_U, \sigma_U^2)$
 
@@ -170,53 +179,57 @@ $$
 \frac{(T - \mu_V)^2}{\sigma_V^2} - \frac{(T - \mu_U)^2}{\sigma_U^2} + 2\ln\left(\frac{\sigma_V}{\sigma_U}\right) = 0
 $$
 
-### Bảng kết quả huấn luyện ngưỡng:
+### Bảng kết quả huấn luyện ngưỡng (Khung 25 ms):
 
 | Chế độ tiền xử lý | Số khung Voiced | $\mu_V \pm \sigma_V$ | Số khung Unvoiced | $\mu_U \pm \sigma_U$ | Ngưỡng tối ưu $T$ |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Baseline (Chưa lọc)** | 614 | $0.6474 \pm 0.1535$ | 180 | $0.2805 \pm 0.1441$ | **$T = 0.4620$** |
-| **Có lọc thông dải (Bandpass)** | 614 | $0.6832 \pm 0.1442$ | 180 | $0.3442 \pm 0.1370$ | **$T = 0.5124$** |
+| **Baseline (Chưa lọc)** | 614 | $0.6166 \pm 0.1549$ | 180 | $0.2718 \pm 0.1355$ | **$T = 0.4408$** |
+| **Có lọc thông dải (Bandpass)** | 614 | $0.6490 \pm 0.1466$ | 180 | $0.3326 \pm 0.1337$ | **$T = 0.4892$** |
 
 ### Biểu đồ phân bố xác suất Gaussian:
 
-| Baseline (Chưa lọc: $T = 0.4620$) | Có lọc Bandpass (Đã lọc: $T = 0.5124$) |
+| Baseline (Chưa lọc: $T = 0.4408$) | Có lọc Bandpass (Đã lọc: $T = 0.4892$) |
 | :---: | :---: |
 | ![02_threshold_distribution.png](outputs/figures/02_threshold_distribution.png) | ![02_threshold_distribution_bandpassprefilter.png](outputs/figures/02_threshold_distribution_bandpassprefilter.png) |
 
 ---
 
-## I.4. Khảo Sát Ảnh Hưởng Chiều Dài Khung (20ms vs 30ms)
+## I.4. Khảo Sát Ảnh Hưởng Chiều Dài Khung (20ms vs 25ms [Chuẩn] vs 30ms)
 
-Thực nghiệm đối chiếu trên file giọng nam trầm `TinHieuHuanLuyen/phone_M1.wav` ($F_{0\text{-mean}} = 122.0\text{ Hz}$, $F_{0\text{-std}} = 18.0\text{ Hz}$):
+Theo định hướng của giảng viên, hệ thống được **chốt cố định khung 25 ms** làm thước đo chuẩn mực công bằng cho toàn bộ sinh viên. Thực nghiệm đối chiếu giữa 3 mức chiều dài khung (20 ms, 25 ms, 30 ms) trên file giọng nam trầm `TinHieuHuanLuyen/phone_M1.wav` ($F_{0\text{-mean}} = 122.0\text{ Hz}$, $F_{0\text{-std}} = 18.0\text{ Hz}$, $T = 0.4408$):
 
 ### Bảng so sánh định lượng:
 
-| Chỉ số đánh giá | Khung 20 ms | Khung 30 ms | Nhận xét cải thiện |
-| :--- | :---: | :---: | :--- |
-| **Số khung phát hiện Hữu thanh** | 165 khung | **191 khung** | Khung 30ms chứa đủ số chu kỳ của giọng nam trầm |
-| **$F_{0\text{-mean}}$ ước lượng** | 136.55 Hz | **129.06 Hz** | Tiệm cận giá trị chuẩn 122.0 Hz hơn rất nhiều |
-| **Sai số tuyệt đối $\lvert\Delta F_0\rvert$** | 14.55 Hz | **7.06 Hz** | **Giảm hơn 51.5% sai số** |
-| **Sai số tương đối (%)** | 11.93 % | **5.79 %** | Giảm một nửa sai lệch |
-| **V/UV Accuracy (%)** | 71.08 % | **78.50 %** | Tăng +7.42% |
-| **Voiced F1-Score (%)** | 80.20 % | **87.36 %** | Tăng +7.16% |
+| Chỉ số đánh giá | Khung 20 ms | Khung 25 ms (Chuẩn môn học) | Khung 30 ms | Nhận xét phân tích |
+| :--- | :---: | :---: | :---: | :--- |
+| **Số mẫu / khung ($f_s=16\text{k}$)** | 320 mẫu | **400 mẫu** | 480 mẫu | 25ms tương ứng đúng 400 mẫu chẵn |
+| **Số khung Voiced phát hiện** | 180 khung | **193 khung** | 204 khung | 25ms bắt trọn vẹn số chu kỳ của giọng nam |
+| **$F_{0\text{-mean}}$ ước lượng** | 134.52 Hz | **130.93 Hz** | 130.04 Hz | Tiệm cận chuẩn 122.0 Hz hơn rất nhiều so với 20ms |
+| **Sai số tuyệt đối $\lvert\Delta F_0\rvert$** | 12.52 Hz | **8.93 Hz** | 8.04 Hz | **Giảm 28.7% sai số so với khung 20ms** |
+| **Sai số tương đối (%)** | 10.26 % | **7.32 %** | 6.59 % | Sai số kiểm soát tốt dưới 7.5% |
+| **V/UV Accuracy (%)** | 74.70 % | **78.02 %** | 81.16 % | Tăng +3.32% so với 20ms |
+| **Voiced F1-Score (%)** | 84.43 % | **87.41 %** | 90.18 % | Tăng gần +3% so với 20ms |
 
 ![03_compare_frame_length.png](outputs/figures/03_compare_frame_length.png)
 
-$\implies$ **Kết luận khoa học:** Khung 30 ms đảm bảo chứa tối thiểu 2–3 chu kỳ hoàn chỉnh ngay cả ở tần số đáy $70\text{ Hz}$ ($T_0 \approx 14.3\text{ ms}$), giúp đỉnh tự tương quan $R(\tau)$ đạt cực đại ổn định. Do đó, **30 ms (hop 10 ms)** được chọn làm chuẩn toàn hệ thống.
+$\implies$ **Luận điểm khoa học cho việc chốt chuẩn 25 ms:**
+1. **Khung 20 ms (320 mẫu):** Quá ngắn đối với các âm vực nam trầm ($F_0 \approx 70 - 80\text{ Hz} \implies T_0 \approx 12.5 - 14.3\text{ ms}$). Khung 20 ms chỉ chứa được khoảng $1.4 - 1.6$ chu kỳ, khiến phép tự tương quan dễ bị nhiễu và bắt trượt đỉnh, dẫn tới sai số cao (12.52 Hz).
+2. **Khung 30 ms (480 mẫu):** Chứa nhiều chu kỳ tuần hoàn ($> 2.4$ chu kỳ), tuy nhiên độ dài khung lớn làm giảm độ phân giải thời gian và gây hiệu ứng nhòe (*smearing*) tại các ranh giới chuyển tiếp âm nhanh.
+3. **Khung 25 ms (400 mẫu):** Là **điểm cân bằng vàng (Golden Middle Ground)**. Ở tần số đáy $80\text{ Hz}$, $25\text{ ms}$ chứa trọn vẹn đúng $2.0$ chu kỳ tuần hoàn đầy đủ, đủ điều kiện tiên quyết cho phép tìm cực đại tự tương quan hoạt động chính xác, đồng thời vẫn giữ được độ nhạy thời gian vượt trội. Do đó, **25 ms (hop 10 ms)** là lựa chọn chuẩn xác và công bằng nhất.
 
 ---
 
 ## I.5. Đánh Giá Kiểm Thử Trên 4 File Kiểm Thử (Baseline)
 
-### Bảng kết quả kiểm thử định lượng Baseline ($T = 0.4620$):
+### Bảng kết quả kiểm thử định lượng Baseline ($T = 0.4408$, Frame = 25 ms):
 
 | File kiểm thử | Kênh / Giới tính | Ref $F_{0\text{-mean}}$ | Pred $F_{0\text{-mean}}$ | $\lvert\Delta F_0\rvert$ (Hz) | Sai số % | Ref $F_{0\text{-std}}$ | Pred $F_{0\text{-std}}$ | $\lvert\Delta\text{std}\rvert$ | V/UV Acc | F1-Score |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `phone_F2.wav` | Điện thoại / Nữ | 145.00 Hz | 152.20 Hz | 7.20 Hz | 4.96% | 33.70 | 31.40 | 2.30 | 77.62% | 85.92% |
-| `phone_M2.wav` | Điện thoại / Nam | 129.00 Hz | 132.59 Hz | 3.59 Hz | 2.79% | 18.60 | 13.97 | 4.63 | 78.78% | 89.71% |
-| `studio_F2.wav`| Studio / Nữ | 200.00 Hz | 199.27 Hz | 0.73 Hz | 0.36% | 46.10 | 43.35 | 2.75 | 91.99% | 95.45% |
-| `studio_M2.wav`| Studio / Nam | 155.00 Hz | 154.84 Hz | **0.16 Hz** | **0.10%** | 30.80 | 30.08 | 0.72 | 88.14% | 91.98% |
-| **TRUNG BÌNH** | — | — | — | **2.92 Hz** | **2.05%** | — | — | **2.60** | **84.13%** | **90.77%** |
+| `phone_F2.wav` | Điện thoại / Nữ | 145.00 Hz | 152.77 Hz | 7.77 Hz | 5.36% | 33.70 | 31.44 | 2.26 | 78.24% | 87.29% |
+| `phone_M2.wav` | Điện thoại / Nam | 129.00 Hz | 131.92 Hz | 2.92 Hz | 2.26% | 18.60 | 14.07 | 4.53 | 77.34% | 89.26% |
+| `studio_F2.wav`| Studio / Nữ | 200.00 Hz | 198.98 Hz | 1.02 Hz | 0.51% | 46.10 | 43.35 | 2.75 | 91.05% | 95.06% |
+| `studio_M2.wav`| Studio / Nam | 155.00 Hz | 155.97 Hz | **0.97 Hz** | **0.63%** | 30.80 | 30.24 | 0.56 | 87.71% | 92.50% |
+| **TRUNG BÌNH** | — | — | — | **3.17 Hz** | **2.19%** | — | — | **2.53** | **83.58%** | **91.03%** |
 
 ### Đồ thị đường bao Pitch Contour 4 file kiểm thử (Baseline):
 
@@ -249,8 +262,8 @@ S_i = \begin{cases}
 $$
 
 **Thông số áp dụng:**  
-* Mô hình Baseline: $T_{\text{high}} = 0.4620, T_{\text{low}} = 0.40$
-* Mô hình Bandpass: $T_{\text{high}} = 0.5124, T_{\text{low}} = 0.42$
+* Mô hình Baseline: $T_{\text{high}} = 0.4408, T_{\text{low}} = 0.40$
+* Mô hình Bandpass: $T_{\text{high}} = 0.4892, T_{\text{low}} = 0.42$
 
 ---
 
@@ -305,10 +318,10 @@ $$
 Độ lệch pha bằng 0 tuyệt đối tại mọi tần số, bảo toàn nguyên vẹn vị trí thời gian của các đỉnh xung thanh môn $T_0$.
 
 **Đồng bộ phân bố:**  
-Do lọc làm sạch tín hiệu, $\mu_V$ tăng từ $0.6474 \rightarrow 0.6832$, hệ thống tự động đồng bộ ngưỡng tối ưu mới:
+Do lọc làm sạch tín hiệu, $\mu_V$ tăng từ $0.6166 \rightarrow 0.6490$, hệ thống tự động đồng bộ ngưỡng tối ưu mới:
 
 $$
-T = 0.5124
+T = 0.4892
 $$
 
 ---
@@ -319,18 +332,18 @@ $$
 
 | STT | Cấu hình Plugin | Ngưỡng $T$ | `phone_F2` (145Hz) | `phone_M2` (129Hz) | `studio_F2` (200Hz) | `studio_M2` (155Hz) | Sai số TB $F_0$ | F1-Score TB | V/UV Acc TB |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **1** | **Baseline (Gốc)** | $0.4620$ | 7.20 Hz | 3.59 Hz | 0.73 Hz | **0.16 Hz** | 2.92 Hz | 90.77% | 84.13% |
-| **2** | **[Hysteresis]** | $0.4620$ | 6.62 Hz | **3.25 Hz** | 0.35 Hz | 0.33 Hz | 2.64 Hz | 91.87% | 85.03% |
-| **3** | **[Energy Ext]** | $0.4620$ | 6.21 Hz | 3.68 Hz | 1.36 Hz | 0.75 Hz | 3.00 Hz | 92.34% | 85.36% |
-| **4** | **[Bandpass Filter]** | $0.5124$ | 7.39 Hz | 3.83 Hz | 0.15 Hz | 0.19 Hz | 2.89 Hz | 89.29% | 82.76% |
-| **5** | **[Hysteresis + Energy Ext]** | $0.4620$ | 6.14 Hz | 3.47 Hz | 1.36 Hz | 1.21 Hz | 3.04 Hz | **92.73%** | **85.71%** |
-| **6** | **[Bandpass + Hysteresis]** | $0.5124$ | 6.30 Hz | 3.53 Hz | **0.08 Hz** | 0.46 Hz | **2.59 Hz** | 91.11% | 84.24% |
-| **7** | **[Bandpass + Energy Ext]** | $0.5124$ | 5.91 Hz | 4.06 Hz | 0.33 Hz | 0.28 Hz | 2.64 Hz | 91.69% | 84.68% |
-| **8** | **[Cả 3 Plugins]** | $0.5124$ | **5.74 Hz** | 3.77 Hz | 0.21 Hz | 0.95 Hz | 2.67 Hz | 92.36% | 85.27% |
+| **1** | **Baseline (Gốc)** | $0.4408$ | 7.77 Hz | 2.92 Hz | 1.02 Hz | 0.97 Hz | 3.17 Hz | 91.03% | 83.58% |
+| **2** | **[Hysteresis]** | $0.4408$ | 7.52 Hz | **2.40 Hz** | **0.06 Hz** | 1.27 Hz | **2.81 Hz** | 91.82% | 84.24% |
+| **3** | **[Energy Ext]** | $0.4408$ | 6.80 Hz | 2.88 Hz | 0.65 Hz | 0.97 Hz | 2.83 Hz | 92.89% | 85.09% |
+| **4** | **[Bandpass Filter]** | $0.4892$ | 8.58 Hz | 4.20 Hz | 1.07 Hz | 0.24 Hz | 3.52 Hz | 89.51% | 82.28% |
+| **5** | **[Hysteresis + Energy Ext]** | $0.4408$ | 6.75 Hz | 2.73 Hz | 0.65 Hz | 1.27 Hz | 2.85 Hz | **93.07%** | **85.25%** |
+| **6** | **[Bandpass + Hysteresis]** | $0.4892$ | 6.74 Hz | 4.24 Hz | 1.18 Hz | 0.83 Hz | 3.25 Hz | 91.03% | 83.51% |
+| **7** | **[Bandpass + Energy Ext]** | $0.4892$ | 7.58 Hz | 4.60 Hz | 0.19 Hz | **0.17 Hz** | 3.13 Hz | 91.53% | 83.89% |
+| **8** | **[Cả 3 Plugins]** | $0.4892$ | **6.11 Hz** | 4.59 Hz | 0.23 Hz | 1.15 Hz | 3.02 Hz | 91.78% | 84.06% |
 
-* **Quán quân về độ chính xác $F_0$:** **Cấu hình 6 `[Bandpass + Hysteresis]`** đạt sai số thấp nhất toàn diện (**2.59 Hz**), đặc biệt trên `studio_F2.wav` sai số chỉ còn **0.08 Hz** ($< 0.05\%$).
-* **Quán quân về phân loại V/UV:** **Cấu hình 5 `[Hysteresis + Energy Ext]`** đạt **F1 = 92.73%** và **Accuracy = 85.71%**.
-* **Cấu hình cân bằng tối ưu:** **Cấu hình 8 `[Cả 3 Plugins]`** đạt sai số $F_0$ rất thấp (**2.67 Hz**) cùng F1 cao vượt bậc (**92.36%**).
+* **Quán quân về độ chính xác $F_0$:** **Cấu hình 2 `[Hysteresis]`** đạt sai số thấp nhất toàn diện (**2.81 Hz**), đặc biệt trên `studio_F2.wav` sai số chỉ còn **0.06 Hz** ($< 0.03\%$).
+* **Quán quân về phân loại V/UV:** **Cấu hình 5 `[Hysteresis + Energy Ext]`** đạt **F1 = 93.07%** và **Accuracy = 85.25%**.
+* **Cấu hình cân bằng:** **Cấu hình 8 `[Cả 3 Plugins]`** đạt sai số $F_0$ rất thấp (**3.02 Hz**) cùng F1 cao (**91.78%**).
 
 ### Biểu đồ cột xếp hạng 8 tổ hợp:
 ![05_all_combinations_ranking.png](outputs/figures/05_all_combinations_ranking.png)

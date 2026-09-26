@@ -12,7 +12,7 @@ from src.core.acf import find_f0_acf
 def extract_training_distributions(
     training_dir: str = "TinHieuHuanLuyen",
     method: str = "acf",
-    frame_duration_ms: float = 30.0,
+    frame_duration_ms: float = 25.0,
     hop_duration_ms: float = 10.0,
     f0_min: float = 70.0,
     f0_max: float = 400.0,

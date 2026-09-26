@@ -1,6 +1,6 @@
 {
   "method": "acf",
-  "frame_duration_ms": 30.0,
+  "frame_duration_ms": 25.0,
   "hop_duration_ms": 10.0,
   "f0_min": 70.0,
   "f0_max": 400.0,
@@ -13,9 +13,9 @@
   ],
   "num_voiced_frames": 614,
   "num_unvoiced_frames": 180,
-  "mean_v": 0.6474,
-  "std_v": 0.1535,
-  "mean_u": 0.2805,
-  "std_u": 0.1441,
-  "threshold_T": 0.462
+  "mean_v": 0.6166,
+  "std_v": 0.1549,
+  "mean_u": 0.2718,
+  "std_u": 0.1355,
+  "threshold_T": 0.4408
 }

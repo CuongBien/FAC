@@ -13,11 +13,11 @@ class PitchDetector:
     def __init__(
         self,
         method: Literal["acf", "amdf"] = "acf",
-        frame_duration_ms: float = 30.0,
+        frame_duration_ms: float = 25.0,
         hop_duration_ms: float = 10.0,
         f0_min: float = 70.0,
         f0_max: float = 400.0,
-        threshold: float = 0.462,
+        threshold: float = 0.4408,
         ste_silence_ratio: float = 0.008,
         use_median_filter: bool = True,
         median_size: int = 3,

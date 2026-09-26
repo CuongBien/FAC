@@ -38,7 +38,7 @@ def load_wav(filepath: str):
 def frame_signal(
     signal: np.ndarray,
     sample_rate: int,
-    frame_duration_ms: float = 30.0,
+    frame_duration_ms: float = 25.0,
     hop_duration_ms: float = 10.0,
     window: str = "rectangular",
 ):
@@ -47,8 +47,8 @@ def frame_signal(
     Args:
         signal: 1D audio samples.
         sample_rate: Audio sampling frequency in Hz.
-        frame_duration_ms: Frame length in milliseconds (e.g., 20.0 or 30.0).
-        hop_duration_ms: Frame shift / hop size in milliseconds (e.g., 10.0).
+        frame_duration_ms: Frame length in milliseconds (e.g., 25.0 ms).
+        hop_duration_ms: Frame shift / hop size in milliseconds (e.g., 10.0 ms).
         window: Window type: 'rectangular', 'hamming', or 'hanning'.
 
     Returns:
@@ -90,7 +90,7 @@ def frame_signal(
 def compute_ste(
     signal: np.ndarray,
     sample_rate: int,
-    frame_duration_ms: float = 30.0,
+    frame_duration_ms: float = 25.0,
     hop_duration_ms: float = 10.0,
 ):
     """Compute Short-Time Energy (STE) for each frame.

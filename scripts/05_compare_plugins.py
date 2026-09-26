@@ -45,19 +45,19 @@ def run_all_combinations(
     files = ["phone_F2", "phone_M2", "studio_F2", "studio_M2"]
 
     # 1. Tải ngưỡng tối ưu tương ứng: Baseline (chưa lọc) vs Bandpass (đã lọc)
-    t_base = 0.4620
-    t_bp = 0.5124
+    t_base = 0.4408
+    t_bp = 0.4892
     if os.path.exists("outputs/reports/threshold_acf.json"):
         try:
             with open("outputs/reports/threshold_acf.json", "r", encoding="utf-8") as f:
-                t_base = float(json.load(f).get("threshold_T", 0.4620))
+                t_base = float(json.load(f).get("threshold_T", 0.4408))
         except Exception:
             pass
 
     if os.path.exists("outputs/reports/threshold_acf_bandpassprefilter.json"):
         try:
             with open("outputs/reports/threshold_acf_bandpassprefilter.json", "r", encoding="utf-8") as f:
-                t_bp = float(json.load(f).get("threshold_T", 0.5124))
+                t_bp = float(json.load(f).get("threshold_T", 0.4892))
         except Exception:
             pass
 
