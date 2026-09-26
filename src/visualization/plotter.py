@@ -103,6 +103,107 @@ def plot_frame_acf_comparison(
     return fig
 
 
+def plot_frame_amdf_comparison(
+    voiced_frame: np.ndarray,
+    voiced_amdf: np.ndarray,
+    voiced_f0: float,
+    voiced_lag: int,
+    voiced_dip: float,
+    unvoiced_frame: np.ndarray,
+    unvoiced_amdf: np.ndarray,
+    unvoiced_lag: int,
+    unvoiced_dip: float,
+    sample_rate: int,
+    f0_min: float = 70.0,
+    f0_max: float = 400.0,
+    threshold: Optional[float] = None,
+    save_path: Optional[str] = None,
+    title: str = "So sánh Hàm Hiệu Độ Lớn Trung Bình (AMDF): Khung Hữu Thanh vs Vô Thanh",
+):
+    """Plot a comprehensive 2x2 comparison between a Voiced frame and an Unvoiced frame for AMDF:
+
+    - Top Left: Voiced Frame Waveform (shows quasi-periodicity).
+    - Bottom Left: Voiced Frame Normalized AMDF (shows deep local dip at pitch period T0).
+    - Top Right: Unvoiced Frame Waveform (noise-like, non-periodic).
+    - Bottom Right: Unvoiced Frame Normalized AMDF (stays high, no deep dip).
+    """
+    n_v = len(voiced_frame)
+    n_uv = len(unvoiced_frame)
+
+    t_v = np.arange(n_v) / sample_rate * 1000.0  # ms
+    t_uv = np.arange(n_uv) / sample_rate * 1000.0  # ms
+
+    lag_v_ms = np.arange(len(voiced_amdf)) / sample_rate * 1000.0  # ms
+    lag_uv_ms = np.arange(len(unvoiced_amdf)) / sample_rate * 1000.0  # ms
+
+    lag_min = int(round(sample_rate / f0_max))
+    lag_max = int(round(sample_rate / f0_min))
+    lag_min_ms = lag_min / sample_rate * 1000.0
+    lag_max_ms = lag_max / sample_rate * 1000.0
+
+    plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
+    fig, axes = plt.subplots(2, 2, figsize=(14, 9))
+    fig.suptitle(title, fontsize=15, fontweight="bold", y=0.98)
+
+    # Subplot 1: Voiced Waveform
+    ax1 = axes[0, 0]
+    ax1.plot(t_v, voiced_frame, color="#1f77b4", linewidth=1.5, label="Voiced signal")
+    ax1.set_title("1. Tín hiệu Khung Hữu Thanh (Voiced Frame)", fontsize=12, fontweight="bold", color="#1f77b4")
+    ax1.set_xlabel("Thời gian (ms)")
+    ax1.set_ylabel("Biên độ chuẩn hóa")
+    ax1.grid(True, linestyle="--", alpha=0.6)
+    ax1.legend(loc="upper right")
+
+    # Subplot 2: Voiced AMDF
+    ax2 = axes[1, 0]
+    ax2.plot(lag_v_ms, voiced_amdf, color="#1f77b4", linewidth=1.5, label="Normalized AMDF D(τ)")
+    ax2.axvspan(lag_min_ms, lag_max_ms, color="green", alpha=0.15, label=f"Vùng tìm F0 [{f0_min:.0f}-{f0_max:.0f} Hz]")
+    t0_ms = voiced_lag / sample_rate * 1000.0
+    ax2.plot(t0_ms, voiced_dip, "ro", markersize=8, label=f"Đáy T0 = {t0_ms:.2f} ms\nF0 = {voiced_f0:.1f} Hz (Dip: {voiced_dip:.3f})")
+    ax2.axvline(t0_ms, color="red", linestyle="--", alpha=0.7)
+    if threshold is not None:
+        ax2.axhline(threshold, color="purple", linestyle=":", linewidth=1.8, label=f"Ngưỡng T = {threshold:.3f}")
+    ax2.set_title(f"AMDF Khung Hữu Thanh -> F0 = {voiced_f0:.1f} Hz (Đáy cực tiểu sâu)", fontsize=12, fontweight="bold", color="darkgreen")
+    ax2.set_xlabel("Độ trễ lag τ (ms)")
+    ax2.set_ylabel("AMDF chuẩn hóa D(τ)")
+    ax2.set_ylim(-0.05, 1.05)
+    ax2.grid(True, linestyle="--", alpha=0.6)
+    ax2.legend(loc="upper right")
+
+    # Subplot 3: Unvoiced Waveform
+    ax3 = axes[0, 1]
+    ax3.plot(t_uv, unvoiced_frame, color="#d62728", linewidth=1.2, label="Unvoiced signal")
+    ax3.set_title("2. Tín hiệu Khung Vô Thanh (Unvoiced Frame)", fontsize=12, fontweight="bold", color="#d62728")
+    ax3.set_xlabel("Thời gian (ms)")
+    ax3.set_ylabel("Biên độ chuẩn hóa")
+    ax3.grid(True, linestyle="--", alpha=0.6)
+    ax3.legend(loc="upper right")
+
+    # Subplot 4: Unvoiced AMDF
+    ax4 = axes[1, 1]
+    ax4.plot(lag_uv_ms, unvoiced_amdf, color="#d62728", linewidth=1.5, label="Normalized AMDF D(τ)")
+    ax4.axvspan(lag_min_ms, lag_max_ms, color="orange", alpha=0.15, label=f"Vùng tìm F0 [{f0_min:.0f}-{f0_max:.0f} Hz]")
+    unvoiced_t0_ms = unvoiced_lag / sample_rate * 1000.0
+    ax4.plot(unvoiced_t0_ms, unvoiced_dip, "kx", markersize=8, markeredgewidth=2, label=f"Cực tiểu cục bộ ({unvoiced_dip:.3f} > Ngưỡng)")
+    if threshold is not None:
+        ax4.axhline(threshold, color="purple", linestyle=":", linewidth=1.8, label=f"Ngưỡng T = {threshold:.3f}")
+    ax4.set_title("AMDF Khung Vô Thanh -> F0 không xác định (Không có đáy sâu)", fontsize=12, fontweight="bold", color="darkred")
+    ax4.set_xlabel("Độ trễ lag τ (ms)")
+    ax4.set_ylabel("AMDF chuẩn hóa D(τ)")
+    ax4.set_ylim(-0.05, 1.05)
+    ax4.grid(True, linestyle="--", alpha=0.6)
+    ax4.legend(loc="upper right")
+
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+
+    if save_path:
+        os.makedirs(os.path.dirname(os.path.abspath(save_path)), exist_ok=True)
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+
+    plt.close(fig)
+    return fig
+
+
 def plot_signal_and_f0_contour(
     time_sig: np.ndarray,
     signal: np.ndarray,
@@ -210,8 +311,10 @@ def plot_distributions_and_threshold(
     # Threshold line
     ax.axvline(threshold, color="red", linestyle="--", linewidth=2.2, label=f"Ngưỡng tối ưu T = {threshold:.3f}")
 
-    ax.set_title(title, fontsize=13, fontweight="bold")
-    ax.set_xlabel(f"Biên độ đỉnh cực đại chuẩn hóa của {method.upper()} [R(τ*)/R(0)]", fontsize=11)
+    if method.lower() == "amdf":
+        ax.set_xlabel(f"Biên độ đáy cực tiểu chuẩn hóa của AMDF [D(τ*)]", fontsize=11)
+    else:
+        ax.set_xlabel(f"Biên độ đỉnh cực đại chuẩn hóa của {method.upper()} [R(τ*)/R(0)]", fontsize=11)
     ax.set_ylabel("Mật độ xác suất (Probability Density)", fontsize=11)
     ax.set_xlim(x_min, x_max)
     ax.grid(True, linestyle="--", alpha=0.6)
