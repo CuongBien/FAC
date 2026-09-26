@@ -360,14 +360,114 @@ $$
 
 # PHẦN II: THUẬT TOÁN HÀM HIỆU ĐỘ LỚN TRUNG BÌNH (AMDF)
 
-*(Phần này để trống cho việc triển khai thuật toán AMDF)*
+## II.1. Cơ Sở Lý Thuyết Thuật Toán AMDF
+
+Hàm hiệu độ lớn trung bình (Average Magnitude Difference Function - AMDF) là một thuật toán ước lượng cao độ trên miền thời gian có chi phí tính toán thấp. Thay vì tính tích tương quan như ACF, AMDF đo lường hiệu số biên độ tuyệt đối giữa khung tín hiệu và phiên bản dịch trễ của nó:
+
+$$
+D(\tau) = \sum_{n=0}^{N-1-\tau} |x[n] - x[n+\tau]|
+$$
+
+Để chuẩn hóa biên độ trong dải $[0.0, 1.0]$ và loại bỏ ảnh hưởng biên độ tín hiệu, hàm AMDF chuẩn hóa được định nghĩa:
+
+$$
+D_{\text{norm}}(\tau) = \frac{\sum_{n=0}^{N-1-\tau} |x[n] - x[n+\tau]|}{\sum_{n=0}^{N-1-\tau} (|x[n]| + |x[n+\tau]|)}
+$$
+
+* **Tại độ trễ $\tau = 0$:** $x[n] - x[n] = 0 \implies D(0) = 0$.
+* **Âm Hữu thanh (Voiced):** Tín hiệu có tính chất gần như tuần hoàn ($x[n] \approx x[n + \tau_0]$). Tại độ trễ $\tau_0 = T_0 \cdot f_s$, các mẫu gần như triệt tiêu lẫn nhau, làm xuất hiện một **đáy cực tiểu địa phương rất sâu (Deep Dip / Valley)**:
+  $$D_{\text{norm}}(\tau_0) \approx 0 \ll T$$
+  Tần số cơ bản $F_0$ được tính từ vị trí của đáy cực tiểu sâu nhất:
+  $$F_0 = \frac{f_s}{\tau_0} \quad (\text{Hz})$$
+* **Âm Vô thanh (Unvoiced):** Do dạng sóng ngẫu nhiên, hiệu số $\lvert x[n] - x[n+\tau] \rvert$ luôn có độ lớn đáng kể ở mọi độ trễ $\tau$. Giá trị hàm AMDF luôn duy trì ở mức cao ($> 0.5$) và dao động hỗn loạn, không có đáy nào lặn sâu dưới ngưỡng phân tách $T$.
+
+---
+
+## II.2. Minh Họa Khung Hữu Thanh vs Vô Thanh bằng AMDF
+
+Thực nghiệm trên file âm thanh `TinHieuHuanLuyen/phone_F1.wav` ($f_s = 16000\text{ Hz}$, khung chuẩn $25\text{ ms} = 400\text{ mẫu}$):
+
+![01_demo_amdf_frames.png](outputs/figures/01_demo_amdf_frames.png)
+
+### Bảng phân tích chi tiết hai khung đại diện (AMDF):
+
+| Đặc trưng | Khung Hữu Thanh (Voiced) | Khung Vô Thanh (Unvoiced) |
+| :--- | :--- | :--- |
+| **Vị trí khung** | Khung #103 ($t = 1.042\text{ s}$) | Khung #176 ($t = 1.772\text{ s}$) |
+| **Đặc tính dạng sóng** | Tuần hoàn rõ rệt, biên độ lớn | Ngẫu nhiên tựa nhiễu trắng, biên độ nhỏ |
+| **Độ trễ cực tiểu $\tau_0$** | $\tau_0 = 71$ mẫu | Đáy cục bộ trôi nổi tại $\tau = 52$ |
+| **Biên độ cực tiểu $D(\tau_0)$** | **$0.075$** ($\ll T = 0.4380$) | **$0.542$** ($> T = 0.4380$) |
+| **Chu kỳ cơ bản $T_0$** | $T_0 = 71 / 16000 = 4.44\text{ ms}$ | Không xác định |
+| **Tần số cơ bản $F_0$** | **$F_0 = 225.35\text{ Hz}$** (gần nhãn $217\text{ Hz}$) | **$F_0 = \text{Undefined}$** (Vô thanh) |
+
+---
+
+## II.3. Huấn Luyện Ngưỡng T_AMDF Tối Ưu Bằng Phân Bố Gauss
+
+Đối với AMDF, khung Voiced có biên độ đáy cực tiểu **nhỏ** ($\mu_V < \mu_U$), ngược lại với ACF. Trích xuất trên toàn bộ tập `TinHieuHuanLuyen/`:
+* Tập khung Hữu thanh: $N_V = 614$ khung $\rightarrow \mathcal{N}(\mu_V, \sigma_V^2)$
+* Tập khung Vô thanh: $N_U = 180$ khung $\rightarrow \mathcal{N}(\mu_U, \sigma_U^2)$
+
+### Bảng kết quả huấn luyện ngưỡng AMDF (Khung 25 ms):
+
+| Chế độ tiền xử lý | Số khung Voiced | $\mu_V \pm \sigma_V$ (Đáy AMDF) | Số khung Unvoiced | $\mu_U \pm \sigma_U$ (Đáy AMDF) | Ngưỡng tối ưu $T$ |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Baseline (Chưa lọc)** | 614 | $0.2382 \pm 0.1486$ | 180 | $0.6121 \pm 0.1137$ | **$T = 0.4380$** |
+| **Có lọc Bandpass** | 614 | $0.1872 \pm 0.1428$ | 180 | $0.5455 \pm 0.1207$ | **$T = 0.3734$** |
+
+### Biểu đồ phân bố xác suất Gaussian AMDF:
+
+| Baseline AMDF ($T = 0.4380$) | Có lọc Bandpass AMDF ($T = 0.3734$) |
+| :---: | :---: |
+| ![02_threshold_distribution_amdf.png](outputs/figures/02_threshold_distribution_amdf.png) | ![02_threshold_distribution_amdf_bandpassprefilter.png](outputs/figures/02_threshold_distribution_amdf_bandpassprefilter.png) |
+
+---
+
+## II.4. Đánh Giá Kiểm Thử Trên 4 File Kiểm Thử (AMDF Baseline)
+
+Chạy kiểm thử tự động toàn bộ 4 file kiểm thử với thuật toán AMDF ($T = 0.4380$, Frame = 25 ms):
+
+| File kiểm thử | Kênh / Giới tính | Ref $F_{0\text{-mean}}$ | Pred $F_{0\text{-mean}}$ | $\lvert\Delta F_0\rvert$ (Hz) | Sai số % | Ref $F_{0\text{-std}}$ | Pred $F_{0\text{-std}}$ | $\lvert\Delta\text{std}\rvert$ | V/UV Acc | F1-Score |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| `phone_F2.wav` | Điện thoại / Nữ | 145.00 Hz | 150.19 Hz | 5.19 Hz | 3.58% | 33.70 | 32.46 | 1.24 | 78.45% | 87.56% |
+| `phone_M2.wav` | Điện thoại / Nam | 129.00 Hz | 129.48 Hz | **0.48 Hz** | **0.37%** | 18.60 | 15.58 | 3.02 | 80.22% | 92.86% |
+| `studio_F2.wav`| Studio / Nữ | 200.00 Hz | 199.80 Hz | **0.20 Hz** | **0.10%** | 46.10 | 44.93 | 1.17 | 91.37% | 95.45% |
+| `studio_M2.wav`| Studio / Nam | 155.00 Hz | 155.52 Hz | **0.52 Hz** | **0.33%** | 30.80 | 30.55 | 0.25 | 88.56% | 93.33% |
+| **TRUNG BÌNH** | — | — | — | **1.60 Hz** | **1.09%** | — | — | **1.42** | **84.65%** | **92.30%** |
+
+### Đồ thị Pitch Contour 4 file kiểm thử (AMDF):
+
+| `phone_F2.wav` | `phone_M2.wav` |
+| :---: | :---: |
+| ![04_test_amdf_phone_F2.png](outputs/figures/04_test_amdf_phone_F2.png) | ![04_test_amdf_phone_M2.png](outputs/figures/04_test_amdf_phone_M2.png) |
+| **`studio_F2.wav`** | **`studio_M2.wav`** |
+| ![04_test_amdf_studio_F2.png](outputs/figures/04_test_amdf_studio_F2.png) | ![04_test_amdf_studio_M2.png](outputs/figures/04_test_amdf_studio_M2.png) |
+
+---
+
+## II.5. Đối Sánh Trực Tiếp: ACF vs. AMDF
+
+### Bảng so sánh tổng hợp hiệu năng giữa hai thuật toán (Frame = 25 ms, Baseline):
+
+| Tiêu chí đánh giá | Thuật toán ACF | Thuật toán AMDF | So sánh & Nhận xét |
+| :--- | :---: | :---: | :--- |
+| **Dấu hiệu nhận diện $T_0$** | Cực đại $R(\tau) \ge T$ | Cực tiểu $D(\tau) \le T$ | Đối ngẫu (Dual representations) |
+| **Ngưỡng tối ưu Gauss $T$** | $T_{\text{ACF}} = 0.4408$ | $T_{\text{AMDF}} = 0.4380$ | Rất cân xứng quanh giá trị $0.44$ |
+| **Sai số tuyệt đối $\lvert\Delta F_0\rvert$ TB** | 3.17 Hz (2.19%) | **1.60 Hz (1.09%)** | **AMDF giảm 49.5% sai số so với ACF** |
+| **Sai số trên giọng nam trầm (`phone_M2`)** | 2.92 Hz | **0.48 Hz** | AMDF bắt cực tiểu đáy sâu cực nhạy |
+| **Sai số phòng thu (`studio_F2`)** | 1.02 Hz | **0.20 Hz** | Cả hai đều xuất sắc ($< 0.5\%$) |
+| **Độ chính xác phân loại V/UV** | 83.58% | **84.65%** | AMDF nhỉnh hơn +1.07% |
+| **Voiced F1-Score** | 91.03% | **92.30%** | AMDF nhỉnh hơn +1.27% |
+| **Chi phí tính toán** | Phép nhân $(x \cdot x)$ | Phép trừ ($\lvert x_1 - x_2 \rvert$) | **AMDF nhẹ hơn**, không cần bộ nhân phần cứng |
+
+$\implies$ **Đánh giá tổng quan:** AMDF cho thấy độ sắc bén vượt trội khi tìm chu kỳ tuần hoàn giọng nói, đặc biệt ở giọng nam trầm và môi trường kênh thoại. Việc kết hợp cả ACF và AMDF vào hệ thống mang lại cái nhìn toàn diện và sâu sắc cho đồ án.
 
 ---
 
 # PHẦN III: PHÂN TÍCH HIỆN TƯỢNG TRÊN ĐỒ THỊ & NGUYÊN NHÂN SAI SỐ
 
 1. **Sự suy giảm chất lượng giữa Kênh thoại (Phone) và Phòng thu (Studio):**
-   * Tín hiệu phòng thu (`studio_*`) có tỷ số tín hiệu trên nhiễu (SNR) cao và dải thông rộng. Thuật toán đạt độ chính xác gần như tuyệt đối ($|\Delta F_0| < 0.2\text{ Hz}$, độ chính xác V/UV $> 92\%$).
+   * Tín hiệu phòng thu (`studio_*`) có tỷ số tín hiệu trên nhiễu (SNR) cao và dải thông rộng. Thuật toán đạt độ chính xác gần như tuyệt đối ($\lvert\Delta F_0\rvert < 0.2\text{ Hz}$, độ chính xác V/UV $> 92\%$).
    * Tín hiệu điện thoại (`phone_*`) bị giới hạn băng thông hẹp tiêu chuẩn ($300 - 3400\text{ Hz}$). Thành phần tần số cơ bản của giọng nam ($F_0 < 300\text{ Hz}$) bị suy giảm mạnh, buộc thuật toán phải bắt vào chu kỳ bao của các sóng hài bậc cao, dẫn tới sai số trung bình cao hơn ($3 - 5\text{ Hz}$).
 2. **Hiện tượng đứt gãy contour tại ranh giới âm tiết (Boundary Dropping):**
    * Tại vùng bắt đầu phát âm (*onset*) hoặc vùng tắt âm (*offset*), thanh môn mở dần làm biên độ tự tương quan giảm trước khi năng lượng âm thanh tắt hẳn. Mô hình Baseline đơn ngưỡng tĩnh bị rụng 1–2 khung viền. Bộ đôi **Hysteresis Thresholding** và **Energy Edge Extension** khắc phục triệt để hiện tượng này, giúp đường pitch liền mạch.
