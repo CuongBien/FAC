@@ -546,7 +546,8 @@ def plot_combinations_ranking(
     errs = [rec["average_error_hz"] for rec in summary_records]
     f1s = [rec["average_voiced_f1_pct"] for rec in summary_records]
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))
+    fig_height = max(8, len(names) * 0.55)
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, fig_height))
     fig.suptitle(title, fontsize=15, fontweight="bold")
 
     y_pos = np.arange(len(names))
@@ -574,7 +575,9 @@ def plot_combinations_ranking(
     ax2.set_yticks(y_pos)
     ax2.set_yticklabels([])  # hide duplicate labels
     ax2.invert_yaxis()
-    ax2.set_xlim(85, 95)
+    f1_min = max(0.0, float(np.floor(min(f1s) - 2.0)))
+    f1_max = min(100.0, float(np.ceil(max(f1s) + 2.0)))
+    ax2.set_xlim(f1_min, f1_max)
     ax2.set_xlabel("Voiced F1-Score (%) - [Cao hơn là tốt hơn]", fontsize=11, fontweight="bold")
     ax2.set_title("2. So sánh Voiced F1-Score (%)", fontsize=12, fontweight="bold")
     ax2.grid(True, axis="x", linestyle="--", alpha=0.5)

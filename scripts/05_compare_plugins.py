@@ -32,6 +32,7 @@ from src.plugins import (
     HysteresisPlugin,
     EnergyExtensionPlugin,
     BandpassFilterPlugin,
+    CenterClippingPlugin,
 )
 from src.analysis.evaluation import evaluate_against_ground_truth
 from src.visualization.plotter import plot_plugin_contour_comparison, plot_combinations_ranking
@@ -54,79 +55,106 @@ def run_all_combinations(
     if output_ranking_fig is None:
         output_ranking_fig = f"outputs/figures/05_all_combinations_ranking_{method}.png" if method != "acf" else "outputs/figures/05_all_combinations_ranking.png"
 
-    # 1. Tải ngưỡng tối ưu tương ứng: Baseline (chưa lọc) vs Bandpass (đã lọc)
+    # 1. Tải ngưỡng tối ưu cho 4 nhóm tiền xử lý: Raw, Bandpass, CenterClip, Bandpass+CenterClip
     if method == "amdf":
-        t_base_file = "outputs/reports/threshold_amdf.json"
-        t_bp_file = "outputs/reports/threshold_amdf_bandpassprefilter.json"
-        t_base = 0.4380
+        t_raw = 0.4380
         t_bp = 0.3734
-        hyst_t_low_base = 0.380
-        hyst_t_low_bp = 0.320
+        t_clip = 0.6488
+        t_bp_clip = 0.5628
     else:
-        t_base_file = "outputs/reports/threshold_acf.json"
-        t_bp_file = "outputs/reports/threshold_acf_bandpassprefilter.json"
-        t_base = 0.4408
+        t_raw = 0.4408
         t_bp = 0.4892
-        hyst_t_low_base = 0.400
-        hyst_t_low_bp = 0.420
+        t_clip = 0.3352
+        t_bp_clip = 0.3953
 
-    if os.path.exists(t_base_file):
+    thresh_file = "outputs/reports/threshold_all_preprocessors.json"
+    if os.path.exists(thresh_file):
         try:
-            with open(t_base_file, "r", encoding="utf-8") as f:
-                t_base = float(json.load(f).get("threshold_T", t_base))
+            with open(thresh_file, "r", encoding="utf-8") as f:
+                t_all = json.load(f)
+                if method in t_all:
+                    t_raw = float(t_all[method]["raw"]["t_opt"])
+                    t_bp = float(t_all[method]["bp"]["t_opt"])
+                    t_clip = float(t_all[method]["clip"]["t_opt"])
+                    t_bp_clip = float(t_all[method]["bp_clip"]["t_opt"])
         except Exception:
             pass
 
-    if os.path.exists(t_bp_file):
-        try:
-            with open(t_bp_file, "r", encoding="utf-8") as f:
-                t_bp = float(json.load(f).get("threshold_T", t_bp))
-        except Exception:
-            pass
+    # Helper tạo plugin cho các nhóm
+    def make_bp():
+        return BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0)
 
-    # Định nghĩa toàn bộ 8 tổ hợp (2^3) theo đúng phân phối ngưỡng
+    def make_clip():
+        return CenterClippingPlugin(clipping_ratio=0.40, mode="standard")
+
+    def make_hyst(t):
+        return HysteresisPlugin(t_high=t, t_low=t * 0.90)
+
+    def make_energy():
+        return EnergyExtensionPlugin(threshold_discount=0.20)
+
+    # Định nghĩa toàn bộ 16 tổ hợp (2^4) theo đúng phân phối ngưỡng tương ứng
     configs = {
-        "1. Baseline (Gốc)": PitchDetector(method=method, threshold=t_base),
-        "2. [Hysteresis]": PluginPitchDetector(
-            base_detector=PitchDetector(method=method, threshold=t_base),
-            plugins=[HysteresisPlugin(t_high=t_base, t_low=hyst_t_low_base)],
+        "01. Baseline (Gốc)": PitchDetector(method=method, threshold=t_raw),
+        "02. [Hysteresis]": PluginPitchDetector(
+            base_detector=PitchDetector(method=method, threshold=t_raw),
+            plugins=[make_hyst(t_raw)],
         ),
-        "3. [Energy Ext]": PluginPitchDetector(
-            base_detector=PitchDetector(method=method, threshold=t_base),
-            plugins=[EnergyExtensionPlugin(threshold_discount=0.20)],
+        "03. [Energy Ext]": PluginPitchDetector(
+            base_detector=PitchDetector(method=method, threshold=t_raw),
+            plugins=[make_energy()],
         ),
-        "4. [Bandpass Filter]": PluginPitchDetector(
+        "04. [Center Clip]": PluginPitchDetector(
+            base_detector=PitchDetector(method=method, threshold=t_clip),
+            plugins=[make_clip()],
+        ),
+        "05. [Bandpass Filter]": PluginPitchDetector(
             base_detector=PitchDetector(method=method, threshold=t_bp),
-            plugins=[BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0)],
+            plugins=[make_bp()],
         ),
-        "5. [Hysteresis + Energy Ext]": PluginPitchDetector(
-            base_detector=PitchDetector(method=method, threshold=t_base),
-            plugins=[
-                HysteresisPlugin(t_high=t_base, t_low=hyst_t_low_base),
-                EnergyExtensionPlugin(threshold_discount=0.20),
-            ],
+        "06. [Hyst + Energy Ext]": PluginPitchDetector(
+            base_detector=PitchDetector(method=method, threshold=t_raw),
+            plugins=[make_hyst(t_raw), make_energy()],
         ),
-        "6. [Bandpass + Hysteresis]": PluginPitchDetector(
+        "07. [Center Clip + Hyst]": PluginPitchDetector(
+            base_detector=PitchDetector(method=method, threshold=t_clip),
+            plugins=[make_clip(), make_hyst(t_clip)],
+        ),
+        "08. [Center Clip + Energy Ext]": PluginPitchDetector(
+            base_detector=PitchDetector(method=method, threshold=t_clip),
+            plugins=[make_clip(), make_energy()],
+        ),
+        "09. [Bandpass + Hyst]": PluginPitchDetector(
             base_detector=PitchDetector(method=method, threshold=t_bp),
-            plugins=[
-                BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
-                HysteresisPlugin(t_high=t_bp, t_low=hyst_t_low_bp),
-            ],
+            plugins=[make_bp(), make_hyst(t_bp)],
         ),
-        "7. [Bandpass + Energy Ext]": PluginPitchDetector(
+        "10. [Bandpass + Energy Ext]": PluginPitchDetector(
             base_detector=PitchDetector(method=method, threshold=t_bp),
-            plugins=[
-                BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
-                EnergyExtensionPlugin(threshold_discount=0.20),
-            ],
+            plugins=[make_bp(), make_energy()],
         ),
-        "8. [Cả 3 Plugins]": PluginPitchDetector(
+        "11. [Bandpass + Center Clip]": PluginPitchDetector(
+            base_detector=PitchDetector(method=method, threshold=t_bp_clip),
+            plugins=[make_bp(), make_clip()],
+        ),
+        "12. [Center Clip + Hyst + Energy]": PluginPitchDetector(
+            base_detector=PitchDetector(method=method, threshold=t_clip),
+            plugins=[make_clip(), make_hyst(t_clip), make_energy()],
+        ),
+        "13. [Bandpass + Hyst + Energy]": PluginPitchDetector(
             base_detector=PitchDetector(method=method, threshold=t_bp),
-            plugins=[
-                BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
-                HysteresisPlugin(t_high=t_bp, t_low=hyst_t_low_bp),
-                EnergyExtensionPlugin(threshold_discount=0.20),
-            ],
+            plugins=[make_bp(), make_hyst(t_bp), make_energy()],
+        ),
+        "14. [Bandpass + Center Clip + Hyst]": PluginPitchDetector(
+            base_detector=PitchDetector(method=method, threshold=t_bp_clip),
+            plugins=[make_bp(), make_clip(), make_hyst(t_bp_clip)],
+        ),
+        "15. [Bandpass + Center Clip + Energy]": PluginPitchDetector(
+            base_detector=PitchDetector(method=method, threshold=t_bp_clip),
+            plugins=[make_bp(), make_clip(), make_energy()],
+        ),
+        "16. [Cả 4 Plugins]": PluginPitchDetector(
+            base_detector=PitchDetector(method=method, threshold=t_bp_clip),
+            plugins=[make_bp(), make_clip(), make_hyst(t_bp_clip), make_energy()],
         ),
     }
 
@@ -197,16 +225,17 @@ def run_all_combinations(
     print(f"[*] Cấu hình có F1-SCORE CAO NHẤT : {best_f1_cfg['config_name']} (F1 TB: {best_f1_cfg['average_voiced_f1_pct']}%, Acc: {best_f1_cfg['average_accuracy_pct']}%)")
     print("-" * 125)
 
-    # 1. Vẽ biểu đồ xếp hạng toàn bộ 8 tổ hợp
-    plot_combinations_ranking(summary_records, save_path=output_ranking_fig)
+    # 1. Vẽ biểu đồ xếp hạng toàn bộ 16 tổ hợp
+    plot_combinations_ranking(summary_records, save_path=output_ranking_fig, title=f"Đánh giá toàn bộ 16 tổ hợp Plugins ({method.upper()}) trên tập Kiểm thử")
     print(f"Saved ranking figure: {output_ranking_fig}")
 
-    # 2. Xuất biểu đồ trực quan đối sánh Baseline vs Tổ hợp tốt nhất (Cả 3 Plugins)
+    # 2. Xuất biểu đồ trực quan đối sánh Baseline vs Tổ hợp tốt nhất
     fig_dir = "outputs/figures"
-    detector_base = configs["1. Baseline (Gốc)"]
-    detector_best = configs["8. [Cả 3 Plugins]"]
+    detector_base = configs["01. Baseline (Gốc)"]
+    best_name = best_err_cfg["config_name"]
+    detector_best = configs[best_name]
 
-    print("\nĐang xuất 4 biểu đồ đối sánh trực quan (Baseline vs. Best Combination)...")
+    print(f"\nĐang xuất 4 biểu đồ đối sánh trực quan (Baseline vs. {best_name})...")
     for f_id in files:
         wav_path = os.path.join(test_dir, f"{f_id}.wav")
         lab_path = os.path.join(test_dir, f"{f_id}.lab")
@@ -231,7 +260,7 @@ def run_all_combinations(
             eval_enhanced=ev_best,
             ground_truth_segments=ev_base["gt_segments"],
             file_name=f"{f_id}.wav",
-            plugin_names_str=f"{method.upper()} (Bandpass + Hysteresis + EnergyExt)",
+            plugin_names_str=f"{method.upper()}: {best_name}",
             save_path=fig_path,
         )
 

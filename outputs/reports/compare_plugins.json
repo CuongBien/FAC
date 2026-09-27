@@ -1,6 +1,6 @@
 [
   {
-    "config_name": "1. Baseline (Gốc)",
+    "config_name": "01. Baseline (Gốc)",
     "average_error_hz": 3.17,
     "average_accuracy_pct": 83.58,
     "average_voiced_f1_pct": 91.03,
@@ -36,7 +36,7 @@
     }
   },
   {
-    "config_name": "2. [Hysteresis]",
+    "config_name": "02. [Hysteresis]",
     "average_error_hz": 2.81,
     "average_accuracy_pct": 84.24,
     "average_voiced_f1_pct": 91.82,
@@ -72,7 +72,7 @@
     }
   },
   {
-    "config_name": "3. [Energy Ext]",
+    "config_name": "03. [Energy Ext]",
     "average_error_hz": 2.83,
     "average_accuracy_pct": 85.09,
     "average_voiced_f1_pct": 92.89,
@@ -108,7 +108,43 @@
     }
   },
   {
-    "config_name": "4. [Bandpass Filter]",
+    "config_name": "04. [Center Clip]",
+    "average_error_hz": 2.62,
+    "average_accuracy_pct": 82.14,
+    "average_voiced_f1_pct": 89.23,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 151.59,
+        "abs_error_mean": 6.59,
+        "rel_error_mean_pct": 4.55,
+        "accuracy": 78.03,
+        "voiced_f1": 87.02
+      },
+      "phone_M2": {
+        "pred_f0_mean": 131.15,
+        "abs_error_mean": 2.15,
+        "rel_error_mean_pct": 1.67,
+        "accuracy": 75.9,
+        "voiced_f1": 87.5
+      },
+      "studio_F2": {
+        "pred_f0_mean": 201.03,
+        "abs_error_mean": 1.03,
+        "rel_error_mean_pct": 0.52,
+        "accuracy": 88.18,
+        "voiced_f1": 91.34
+      },
+      "studio_M2": {
+        "pred_f0_mean": 155.72,
+        "abs_error_mean": 0.72,
+        "rel_error_mean_pct": 0.46,
+        "accuracy": 86.44,
+        "voiced_f1": 91.06
+      }
+    }
+  },
+  {
+    "config_name": "05. [Bandpass Filter]",
     "average_error_hz": 3.52,
     "average_accuracy_pct": 82.28,
     "average_voiced_f1_pct": 89.51,
@@ -144,7 +180,7 @@
     }
   },
   {
-    "config_name": "5. [Hysteresis + Energy Ext]",
+    "config_name": "06. [Hyst + Energy Ext]",
     "average_error_hz": 2.85,
     "average_accuracy_pct": 85.25,
     "average_voiced_f1_pct": 93.07,
@@ -180,43 +216,115 @@
     }
   },
   {
-    "config_name": "6. [Bandpass + Hysteresis]",
-    "average_error_hz": 3.25,
-    "average_accuracy_pct": 83.51,
-    "average_voiced_f1_pct": 91.03,
+    "config_name": "07. [Center Clip + Hyst]",
+    "average_error_hz": 2.3,
+    "average_accuracy_pct": 82.63,
+    "average_voiced_f1_pct": 89.84,
     "files": {
       "phone_F2": {
-        "pred_f0_mean": 151.74,
-        "abs_error_mean": 6.74,
-        "rel_error_mean_pct": 4.65,
-        "accuracy": 77.62,
-        "voiced_f1": 86.92
+        "pred_f0_mean": 151.64,
+        "abs_error_mean": 6.64,
+        "rel_error_mean_pct": 4.58,
+        "accuracy": 77.82,
+        "voiced_f1": 86.75
       },
       "phone_M2": {
-        "pred_f0_mean": 133.24,
-        "abs_error_mean": 4.24,
-        "rel_error_mean_pct": 3.29,
-        "accuracy": 76.26,
-        "voiced_f1": 87.97
+        "pred_f0_mean": 130.58,
+        "abs_error_mean": 1.58,
+        "rel_error_mean_pct": 1.22,
+        "accuracy": 77.34,
+        "voiced_f1": 89.34
       },
       "studio_F2": {
-        "pred_f0_mean": 198.82,
-        "abs_error_mean": 1.18,
-        "rel_error_mean_pct": 0.59,
-        "accuracy": 92.01,
-        "voiced_f1": 96.24
+        "pred_f0_mean": 200.49,
+        "abs_error_mean": 0.49,
+        "rel_error_mean_pct": 0.25,
+        "accuracy": 88.5,
+        "voiced_f1": 91.76
       },
       "studio_M2": {
-        "pred_f0_mean": 155.83,
-        "abs_error_mean": 0.83,
-        "rel_error_mean_pct": 0.53,
-        "accuracy": 88.14,
-        "voiced_f1": 93.0
+        "pred_f0_mean": 155.48,
+        "abs_error_mean": 0.48,
+        "rel_error_mean_pct": 0.31,
+        "accuracy": 86.86,
+        "voiced_f1": 91.53
       }
     }
   },
   {
-    "config_name": "7. [Bandpass + Energy Ext]",
+    "config_name": "08. [Center Clip + Energy Ext]",
+    "average_error_hz": 2.37,
+    "average_accuracy_pct": 83.4,
+    "average_voiced_f1_pct": 90.82,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 151.3,
+        "abs_error_mean": 6.3,
+        "rel_error_mean_pct": 4.35,
+        "accuracy": 78.87,
+        "voiced_f1": 88.1
+      },
+      "phone_M2": {
+        "pred_f0_mean": 131.06,
+        "abs_error_mean": 2.06,
+        "rel_error_mean_pct": 1.59,
+        "accuracy": 77.34,
+        "voiced_f1": 89.34
+      },
+      "studio_F2": {
+        "pred_f0_mean": 200.21,
+        "abs_error_mean": 0.21,
+        "rel_error_mean_pct": 0.1,
+        "accuracy": 90.1,
+        "voiced_f1": 93.85
+      },
+      "studio_M2": {
+        "pred_f0_mean": 155.9,
+        "abs_error_mean": 0.9,
+        "rel_error_mean_pct": 0.58,
+        "accuracy": 87.29,
+        "voiced_f1": 91.98
+      }
+    }
+  },
+  {
+    "config_name": "09. [Bandpass + Hyst]",
+    "average_error_hz": 3.2,
+    "average_accuracy_pct": 82.97,
+    "average_voiced_f1_pct": 90.38,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 152.28,
+        "abs_error_mean": 7.28,
+        "rel_error_mean_pct": 5.02,
+        "accuracy": 76.99,
+        "voiced_f1": 86.05
+      },
+      "phone_M2": {
+        "pred_f0_mean": 133.27,
+        "abs_error_mean": 4.27,
+        "rel_error_mean_pct": 3.31,
+        "accuracy": 75.9,
+        "voiced_f1": 87.5
+      },
+      "studio_F2": {
+        "pred_f0_mean": 198.93,
+        "abs_error_mean": 1.07,
+        "rel_error_mean_pct": 0.54,
+        "accuracy": 91.69,
+        "voiced_f1": 95.85
+      },
+      "studio_M2": {
+        "pred_f0_mean": 155.17,
+        "abs_error_mean": 0.17,
+        "rel_error_mean_pct": 0.11,
+        "accuracy": 87.29,
+        "voiced_f1": 92.12
+      }
+    }
+  },
+  {
+    "config_name": "10. [Bandpass + Energy Ext]",
     "average_error_hz": 3.13,
     "average_accuracy_pct": 83.89,
     "average_voiced_f1_pct": 91.53,
@@ -252,17 +360,89 @@
     }
   },
   {
-    "config_name": "8. [Cả 3 Plugins]",
-    "average_error_hz": 3.02,
-    "average_accuracy_pct": 84.06,
-    "average_voiced_f1_pct": 91.78,
+    "config_name": "11. [Bandpass + Center Clip]",
+    "average_error_hz": 2.25,
+    "average_accuracy_pct": 82.2,
+    "average_voiced_f1_pct": 89.42,
     "files": {
       "phone_F2": {
-        "pred_f0_mean": 151.11,
-        "abs_error_mean": 6.11,
-        "rel_error_mean_pct": 4.21,
+        "pred_f0_mean": 150.19,
+        "abs_error_mean": 5.19,
+        "rel_error_mean_pct": 3.58,
         "accuracy": 77.82,
-        "voiced_f1": 87.24
+        "voiced_f1": 87.0
+      },
+      "phone_M2": {
+        "pred_f0_mean": 131.69,
+        "abs_error_mean": 2.69,
+        "rel_error_mean_pct": 2.09,
+        "accuracy": 76.26,
+        "voiced_f1": 87.87
+      },
+      "studio_F2": {
+        "pred_f0_mean": 200.59,
+        "abs_error_mean": 0.59,
+        "rel_error_mean_pct": 0.3,
+        "accuracy": 89.14,
+        "voiced_f1": 92.61
+      },
+      "studio_M2": {
+        "pred_f0_mean": 155.52,
+        "abs_error_mean": 0.52,
+        "rel_error_mean_pct": 0.33,
+        "accuracy": 85.59,
+        "voiced_f1": 90.21
+      }
+    }
+  },
+  {
+    "config_name": "12. [Center Clip + Hyst + Energy]",
+    "average_error_hz": 2.23,
+    "average_accuracy_pct": 83.49,
+    "average_voiced_f1_pct": 90.93,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 151.37,
+        "abs_error_mean": 6.37,
+        "rel_error_mean_pct": 4.39,
+        "accuracy": 78.87,
+        "voiced_f1": 88.1
+      },
+      "phone_M2": {
+        "pred_f0_mean": 130.44,
+        "abs_error_mean": 1.44,
+        "rel_error_mean_pct": 1.12,
+        "accuracy": 77.7,
+        "voiced_f1": 89.8
+      },
+      "studio_F2": {
+        "pred_f0_mean": 199.81,
+        "abs_error_mean": 0.19,
+        "rel_error_mean_pct": 0.1,
+        "accuracy": 90.1,
+        "voiced_f1": 93.85
+      },
+      "studio_M2": {
+        "pred_f0_mean": 155.91,
+        "abs_error_mean": 0.91,
+        "rel_error_mean_pct": 0.59,
+        "accuracy": 87.29,
+        "voiced_f1": 91.98
+      }
+    }
+  },
+  {
+    "config_name": "13. [Bandpass + Hyst + Energy]",
+    "average_error_hz": 2.8,
+    "average_accuracy_pct": 83.95,
+    "average_voiced_f1_pct": 91.64,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 151.27,
+        "abs_error_mean": 6.27,
+        "rel_error_mean_pct": 4.32,
+        "accuracy": 77.82,
+        "voiced_f1": 87.18
       },
       "phone_M2": {
         "pred_f0_mean": 133.59,
@@ -272,18 +452,126 @@
         "voiced_f1": 90.24
       },
       "studio_F2": {
-        "pred_f0_mean": 199.77,
-        "abs_error_mean": 0.23,
-        "rel_error_mean_pct": 0.11,
+        "pred_f0_mean": 199.81,
+        "abs_error_mean": 0.19,
+        "rel_error_mean_pct": 0.1,
         "accuracy": 92.65,
         "voiced_f1": 97.01
       },
       "studio_M2": {
-        "pred_f0_mean": 156.15,
-        "abs_error_mean": 1.15,
-        "rel_error_mean_pct": 0.75,
-        "accuracy": 87.71,
-        "voiced_f1": 92.62
+        "pred_f0_mean": 155.17,
+        "abs_error_mean": 0.17,
+        "rel_error_mean_pct": 0.11,
+        "accuracy": 87.29,
+        "voiced_f1": 92.12
+      }
+    }
+  },
+  {
+    "config_name": "14. [Bandpass + Center Clip + Hyst]",
+    "average_error_hz": 2.09,
+    "average_accuracy_pct": 82.65,
+    "average_voiced_f1_pct": 89.98,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 149.9,
+        "abs_error_mean": 4.9,
+        "rel_error_mean_pct": 3.38,
+        "accuracy": 77.82,
+        "voiced_f1": 87.0
+      },
+      "phone_M2": {
+        "pred_f0_mean": 131.65,
+        "abs_error_mean": 2.65,
+        "rel_error_mean_pct": 2.06,
+        "accuracy": 76.98,
+        "voiced_f1": 88.8
+      },
+      "studio_F2": {
+        "pred_f0_mean": 200.43,
+        "abs_error_mean": 0.43,
+        "rel_error_mean_pct": 0.22,
+        "accuracy": 89.78,
+        "voiced_f1": 93.44
+      },
+      "studio_M2": {
+        "pred_f0_mean": 155.37,
+        "abs_error_mean": 0.37,
+        "rel_error_mean_pct": 0.24,
+        "accuracy": 86.02,
+        "voiced_f1": 90.68
+      }
+    }
+  },
+  {
+    "config_name": "15. [Bandpass + Center Clip + Energy]",
+    "average_error_hz": 1.92,
+    "average_accuracy_pct": 83.54,
+    "average_voiced_f1_pct": 91.06,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 149.73,
+        "abs_error_mean": 4.73,
+        "rel_error_mean_pct": 3.26,
+        "accuracy": 78.45,
+        "voiced_f1": 87.79
+      },
+      "phone_M2": {
+        "pred_f0_mean": 131.31,
+        "abs_error_mean": 2.31,
+        "rel_error_mean_pct": 1.79,
+        "accuracy": 78.42,
+        "voiced_f1": 90.61
+      },
+      "studio_F2": {
+        "pred_f0_mean": 200.08,
+        "abs_error_mean": 0.08,
+        "rel_error_mean_pct": 0.04,
+        "accuracy": 90.42,
+        "voiced_f1": 94.25
+      },
+      "studio_M2": {
+        "pred_f0_mean": 155.55,
+        "abs_error_mean": 0.55,
+        "rel_error_mean_pct": 0.36,
+        "accuracy": 86.86,
+        "voiced_f1": 91.6
+      }
+    }
+  },
+  {
+    "config_name": "16. [Cả 4 Plugins]",
+    "average_error_hz": 1.93,
+    "average_accuracy_pct": 83.48,
+    "average_voiced_f1_pct": 91.0,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 149.91,
+        "abs_error_mean": 4.91,
+        "rel_error_mean_pct": 3.38,
+        "accuracy": 78.24,
+        "voiced_f1": 87.53
+      },
+      "phone_M2": {
+        "pred_f0_mean": 131.2,
+        "abs_error_mean": 2.2,
+        "rel_error_mean_pct": 1.7,
+        "accuracy": 78.42,
+        "voiced_f1": 90.61
+      },
+      "studio_F2": {
+        "pred_f0_mean": 200.05,
+        "abs_error_mean": 0.05,
+        "rel_error_mean_pct": 0.02,
+        "accuracy": 90.42,
+        "voiced_f1": 94.25
+      },
+      "studio_M2": {
+        "pred_f0_mean": 155.55,
+        "abs_error_mean": 0.55,
+        "rel_error_mean_pct": 0.36,
+        "accuracy": 86.86,
+        "voiced_f1": 91.6
       }
     }
   }
