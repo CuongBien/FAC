@@ -105,9 +105,14 @@ class PluginPitchDetector:
                     p.adjust_frame_decision(i, 0.0, 0.0, False, context)
                 continue
 
+            # Apply frame-level pre-processing plugins (e.g. Center Clipping)
+            pitch_frame = np.copy(frames[i])
+            for p in self.plugins:
+                pitch_frame = p.pre_process_frame(pitch_frame, sample_rate)
+
             if method == "amdf":
                 f0_val, dip_val, lag = find_f0_amdf(
-                    frames[i],
+                    pitch_frame,
                     sample_rate,
                     f0_min=self.base_detector.f0_min,
                     f0_max=self.base_detector.f0_max,
@@ -120,7 +125,7 @@ class PluginPitchDetector:
                 current_metric = dip_val
             else:
                 f0_val, peak_val, lag = find_f0_acf(
-                    frames[i],
+                    pitch_frame,
                     sample_rate,
                     f0_min=self.base_detector.f0_min,
                     f0_max=self.base_detector.f0_max,

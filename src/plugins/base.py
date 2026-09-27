@@ -25,6 +25,18 @@ class BasePlugin:
         """
         return signal
 
+    def pre_process_frame(self, frame: np.ndarray, sample_rate: int) -> np.ndarray:
+        """Hook executed on each frame before pitch extraction (e.g., center clipping).
+
+        Args:
+            frame: 1D windowed signal frame.
+            sample_rate: Audio sampling frequency in Hz.
+
+        Returns:
+            np.ndarray: Modified 1D frame.
+        """
+        return frame
+
     def adjust_frame_decision(
         self,
         frame_idx: int,

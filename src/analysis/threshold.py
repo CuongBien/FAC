@@ -71,6 +71,11 @@ def extract_training_distributions(
         labels = get_frame_labels(frame_times, lab_data["segments"])
 
         for frame, label in zip(frames, labels):
+            if plugins:
+                for p in plugins:
+                    if hasattr(p, "pre_process_frame"):
+                        frame = p.pre_process_frame(frame, sr)
+
             if label == "v":
                 if method.lower() == "acf":
                     _, peak_val, _ = find_f0_acf(frame, sr, f0_min=f0_min, f0_max=f0_max, mode="normalized")
