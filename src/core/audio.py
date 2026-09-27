@@ -1,3 +1,4 @@
+from typing import Optional
 import warnings
 import numpy as np
 from scipy.io import wavfile
@@ -105,3 +106,31 @@ def compute_ste(
     )
     ste = np.mean(frames ** 2, axis=1)
     return ste, frame_times
+
+
+def add_awgn_noise(
+    signal: np.ndarray,
+    snr_db: Optional[float],
+    seed: Optional[int] = 42,
+) -> np.ndarray:
+    """Add Additive White Gaussian Noise (AWGN) to achieve a target Signal-to-Noise Ratio (SNR in dB).
+
+    Args:
+        signal: 1D input audio array.
+        snr_db: Target SNR in dB. If None or inf, returns a copy of the clean signal.
+        seed: Random seed for reproducibility.
+
+    Returns:
+        np.ndarray: Noisy audio signal.
+    """
+    if snr_db is None or np.isinf(snr_db):
+        return np.copy(signal)
+
+    sig_power = float(np.mean(signal ** 2))
+    if sig_power <= 0:
+        return np.copy(signal)
+
+    noise_power = sig_power / (10.0 ** (snr_db / 10.0))
+    rng = np.random.default_rng(seed)
+    noise = rng.normal(0.0, np.sqrt(noise_power), size=len(signal))
+    return signal + noise

@@ -1,0 +1,194 @@
+[
+  {
+    "snr_db": Infinity,
+    "snr_label": "Clean",
+    "acf_base": {
+      "average_error_hz": 3.17,
+      "average_voiced_f1_pct": 91.03,
+      "average_accuracy_pct": 83.58
+    },
+    "amdf_base": {
+      "average_error_hz": 1.6,
+      "average_voiced_f1_pct": 92.3,
+      "average_accuracy_pct": 84.65
+    },
+    "acf_enh": {
+      "average_error_hz": 1.9,
+      "average_voiced_f1_pct": 91.06,
+      "average_accuracy_pct": 83.54
+    },
+    "amdf_enh": {
+      "average_error_hz": 1.24,
+      "average_voiced_f1_pct": 91.42,
+      "average_accuracy_pct": 83.88
+    }
+  },
+  {
+    "snr_db": 25.0,
+    "snr_label": "+25 dB",
+    "acf_base": {
+      "average_error_hz": 3.18,
+      "average_voiced_f1_pct": 90.84,
+      "average_accuracy_pct": 83.44
+    },
+    "amdf_base": {
+      "average_error_hz": 1.56,
+      "average_voiced_f1_pct": 92.26,
+      "average_accuracy_pct": 84.6
+    },
+    "acf_enh": {
+      "average_error_hz": 1.87,
+      "average_voiced_f1_pct": 90.78,
+      "average_accuracy_pct": 83.29
+    },
+    "amdf_enh": {
+      "average_error_hz": 1.19,
+      "average_voiced_f1_pct": 91.16,
+      "average_accuracy_pct": 83.64
+    }
+  },
+  {
+    "snr_db": 20.0,
+    "snr_label": "+20 dB",
+    "acf_base": {
+      "average_error_hz": 2.95,
+      "average_voiced_f1_pct": 90.88,
+      "average_accuracy_pct": 83.97
+    },
+    "amdf_base": {
+      "average_error_hz": 1.72,
+      "average_voiced_f1_pct": 91.73,
+      "average_accuracy_pct": 84.62
+    },
+    "acf_enh": {
+      "average_error_hz": 1.95,
+      "average_voiced_f1_pct": 91.0,
+      "average_accuracy_pct": 83.96
+    },
+    "amdf_enh": {
+      "average_error_hz": 1.27,
+      "average_voiced_f1_pct": 90.42,
+      "average_accuracy_pct": 83.52
+    }
+  },
+  {
+    "snr_db": 15.0,
+    "snr_label": "+15 dB",
+    "acf_base": {
+      "average_error_hz": 3.06,
+      "average_voiced_f1_pct": 89.91,
+      "average_accuracy_pct": 84.25
+    },
+    "amdf_base": {
+      "average_error_hz": 2.29,
+      "average_voiced_f1_pct": 90.02,
+      "average_accuracy_pct": 84.29
+    },
+    "acf_enh": {
+      "average_error_hz": 1.86,
+      "average_voiced_f1_pct": 91.46,
+      "average_accuracy_pct": 85.42
+    },
+    "amdf_enh": {
+      "average_error_hz": 1.65,
+      "average_voiced_f1_pct": 87.59,
+      "average_accuracy_pct": 82.33
+    }
+  },
+  {
+    "snr_db": 10.0,
+    "snr_label": "+10 dB",
+    "acf_base": {
+      "average_error_hz": 3.6,
+      "average_voiced_f1_pct": 86.92,
+      "average_accuracy_pct": 53.65
+    },
+    "amdf_base": {
+      "average_error_hz": 2.86,
+      "average_voiced_f1_pct": 85.52,
+      "average_accuracy_pct": 52.48
+    },
+    "acf_enh": {
+      "average_error_hz": 2.46,
+      "average_voiced_f1_pct": 90.6,
+      "average_accuracy_pct": 56.44
+    },
+    "amdf_enh": {
+      "average_error_hz": 3.29,
+      "average_voiced_f1_pct": 83.19,
+      "average_accuracy_pct": 50.75
+    }
+  },
+  {
+    "snr_db": 5.0,
+    "snr_label": "+5 dB",
+    "acf_base": {
+      "average_error_hz": 4.91,
+      "average_voiced_f1_pct": 80.58,
+      "average_accuracy_pct": 46.24
+    },
+    "amdf_base": {
+      "average_error_hz": 5.43,
+      "average_voiced_f1_pct": 77.48,
+      "average_accuracy_pct": 44.11
+    },
+    "acf_enh": {
+      "average_error_hz": 2.79,
+      "average_voiced_f1_pct": 89.22,
+      "average_accuracy_pct": 52.8
+    },
+    "amdf_enh": {
+      "average_error_hz": 4.69,
+      "average_voiced_f1_pct": 70.45,
+      "average_accuracy_pct": 39.95
+    }
+  },
+  {
+    "snr_db": 0.0,
+    "snr_label": "+0 dB",
+    "acf_base": {
+      "average_error_hz": 9.06,
+      "average_voiced_f1_pct": 59.01,
+      "average_accuracy_pct": 33.76
+    },
+    "amdf_base": {
+      "average_error_hz": 12.07,
+      "average_voiced_f1_pct": 46.35,
+      "average_accuracy_pct": 27.98
+    },
+    "acf_enh": {
+      "average_error_hz": 2.93,
+      "average_voiced_f1_pct": 86.81,
+      "average_accuracy_pct": 51.03
+    },
+    "amdf_enh": {
+      "average_error_hz": 10.23,
+      "average_voiced_f1_pct": 28.13,
+      "average_accuracy_pct": 21.35
+    }
+  },
+  {
+    "snr_db": -5.0,
+    "snr_label": "-5 dB",
+    "acf_base": {
+      "average_error_hz": 27.81,
+      "average_voiced_f1_pct": 12.53,
+      "average_accuracy_pct": 16.57
+    },
+    "amdf_base": {
+      "average_error_hz": 42.83,
+      "average_voiced_f1_pct": 3.46,
+      "average_accuracy_pct": 14.13
+    },
+    "acf_enh": {
+      "average_error_hz": 1.97,
+      "average_voiced_f1_pct": 81.56,
+      "average_accuracy_pct": 47.27
+    },
+    "amdf_enh": {
+      "average_error_hz": 84.1,
+      "average_voiced_f1_pct": 3.21,
+      "average_accuracy_pct": 14.08
+    }
+  }
+]

@@ -596,3 +596,128 @@ def plot_combinations_ranking(
 
     plt.close(fig)
     return fig
+
+
+def plot_noise_robustness_curves(
+    results_list: list,
+    save_path: Optional[str] = None,
+    title: str = "Khảo sát Độ Bền Vững Kháng Nhiễu (Noise Robustness): ACF vs. AMDF",
+):
+    """Plot dual-panel degradation curves (MAE and F1-Score) across various SNR levels."""
+    labels = [r["snr_label"] for r in results_list]
+    x = np.arange(len(labels))
+
+    err_acf_b = [r["acf_base"]["average_error_hz"] for r in results_list]
+    err_amdf_b = [r["amdf_base"]["average_error_hz"] for r in results_list]
+    err_acf_e = [r["acf_enh"]["average_error_hz"] for r in results_list]
+    err_amdf_e = [r["amdf_enh"]["average_error_hz"] for r in results_list]
+
+    f1_acf_b = [r["acf_base"]["average_voiced_f1_pct"] for r in results_list]
+    f1_amdf_b = [r["amdf_base"]["average_voiced_f1_pct"] for r in results_list]
+    f1_acf_e = [r["acf_enh"]["average_voiced_f1_pct"] for r in results_list]
+    f1_amdf_e = [r["amdf_enh"]["average_voiced_f1_pct"] for r in results_list]
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+    fig.suptitle(title, fontsize=14, fontweight="bold")
+
+    # Panel 1: Error vs SNR (Lower is better)
+    ax1.plot(x, err_acf_b, "o--", color="#1f77b4", linewidth=2.0, markersize=7, label="ACF (Baseline)")
+    ax1.plot(x, err_amdf_b, "s--", color="#d62728", linewidth=2.0, markersize=7, label="AMDF (Baseline)")
+    ax1.plot(x, err_acf_e, "^-", color="#08519c", linewidth=2.5, markersize=8, label="ACF (Tổ hợp Nâng cao Tối ưu)")
+    ax1.plot(x, err_amdf_e, "v-", color="#a50f15", linewidth=2.5, markersize=8, label="AMDF (Tổ hợp Nâng cao Tối ưu)")
+
+    ax1.set_xticks(x)
+    ax1.set_xticklabels(labels, fontsize=10, fontweight="bold")
+    ax1.set_xlabel("Mức tỷ số Tín hiệu trên Nhiễu (SNR) [Giảm dần độ sạch →]", fontsize=11, fontweight="bold")
+    ax1.set_ylabel("Sai số tuyệt đối trung bình |ΔF0| (Hz)", fontsize=11, fontweight="bold")
+    ax1.set_title("1. Sai số F0 (Hz) theo mức nhiễu [Thấp hơn là tốt hơn]", fontsize=12, fontweight="bold")
+    ax1.grid(True, linestyle="--", alpha=0.6)
+    ax1.legend(loc="upper left", frameon=True, fontsize=9.5)
+
+    # Panel 2: F1-Score vs SNR (Higher is better)
+    ax2.plot(x, f1_acf_b, "o--", color="#1f77b4", linewidth=2.0, markersize=7, label="ACF (Baseline)")
+    ax2.plot(x, f1_amdf_b, "s--", color="#d62728", linewidth=2.0, markersize=7, label="AMDF (Baseline)")
+    ax2.plot(x, f1_acf_e, "^-", color="#08519c", linewidth=2.5, markersize=8, label="ACF (Tổ hợp Nâng cao Tối ưu)")
+    ax2.plot(x, f1_amdf_e, "v-", color="#a50f15", linewidth=2.5, markersize=8, label="AMDF (Tổ hợp Nâng cao Tối ưu)")
+
+    ax2.set_xticks(x)
+    ax2.set_xticklabels(labels, fontsize=10, fontweight="bold")
+    ax2.set_xlabel("Mức tỷ số Tín hiệu trên Nhiễu (SNR) [Giảm dần độ sạch →]", fontsize=11, fontweight="bold")
+    ax2.set_ylabel("Voiced F1-Score (%)", fontsize=11, fontweight="bold")
+    ax2.set_title("2. Độ chính xác phân loại V/UV theo mức nhiễu [Cao hơn là tốt hơn]", fontsize=12, fontweight="bold")
+    ax2.grid(True, linestyle="--", alpha=0.6)
+    ax2.legend(loc="lower left", frameon=True, fontsize=9.5)
+
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    if save_path:
+        os.makedirs(os.path.dirname(os.path.abspath(save_path)), exist_ok=True)
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+    plt.close(fig)
+    return fig
+
+
+def plot_noise_mechanism_demo(
+    clean_frame: np.ndarray,
+    noisy_frame: np.ndarray,
+    sample_rate: int,
+    f0_ref: float,
+    snr_db: float = 0.0,
+    save_path: Optional[str] = None,
+):
+    """Plot mechanism demonstration comparing ACF and AMDF response under 0dB SNR."""
+    from src.core.acf import compute_acf
+    from src.core.amdf import compute_amdf
+
+    acf_clean = compute_acf(clean_frame, mode="normalized")
+    acf_noisy = compute_acf(noisy_frame, mode="normalized")
+
+    amdf_clean = compute_amdf(clean_frame, mode="normalized")
+    amdf_noisy = compute_amdf(noisy_frame, mode="normalized")
+
+    t_frame = np.arange(len(clean_frame)) / sample_rate * 1000.0  # ms
+    tau_ms = np.arange(len(acf_clean)) / sample_rate * 1000.0  # ms
+    t0_ref_ms = (1.0 / f0_ref) * 1000.0
+
+    fig = plt.figure(figsize=(15, 9))
+    gs = fig.add_gridspec(2, 2, height_ratios=[1, 1.2], hspace=0.35, wspace=0.22)
+    fig.suptitle(f"Minh họa Cơ chế Kháng Nhiễu tại Khung Hữu Thanh (SNR = {snr_db:.0f} dB)", fontsize=14, fontweight="bold")
+
+    # Subplot 1: Waveforms (Span both columns)
+    ax0 = fig.add_subplot(gs[0, :])
+    ax0.plot(t_frame, noisy_frame, color="#ff7f0e", alpha=0.65, label=f"Tín hiệu lẫn nhiễu ({snr_db:.0f} dB AWGN)")
+    ax0.plot(t_frame, clean_frame, color="#1f77b4", linewidth=1.8, label="Tín hiệu gốc sạch (Voiced Frame)")
+    ax0.set_xlabel("Thời gian (ms)", fontsize=10, fontweight="bold")
+    ax0.set_ylabel("Biên độ", fontsize=10, fontweight="bold")
+    ax0.set_title("Dạng sóng miền thời gian: Khung sạch vs Khung nhiễu cực nặng (0 dB)", fontsize=11, fontweight="bold")
+    ax0.grid(True, linestyle="--", alpha=0.5)
+    ax0.legend(loc="upper right", frameon=True)
+
+    # Subplot 2: ACF comparison
+    ax1 = fig.add_subplot(gs[1, 0])
+    ax1.plot(tau_ms, acf_clean, color="#1f77b4", linewidth=2.0, label="ACF Khung sạch")
+    ax1.plot(tau_ms, acf_noisy, color="#08519c", linewidth=2.0, linestyle="--", label=f"ACF Khung nhiễu ({snr_db:.0f} dB)")
+    ax1.axvline(t0_ref_ms, color="red", linestyle=":", linewidth=2, label=f"Chu kỳ thật T0 = {t0_ref_ms:.2f} ms ({f0_ref:.1f} Hz)")
+    ax1.set_xlim(0, max(tau_ms))
+    ax1.set_xlabel("Độ trễ lag τ (ms)", fontsize=10, fontweight="bold")
+    ax1.set_ylabel("Hàm tương quan chuẩn hóa R(τ)", fontsize=10, fontweight="bold")
+    ax1.set_title("ACF: Đỉnh chu kỳ T0 vẫn nhô cao rõ rệt nhờ nhiễu tự triệt tiêu", fontsize=11, fontweight="bold")
+    ax1.grid(True, linestyle="--", alpha=0.5)
+    ax1.legend(loc="upper right", frameon=True, fontsize=9)
+
+    # Subplot 3: AMDF comparison
+    ax2 = fig.add_subplot(gs[1, 1])
+    ax2.plot(tau_ms, amdf_clean, color="#d62728", linewidth=2.0, label="AMDF Khung sạch")
+    ax2.plot(tau_ms, amdf_noisy, color="#800026", linewidth=2.0, linestyle="--", label=f"AMDF Khung nhiễu ({snr_db:.0f} dB)")
+    ax2.axvline(t0_ref_ms, color="blue", linestyle=":", linewidth=2, label=f"Chu kỳ thật T0 = {t0_ref_ms:.2f} ms ({f0_ref:.1f} Hz)")
+    ax2.set_xlim(0, max(tau_ms))
+    ax2.set_xlabel("Độ trễ lag τ (ms)", fontsize=10, fontweight="bold")
+    ax2.set_ylabel("Hàm hiệu chuẩn hóa D(τ)", fontsize=10, fontweight="bold")
+    ax2.set_title("AMDF: Đáy cực tiểu T0 bị sàn nhiễu nâng cao, lấp phẳng", fontsize=11, fontweight="bold")
+    ax2.grid(True, linestyle="--", alpha=0.5)
+    ax2.legend(loc="lower right", frameon=True, fontsize=9)
+
+    if save_path:
+        os.makedirs(os.path.dirname(os.path.abspath(save_path)), exist_ok=True)
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+    plt.close(fig)
+    return fig
