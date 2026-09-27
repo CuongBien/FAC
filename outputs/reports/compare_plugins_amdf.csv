@@ -1,0 +1,9 @@
+Config,phone_F2_Err,phone_M2_Err,studio_F2_Err,studio_M2_Err,Avg_Err_Hz,Avg_Accuracy_Pct,Avg_F1_Pct
+1. Baseline (Gốc),5.19,0.48,0.2,0.52,1.6,84.65,92.3
+2. [Hysteresis],5.59,0.76,1.27,1.03,2.16,83.64,91.13
+3. [Energy Ext],4.58,0.8,0.5,0.42,1.57,85.95,93.86
+4. [Bandpass Filter],4.32,1.66,1.82,0.95,2.19,83.38,90.93
+5. [Hysteresis + Energy Ext],5.02,1.04,0.5,0.37,1.73,85.3,93.12
+6. [Bandpass + Hysteresis],5.36,2.08,3.07,2.08,3.15,82.28,89.57
+7. [Bandpass + Energy Ext],3.66,1.07,1.9,0.52,1.79,84.67,92.47
+8. [Cả 3 Plugins],4.11,1.51,1.95,0.73,2.08,84.0,91.68
