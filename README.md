@@ -445,7 +445,38 @@ Chạy kiểm thử tự động toàn bộ 4 file kiểm thử với thuật to
 
 ---
 
-## II.5. Đối Sánh Trực Tiếp: ACF vs. AMDF
+## II.5. Khảo Sát & Xếp Hạng Toàn Bộ 8 Tổ Hợp Cải Tiến Cho AMDF ($2^3$)
+
+### Bảng kết quả đối sánh toàn diện 8 cấu hình Plugins trên AMDF:
+
+| STT | Cấu hình Plugin | Ngưỡng $T$ | `phone_F2` (145Hz) | `phone_M2` (129Hz) | `studio_F2` (200Hz) | `studio_M2` (155Hz) | Sai số TB $\lvert\Delta F_0\rvert$ | F1-Score TB | V/UV Acc TB |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **1** | **Baseline (Gốc)** | $0.4380$ | 5.19 Hz | **0.48 Hz** | **0.20 Hz** | 0.52 Hz | 1.60 Hz | 92.30% | 84.65% |
+| **2** | **[Hysteresis]** | $0.4380$ | 5.59 Hz | 0.76 Hz | 1.27 Hz | 1.03 Hz | 2.16 Hz | 91.13% | 83.64% |
+| **3** | **[Energy Ext]** 🏆 | $0.4380$ | **4.58 Hz** | 0.80 Hz | 0.50 Hz | **0.42 Hz** | **1.57 Hz** | **93.86%** | **85.95%** |
+| **4** | **[Bandpass Filter]** | $0.3734$ | 4.32 Hz | 1.66 Hz | 1.82 Hz | 0.95 Hz | 2.19 Hz | 90.93% | 83.38% |
+| **5** | **[Hysteresis + Energy Ext]** | $0.4380$ | 5.02 Hz | 1.04 Hz | 0.50 Hz | 0.37 Hz | 1.73 Hz | 93.12% | 85.30% |
+| **6** | **[Bandpass + Hysteresis]** | $0.3734$ | 5.36 Hz | 2.08 Hz | 3.07 Hz | 2.08 Hz | 3.15 Hz | 89.57% | 82.28% |
+| **7** | **[Bandpass + Energy Ext]** 🌟 | $0.3734$ | **3.66 Hz** | 1.07 Hz | 1.90 Hz | 0.52 Hz | 1.79 Hz | 92.47% | 84.67% |
+| **8** | **[Cả 3 Plugins]** | $0.3734$ | 4.11 Hz | 1.51 Hz | 1.95 Hz | 0.73 Hz | 2.08 Hz | 91.68% | 84.00% |
+
+* **Quán quân toàn diện:** **Cấu hình 3 `[Energy Ext]`** đạt cả sai số thấp nhất (**1.57 Hz**), F1 cao nhất (**93.86%**) và Accuracy cao nhất (**85.95%**).
+* **Đột phá trên file khó:** **Cấu hình 7 `[Bandpass + Energy Ext]`** giảm mạnh sai số trên `phone_F2` từ $5.19\text{ Hz} \rightarrow \mathbf{3.66\text{ Hz}}$ (giảm gần 30%).
+
+### Biểu đồ cột xếp hạng 8 tổ hợp AMDF:
+![05_all_combinations_ranking_amdf.png](outputs/figures/05_all_combinations_ranking_amdf.png)
+
+### Biểu đồ trực quan đối sánh AMDF Baseline vs Enhanced:
+
+| `phone_F2.wav` | `phone_M2.wav` |
+| :---: | :---: |
+| ![05_compare_plugin_amdf_phone_F2.png](outputs/figures/05_compare_plugin_amdf_phone_F2.png) | ![05_compare_plugin_amdf_phone_M2.png](outputs/figures/05_compare_plugin_amdf_phone_M2.png) |
+| **`studio_F2.wav`** | **`studio_M2.wav`** |
+| ![05_compare_plugin_amdf_studio_F2.png](outputs/figures/05_compare_plugin_amdf_studio_F2.png) | ![05_compare_plugin_amdf_studio_M2.png](outputs/figures/05_compare_plugin_amdf_studio_M2.png) |
+
+---
+
+## II.6. Đối Sánh Trực Tiếp: ACF vs. AMDF
 
 ### Bảng so sánh tổng hợp hiệu năng giữa hai thuật toán (Frame = 25 ms, Baseline):
 
