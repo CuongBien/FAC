@@ -9,6 +9,7 @@
 8. Tổ hợp [Cả 3 Plugins: Bandpass + Hysteresis + Energy Extension]
 """
 import argparse
+import itertools
 import json
 import os
 import sys
@@ -33,6 +34,7 @@ from src.plugins import (
     EnergyExtensionPlugin,
     BandpassFilterPlugin,
     CenterClippingPlugin,
+    ViterbiTrackingPlugin,
 )
 from src.analysis.evaluation import evaluate_against_ground_truth
 from src.visualization.plotter import plot_plugin_contour_comparison, plot_combinations_ranking
@@ -93,81 +95,86 @@ def run_all_combinations(
     def make_energy():
         return EnergyExtensionPlugin(threshold_discount=0.20)
 
-    # Định nghĩa toàn bộ 16 tổ hợp (2^4) theo đúng phân phối ngưỡng tương ứng
-    configs = {
-        "01. Baseline (Gốc)": PitchDetector(method=method, threshold=t_raw),
-        "02. [Hysteresis]": PluginPitchDetector(
-            base_detector=PitchDetector(method=method, threshold=t_raw),
-            plugins=[make_hyst(t_raw)],
-        ),
-        "03. [Energy Ext]": PluginPitchDetector(
-            base_detector=PitchDetector(method=method, threshold=t_raw),
-            plugins=[make_energy()],
-        ),
-        "04. [Center Clip]": PluginPitchDetector(
-            base_detector=PitchDetector(method=method, threshold=t_clip),
-            plugins=[make_clip()],
-        ),
-        "05. [Bandpass Filter]": PluginPitchDetector(
-            base_detector=PitchDetector(method=method, threshold=t_bp),
-            plugins=[make_bp()],
-        ),
-        "06. [Hyst + Energy Ext]": PluginPitchDetector(
-            base_detector=PitchDetector(method=method, threshold=t_raw),
-            plugins=[make_hyst(t_raw), make_energy()],
-        ),
-        "07. [Center Clip + Hyst]": PluginPitchDetector(
-            base_detector=PitchDetector(method=method, threshold=t_clip),
-            plugins=[make_clip(), make_hyst(t_clip)],
-        ),
-        "08. [Center Clip + Energy Ext]": PluginPitchDetector(
-            base_detector=PitchDetector(method=method, threshold=t_clip),
-            plugins=[make_clip(), make_energy()],
-        ),
-        "09. [Bandpass + Hyst]": PluginPitchDetector(
-            base_detector=PitchDetector(method=method, threshold=t_bp),
-            plugins=[make_bp(), make_hyst(t_bp)],
-        ),
-        "10. [Bandpass + Energy Ext]": PluginPitchDetector(
-            base_detector=PitchDetector(method=method, threshold=t_bp),
-            plugins=[make_bp(), make_energy()],
-        ),
-        "11. [Bandpass + Center Clip]": PluginPitchDetector(
-            base_detector=PitchDetector(method=method, threshold=t_bp_clip),
-            plugins=[make_bp(), make_clip()],
-        ),
-        "12. [Center Clip + Hyst + Energy]": PluginPitchDetector(
-            base_detector=PitchDetector(method=method, threshold=t_clip),
-            plugins=[make_clip(), make_hyst(t_clip), make_energy()],
-        ),
-        "13. [Bandpass + Hyst + Energy]": PluginPitchDetector(
-            base_detector=PitchDetector(method=method, threshold=t_bp),
-            plugins=[make_bp(), make_hyst(t_bp), make_energy()],
-        ),
-        "14. [Bandpass + Center Clip + Hyst]": PluginPitchDetector(
-            base_detector=PitchDetector(method=method, threshold=t_bp_clip),
-            plugins=[make_bp(), make_clip(), make_hyst(t_bp_clip)],
-        ),
-        "15. [Bandpass + Center Clip + Energy]": PluginPitchDetector(
-            base_detector=PitchDetector(method=method, threshold=t_bp_clip),
-            plugins=[make_bp(), make_clip(), make_energy()],
-        ),
-        "16. [Cả 4 Plugins]": PluginPitchDetector(
-            base_detector=PitchDetector(method=method, threshold=t_bp_clip),
-            plugins=[make_bp(), make_clip(), make_hyst(t_bp_clip), make_energy()],
-        ),
-    }
+    def make_viterbi():
+        return ViterbiTrackingPlugin(w_freq=3.0, w_octave=2.0)
 
-    print("=" * 125)
-    print(f"       BẢNG ĐỐI SÁNH TOÀN BỘ 8 TỔ HỢP PLUGINS TRÊN TẬP KIỂM THỬ (METHOD = {method.upper()})")
-    print("=" * 125)
-    header = f"{'Cấu hình':<32} | {'phone_F2 (|Δ|)':<16} | {'phone_M2 (|Δ|)':<16} | {'studio_F2 (|Δ|)':<16} | {'studio_M2 (|Δ|)':<16} | {'Sai số TB':<10} | {'F1 TB':<8} | {'Acc TB':<8}"
+    plugin_defs = [
+        ("BP", "Bandpass Filter"),
+        ("Clip", "Center Clip"),
+        ("Hyst", "Hysteresis"),
+        ("Energy", "Energy Ext"),
+        ("Viterbi", "Viterbi Tracking"),
+    ]
+
+    # Sinh tự động toàn bộ 32 tổ hợp (2^5) theo bậc k = 0..5
+    configs = {}
+    combo_idx = 1
+    for k in range(6):
+        for combo in itertools.combinations(plugin_defs, k):
+            short_names = [p[0] for p in combo]
+            has_bp = "BP" in short_names
+            has_clip = "Clip" in short_names
+            has_hyst = "Hyst" in short_names
+            has_energy = "Energy" in short_names
+            has_viterbi = "Viterbi" in short_names
+
+            # Chọn ngưỡng tối ưu theo phân phối tiền xử lý
+            if has_bp and has_clip:
+                t = t_bp_clip
+            elif has_bp:
+                t = t_bp
+            elif has_clip:
+                t = t_clip
+            else:
+                t = t_raw
+
+            plugins = []
+            if has_bp:
+                plugins.append(make_bp())
+            if has_clip:
+                plugins.append(make_clip())
+            if has_hyst:
+                plugins.append(make_hyst(t))
+            if has_energy:
+                plugins.append(make_energy())
+            if has_viterbi:
+                plugins.append(make_viterbi())
+
+            if k == 0:
+                name = f"{combo_idx:02d}. Baseline (Gốc)"
+                detector = PitchDetector(method=method, threshold=t)
+            elif k == 5:
+                name = f"{combo_idx:02d}. [Cả 5 Plugins]"
+                detector = PluginPitchDetector(
+                    base_detector=PitchDetector(method=method, threshold=t),
+                    plugins=plugins,
+                )
+            elif k == 1:
+                name = f"{combo_idx:02d}. [{combo[0][1]}]"
+                detector = PluginPitchDetector(
+                    base_detector=PitchDetector(method=method, threshold=t),
+                    plugins=plugins,
+                )
+            else:
+                name = f"{combo_idx:02d}. [{' + '.join(short_names)}]"
+                detector = PluginPitchDetector(
+                    base_detector=PitchDetector(method=method, threshold=t),
+                    plugins=plugins,
+                )
+
+            configs[name] = (detector, t)
+            combo_idx += 1
+
+    print("=" * 137)
+    print(f"       BẢNG ĐỐI SÁNH TOÀN BỘ 32 TỔ HỢP PLUGINS TRÊN TẬP KIỂM THỬ (METHOD = {method.upper()})")
+    print("=" * 137)
+    header = f"{'Cấu hình':<44} | {'phone_F2 (|Δ|)':<16} | {'phone_M2 (|Δ|)':<16} | {'studio_F2 (|Δ|)':<16} | {'studio_M2 (|Δ|)':<16} | {'Sai số TB':<10} | {'F1 TB':<8} | {'Acc TB':<8}"
     print(header)
-    print("-" * 125)
+    print("-" * 137)
 
     summary_records = []
 
-    for name, detector in configs.items():
+    for name, (detector, t_val) in configs.items():
         errs = []
         f1s = []
         accs = []
@@ -196,7 +203,7 @@ def run_all_combinations(
         avg_acc = float(np.mean(accs))
 
         row = (
-            f"{name:<32} | "
+            f"{name:<44} | "
             f"{file_metrics['phone_F2']['abs_error_mean']:5.2f}Hz ({file_metrics['phone_F2']['rel_error_mean_pct']:4.1f}%) | "
             f"{file_metrics['phone_M2']['abs_error_mean']:5.2f}Hz ({file_metrics['phone_M2']['rel_error_mean_pct']:4.1f}%) | "
             f"{file_metrics['studio_F2']['abs_error_mean']:5.2f}Hz ({file_metrics['studio_F2']['rel_error_mean_pct']:4.1f}%) | "
@@ -209,13 +216,14 @@ def run_all_combinations(
 
         summary_records.append({
             "config_name": name,
+            "threshold": round(float(t_val), 4),
             "average_error_hz": round(avg_err, 2),
             "average_accuracy_pct": round(avg_acc, 2),
             "average_voiced_f1_pct": round(avg_f1, 2),
             "files": file_metrics,
         })
 
-    print("=" * 125)
+    print("=" * 137)
 
     # Tìm tổ hợp tốt nhất
     best_err_cfg = min(summary_records, key=lambda x: x["average_error_hz"])
@@ -223,17 +231,17 @@ def run_all_combinations(
 
     print(f"[*] Cấu hình có SAI SỐ THẤP NHẤT: {best_err_cfg['config_name']} (Sai số TB: {best_err_cfg['average_error_hz']} Hz)")
     print(f"[*] Cấu hình có F1-SCORE CAO NHẤT : {best_f1_cfg['config_name']} (F1 TB: {best_f1_cfg['average_voiced_f1_pct']}%, Acc: {best_f1_cfg['average_accuracy_pct']}%)")
-    print("-" * 125)
+    print("-" * 137)
 
-    # 1. Vẽ biểu đồ xếp hạng toàn bộ 16 tổ hợp
-    plot_combinations_ranking(summary_records, save_path=output_ranking_fig, title=f"Đánh giá toàn bộ 16 tổ hợp Plugins ({method.upper()}) trên tập Kiểm thử")
+    # 1. Vẽ biểu đồ xếp hạng toàn bộ các cấu hình
+    plot_combinations_ranking(summary_records, save_path=output_ranking_fig, title=f"Đánh giá toàn bộ 32 tổ hợp Plugins ({method.upper()}) trên tập Kiểm thử")
     print(f"Saved ranking figure: {output_ranking_fig}")
 
     # 2. Xuất biểu đồ trực quan đối sánh Baseline vs Tổ hợp tốt nhất
     fig_dir = "outputs/figures"
-    detector_base = configs["01. Baseline (Gốc)"]
+    detector_base = configs["01. Baseline (Gốc)"][0]
     best_name = best_err_cfg["config_name"]
-    detector_best = configs[best_name]
+    detector_best = configs[best_name][0]
 
     print(f"\nĐang xuất 4 biểu đồ đối sánh trực quan (Baseline vs. {best_name})...")
     for f_id in files:
@@ -272,14 +280,15 @@ def run_all_combinations(
 
     # Lưu CSV
     with open(output_csv, "w", encoding="utf-8") as f:
-        f.write("Config,phone_F2_Err,phone_M2_Err,studio_F2_Err,studio_M2_Err,Avg_Err_Hz,Avg_Accuracy_Pct,Avg_F1_Pct\n")
+        f.write("Config,Threshold,phone_F2_Err,phone_M2_Err,studio_F2_Err,studio_M2_Err,Avg_Err_Hz,Avg_Accuracy_Pct,Avg_F1_Pct\n")
         for rec in summary_records:
-            f.write(f"{rec['config_name']},{rec['files']['phone_F2']['abs_error_mean']},{rec['files']['phone_M2']['abs_error_mean']},{rec['files']['studio_F2']['abs_error_mean']},{rec['files']['studio_M2']['abs_error_mean']},{rec['average_error_hz']},{rec['average_accuracy_pct']},{rec['average_voiced_f1_pct']}\n")
+            t_str = f"{rec.get('threshold', 0.0):.4f}"
+            f.write(f"{rec['config_name']},{t_str},{rec['files']['phone_F2']['abs_error_mean']},{rec['files']['phone_M2']['abs_error_mean']},{rec['files']['studio_F2']['abs_error_mean']},{rec['files']['studio_M2']['abs_error_mean']},{rec['average_error_hz']},{rec['average_accuracy_pct']},{rec['average_voiced_f1_pct']}\n")
     print(f"Saved report: {output_csv}")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Evaluate all 8 plugin combinations.")
+    parser = argparse.ArgumentParser(description="Evaluate all 32 plugin combinations.")
     parser.add_argument("--test_dir", type=str, default="TinHieuKiemThu", help="Test directory")
     parser.add_argument("--method", type=str, default="acf", choices=["acf", "amdf"], help="Pitch detection method (acf or amdf)")
     parser.add_argument("--out_json", type=str, default=None, help="JSON output")

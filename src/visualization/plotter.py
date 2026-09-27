@@ -546,27 +546,29 @@ def plot_combinations_ranking(
     errs = [rec["average_error_hz"] for rec in summary_records]
     f1s = [rec["average_voiced_f1_pct"] for rec in summary_records]
 
-    fig_height = max(8, len(names) * 0.55)
+    fig_height = max(8, len(names) * 0.42)
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, fig_height))
-    fig.suptitle(title, fontsize=15, fontweight="bold")
+    fig.suptitle(title, fontsize=14, fontweight="bold")
 
     y_pos = np.arange(len(names))
+    label_fontsize = 8.5 if len(names) > 20 else 10
+    annot_fontsize = 8.0 if len(names) > 20 else 9.0
 
     # Panel 1: Error (Lower is better)
     min_err = min(errs)
     colors_err = ["#2ca02c" if e == min_err else "#1f77b4" for e in errs]
     bars1 = ax1.barh(y_pos, errs, color=colors_err, alpha=0.85, edgecolor="gray")
     ax1.set_yticks(y_pos)
-    ax1.set_yticklabels(names, fontsize=10)
+    ax1.set_yticklabels(names, fontsize=label_fontsize)
     ax1.invert_yaxis()  # top-down
-    ax1.set_xlabel("Sai số trung bình |ΔF0| (Hz) - [Thấp hơn là tốt hơn]", fontsize=11, fontweight="bold")
-    ax1.set_title("1. So sánh Sai số tuyệt đối trung bình (|ΔF0|)", fontsize=12, fontweight="bold")
+    ax1.set_xlabel("Sai số tuyệt đối trung bình |ΔF0| (Hz) - [Thấp hơn là tốt hơn]", fontsize=10, fontweight="bold")
+    ax1.set_title("1. So sánh Sai số tuyệt đối trung bình (|ΔF0|)", fontsize=11, fontweight="bold")
     ax1.grid(True, axis="x", linestyle="--", alpha=0.5)
 
     for bar in bars1:
         w = bar.get_width()
         ax1.annotate(f"{w:.2f} Hz", xy=(w, bar.get_y() + bar.get_height() / 2),
-                     xytext=(5, 0), textcoords="offset points", va="center", fontsize=9, fontweight="bold")
+                     xytext=(5, 0), textcoords="offset points", va="center", fontsize=annot_fontsize, fontweight="bold")
 
     # Panel 2: F1-Score (Higher is better)
     max_f1 = max(f1s)
@@ -585,7 +587,7 @@ def plot_combinations_ranking(
     for bar in bars2:
         w = bar.get_width()
         ax2.annotate(f"{w:.2f}%", xy=(w, bar.get_y() + bar.get_height() / 2),
-                     xytext=(5, 0), textcoords="offset points", va="center", fontsize=9, fontweight="bold")
+                     xytext=(5, 0), textcoords="offset points", va="center", fontsize=annot_fontsize, fontweight="bold")
 
     plt.tight_layout(rect=[0, 0, 1, 0.95])
     if save_path:

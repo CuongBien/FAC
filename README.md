@@ -24,13 +24,14 @@
     - [I.6.2. Plugin 2: Mở rộng vùng hữu thanh theo năng lượng khung biên (STE)](#i62-plugin-2-mở-rộng-vùng-hữu-thanh-theo-năng-lượng-khung-biên-ste)
     - [I.6.3. Plugin 3: Bộ lọc thông dải Butterworth & Lọc Zero-Phase](#i63-plugin-3-bộ-lọc-thông-dải-butterworth--lọc-zero-phase)
     - [I.6.4. Plugin 4: Cắt gọt trung tâm (Center Clipping - Sondhi 1968)](#i64-plugin-4-cắt-gọt-trung-tâm-center-clipping---sondhi-1968)
-  - [I.7. Khảo Sát & Xếp Hạng Toàn Bộ 16 Tổ Hợp Cải Tiến ($2^4$) Cho ACF](#i7-khảo-sát--xếp-hạng-toàn-bộ-16-tổ-hợp-cải-tiến-24-cho-acf)
+    - [I.6.5. Plugin 5: Quy hoạch động Viterbi Tracking (Dynamic Programming)](#i65-plugin-5-quy-hoạch-động-viterbi-tracking-dynamic-programming)
+  - [I.7. Khảo Sát & Xếp Hạng Toàn Bộ 32 Tổ Hợp Cải Tiến Cho ACF](#i7-khảo-sát--xếp-hạng-toàn-bộ-32-tổ-hợp-cải-tiến-cho-acf)
 - [PHẦN II: THUẬT TOÁN HÀM HIỆU ĐỘ LỚN TRUNG BÌNH (AMDF)](#phần-ii-thuật-toán-hàm-hiệu-độ-lớn-trung-bình-amdf)
   - [II.1. Cơ Sở Lý Thuyết Thuật Toán AMDF](#ii1-cơ-sở-lý-thuyết-thuật-toán-amdf)
   - [II.2. Minh Họa Khung Hữu Thanh vs Vô Thanh bằng AMDF](#ii2-minh-họa-khung-hữu-thanh-vs-vô-thanh-bằng-amdf)
   - [II.3. Huấn Luyện Ngưỡng T_AMDF Tối Ưu Bằng Phân Bố Gauss](#ii3-huấn-luyện-ngưỡng-t_amdf-tối-ưu-bằng-phân-bố-gauss)
   - [II.4. Đánh Giá Kiểm Thử Trên 4 File Kiểm Thử (AMDF Baseline)](#ii4-đánh-giá-kiểm-thử-trên-4-file-kiểm-thử-amdf-baseline)
-  - [II.5. Khảo Sát & Xếp Hạng Toàn Bộ 16 Tổ Hợp Cải Tiến Cho AMDF ($2^4$)](#ii5-khảo-sát--xếp-hạng-toàn-bộ-16-tổ-hợp-cải-tiến-cho-amdf-24)
+  - [II.5. Khảo Sát & Xếp Hạng Toàn Bộ 32 Tổ Hợp Cải Tiến Cho AMDF](#ii5-khảo-sát--xếp-hạng-toàn-bộ-32-tổ-hợp-cải-tiến-cho-amdf)
   - [II.6. Đối Sánh Trực Tiếp: ACF vs. AMDF](#ii6-đối-sánh-trực-tiếp-acf-vs-amdf)
 - [PHẦN III: PHÂN TÍCH HIỆN TƯỢNG TRÊN ĐỒ THỊ & NGUYÊN NHÂN SAI SỐ](#phần-iii-phân-tích-hiện-tượng-trên-đồ-thị--nguyên-nhân-sai-số)
 
@@ -60,7 +61,8 @@ D:\SP\
 │   │   ├── hysteresis.py        # Cải tiến 1: Ngưỡng trễ kép Schmitt Trigger
 │   │   ├── energy_extension.py  # Cải tiến 2: Mở rộng vùng hữu thanh theo STE khung biên
 │   │   ├── bandpass_filter.py   # Cải tiến 3: Bộ lọc thông dải Butterworth bậc 2 Zero-Phase
-│   │   └── center_clipping.py   # Cải tiến 4: Cắt gọt trung tâm Sondhi (Spectral Flattening)
+│   │   ├── center_clipping.py   # Cải tiến 4: Cắt gọt trung tâm Sondhi (Spectral Flattening)
+│   │   └── viterbi_tracking.py  # Cải tiến 5: Quy hoạch động Viterbi Tracking làm mượt cao độ
 │   │
 │   ├── analysis/                # Phân tích thống kê & đánh giá sai số
 │   │   ├── threshold.py         # Trích xuất phân bố Gauss (mean, std), giải phương trình tìm T
@@ -74,7 +76,7 @@ D:\SP\
 │   ├── 02_train_threshold.py    # Huấn luyện tìm ngưỡng T tối ưu (hỗ trợ --plugins)
 │   ├── 03_compare_params.py     # Khảo sát so sánh chiều dài khung (20ms vs 30ms)
 │   ├── 04_run_testing.py        # Chạy 4 file test trong 1 lệnh, xuất 4 hình và bảng chỉ số
-│   └── 05_compare_plugins.py    # Khảo sát và xếp hạng toàn bộ 16 tổ hợp plugins ($2^4$)
+│   └── 05_compare_plugins.py    # Khảo sát và xếp hạng toàn bộ 32 tổ hợp plugins ($2^5$)
 │
 ├── outputs/                     # Toàn bộ kết quả đầu ra
 │   ├── figures/                 # Hình vẽ chất lượng cao (.png, 300 DPI)
@@ -358,37 +360,74 @@ Khi các mẫu biên độ nhỏ bị gán về $0$, phân bố tương quan tha
 
 ---
 
-## I.7. Khảo Sát & Xếp Hạng Toàn Bộ 16 Tổ Hợp Cải Tiến ($2^4$) Cho ACF
+### I.6.5. Plugin 5: Quy hoạch động Viterbi Tracking (Dynamic Programming Pitch Tracking)
 
-### Bảng kết quả đối sánh toàn diện 16 cấu hình trên tập kiểm thử (ACF):
+**Vấn đề giải quyết:**  
+Các thuật toán dò cực trị cục bộ (ACF, AMDF) chỉ xét từng khung độc lập nên dễ mắc lỗi **nhảy quãng tám (Pitch Doubling / Halving)** hoặc bắt nhầm đỉnh formant do sóng hài phụ khi biên độ của đỉnh sai cao hơn đỉnh thật chỉ $0.02 - 0.05$. Bộ lọc trung vị (Median Filter) chỉ sửa được các lỗi 1 khung đơn lẻ, bất lực nếu lỗi kéo dài 2-3 khung liên tiếp.
+
+**Cơ chế sinh lý học & Không gian trạng thái Trellis:**  
+Dây thanh âm là cơ quan cơ học sinh học có quán tính, không thể biến thiên tần số đột ngột trong $10\text{ ms}$. Tại mỗi khung hữu thanh, plugin trích xuất Top-5 cực trị tốt nhất ($K=5$) để xây dựng lưới không gian trạng thái.
+
+**Hàm chi phí Trellis (Cost Function):**
+1. **Chi phí cục bộ ($C_{\text{local}}$):** Đo lường độ tin cậy của ứng viên tại khung $t$:
+   $$C_{\text{local}}(\tau) = 1.0 - R_{\text{norm}}(\tau) \quad (\text{với ACF})$$
+2. **Chi phí chuyển tiếp ($C_{\text{trans}}$):** Phạt bước nhảy tần số theo thang Logarithm cơ số 2 (Octave):
+   $$C_{\text{trans}}(s_{t-1}, s_t) = w_{\text{freq}} \cdot \left( \log_2(F_{0, t}) - \log_2(F_{0, t-1}) \right)^2$$
+   Nếu bước nhảy rơi vào vùng nhảy quãng tám ($[0.8, 1.2]\text{ octave}$), áp dụng mức phạt bổ sung $w_{\text{octave}} = 2.0$.
+
+**Thuật toán Viterbi:** Lan truyền tiến tìm đường đi có tổng chi phí nhỏ nhất và truy vết ngược (Backtracking) để thu được chuỗi cao độ tối ưu toàn cục.
+
+---
+
+## I.7. Khảo Sát & Xếp Hạng Toàn Bộ 32 Tổ Hợp Cải Tiến Cho ACF
+
+### Bảng kết quả đối sánh toàn diện 32 cấu hình trên tập kiểm thử (ACF):
 
 | STT | Cấu hình Plugin | Ngưỡng $T$ | `phone_F2` (145Hz) | `phone_M2` (129Hz) | `studio_F2` (200Hz) | `studio_M2` (155Hz) | Sai số TB $\lvert\Delta F_0\rvert$ | F1-Score TB | V/UV Acc TB |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **01** | **Baseline (Gốc)** | $0.4408$ | 7.77 Hz | 2.92 Hz | 1.02 Hz | 0.97 Hz | 3.17 Hz | 91.03% | 83.58% |
-| **02** | `[Hysteresis]` | $0.4408$ | 7.52 Hz | 2.40 Hz | 0.06 Hz | 1.27 Hz | 2.81 Hz | 91.82% | 84.24% |
-| **03** | `[Energy Ext]` | $0.4408$ | 6.80 Hz | 2.88 Hz | 0.65 Hz | 0.97 Hz | 2.83 Hz | 92.89% | 85.09% |
-| **04** | `[Center Clip]` | $0.3352$ | 6.59 Hz | 2.15 Hz | 1.03 Hz | 0.72 Hz | 2.62 Hz | 89.23% | 82.14% |
-| **05** | `[Bandpass Filter]` | $0.4892$ | 8.58 Hz | 4.20 Hz | 1.07 Hz | 0.24 Hz | 3.52 Hz | 89.51% | 82.28% |
-| **06** | `[Hyst + Energy Ext]` | $0.4408$ | 6.75 Hz | 2.73 Hz | 0.65 Hz | 1.27 Hz | 2.85 Hz | **93.07%** | **85.25%** |
-| **07** | `[Center Clip + Hyst]` | $0.3352$ | 6.64 Hz | 1.58 Hz | 0.49 Hz | 0.48 Hz | 2.30 Hz | 89.84% | 82.63% |
-| **08** | `[Center Clip + Energy Ext]` | $0.3352$ | 6.30 Hz | 2.06 Hz | 0.21 Hz | 0.90 Hz | 2.37 Hz | 90.82% | 83.40% |
-| **09** | `[Bandpass + Hyst]` | $0.4892$ | 7.28 Hz | 4.27 Hz | 1.07 Hz | 0.17 Hz | 3.20 Hz | 90.38% | 82.97% |
-| **10** | `[Bandpass + Energy Ext]` | $0.4892$ | 7.58 Hz | 4.60 Hz | 0.19 Hz | 0.17 Hz | 3.13 Hz | 91.53% | 83.89% |
-| **11** | `[Bandpass + Center Clip]` | $0.3953$ | 5.19 Hz | 2.69 Hz | 0.59 Hz | 0.52 Hz | 2.25 Hz | 89.42% | 82.20% |
-| **12** | `[Center Clip + Hyst + Energy]` | $0.3352$ | 6.37 Hz | 1.44 Hz | 0.19 Hz | 0.91 Hz | 2.23 Hz | 90.93% | 83.49% |
-| **13** | `[Bandpass + Hyst + Energy]` | $0.4892$ | 6.27 Hz | 4.59 Hz | 0.19 Hz | 0.17 Hz | 2.80 Hz | 91.64% | 83.95% |
-| **14** | `[Bandpass + Center Clip + Hyst]` | $0.3953$ | 4.90 Hz | 2.65 Hz | 0.43 Hz | 0.37 Hz | 2.09 Hz | 89.98% | 82.65% |
-| **15** | `[Bandpass + Center Clip + Energy]` 🥇 | $0.3953$ | **4.73 Hz** | 2.31 Hz | 0.08 Hz | 0.55 Hz | **1.92 Hz** | 91.06% | 83.54% |
-| **16** | `[Cả 4 Plugins]` | $0.3953$ | 4.91 Hz | **2.20 Hz** | **0.05 Hz** | 0.55 Hz | **1.93 Hz** | 91.00% | 83.48% |
+| **02** | `[Bandpass Filter]` | $0.4892$ | 8.58 Hz | 4.20 Hz | 1.07 Hz | 0.24 Hz | 3.52 Hz | 89.51% | 82.28% |
+| **03** | `[Center Clip]` | $0.3352$ | 6.59 Hz | 2.15 Hz | 1.03 Hz | 0.72 Hz | 2.62 Hz | 89.23% | 82.14% |
+| **04** | `[Hysteresis]` | $0.4408$ | 7.52 Hz | 2.40 Hz | 0.06 Hz | 1.27 Hz | 2.81 Hz | 91.82% | 84.24% |
+| **05** | `[Energy Ext]` | $0.4408$ | 6.80 Hz | 2.88 Hz | 0.65 Hz | 0.97 Hz | 2.83 Hz | 92.89% | 85.09% |
+| **06** | `[Viterbi Tracking]` | $0.4408$ | 7.89 Hz | 3.05 Hz | 0.96 Hz | 1.84 Hz | 3.43 Hz | 91.03% | 83.58% |
+| **07** | `[BP + Clip]` | $0.3953$ | 5.19 Hz | 2.69 Hz | 0.59 Hz | 0.52 Hz | 2.25 Hz | 89.42% | 82.20% |
+| **08** | `[BP + Hyst]` | $0.4892$ | 7.28 Hz | 4.27 Hz | 1.07 Hz | 0.17 Hz | 3.20 Hz | 90.38% | 82.97% |
+| **09** | `[BP + Energy]` | $0.4892$ | 7.58 Hz | 4.60 Hz | 0.19 Hz | 0.17 Hz | 3.13 Hz | 91.53% | 83.89% |
+| **10** | `[BP + Viterbi]` | $0.4892$ | 8.67 Hz | 4.31 Hz | 1.05 Hz | 0.18 Hz | 3.55 Hz | 89.51% | 82.28% |
+| **11** | `[Clip + Hyst]` | $0.3352$ | 6.64 Hz | 1.58 Hz | 0.49 Hz | 0.48 Hz | 2.30 Hz | 89.84% | 82.63% |
+| **12** | `[Clip + Energy]` | $0.3352$ | 6.30 Hz | 2.06 Hz | 0.21 Hz | 0.90 Hz | 2.37 Hz | 90.82% | 83.40% |
+| **13** | `[Clip + Viterbi]` | $0.3352$ | 5.24 Hz | 3.42 Hz | 0.58 Hz | 0.75 Hz | 2.50 Hz | 89.23% | 82.14% |
+| **14** | `[Hyst + Energy]` | $0.4408$ | 6.75 Hz | 2.73 Hz | 0.65 Hz | 1.27 Hz | 2.85 Hz | **93.07%** | **85.25%** |
+| **15** | `[Hyst + Viterbi]` | $0.4408$ | 7.65 Hz | 2.60 Hz | 0.12 Hz | 2.17 Hz | 3.13 Hz | 91.82% | 84.24% |
+| **16** | `[Energy + Viterbi]` | $0.4408$ | 4.88 Hz | 3.00 Hz | 0.76 Hz | 1.84 Hz | 2.62 Hz | 92.89% | 85.09% |
+| **17** | `[BP + Clip + Hyst]` | $0.3953$ | 4.90 Hz | 2.65 Hz | 0.43 Hz | 0.37 Hz | 2.09 Hz | 89.98% | 82.65% |
+| **18** | `[BP + Clip + Energy]` | $0.3953$ | 4.73 Hz | 2.31 Hz | 0.08 Hz | 0.55 Hz | 1.92 Hz | 91.06% | 83.54% |
+| **19** | `[BP + Clip + Viterbi]` | $0.3953$ | 4.65 Hz | 2.69 Hz | 0.42 Hz | 0.60 Hz | 2.09 Hz | 89.42% | 82.20% |
+| **20** | `[BP + Hyst + Energy]` | $0.4892$ | 6.27 Hz | 4.59 Hz | 0.19 Hz | 0.17 Hz | 2.80 Hz | 91.64% | 83.95% |
+| **21** | `[BP + Hyst + Viterbi]` | $0.4892$ | 7.36 Hz | 4.39 Hz | 1.05 Hz | 0.13 Hz | 3.23 Hz | 90.38% | 82.97% |
+| **22** | `[BP + Energy + Viterbi]` | $0.4892$ | 7.69 Hz | 4.63 Hz | 0.12 Hz | 0.13 Hz | 3.14 Hz | 91.53% | 83.89% |
+| **23** | `[Clip + Hyst + Energy]` | $0.3352$ | 6.37 Hz | **1.44 Hz** | 0.19 Hz | 0.91 Hz | 2.23 Hz | 90.93% | 83.49% |
+| **24** | `[Clip + Hyst + Viterbi]` | $0.3352$ | 6.40 Hz | 2.92 Hz | 0.29 Hz | 0.46 Hz | 2.52 Hz | 89.84% | 82.63% |
+| **25** | `[Clip + Energy + Viterbi]` | $0.3352$ | 4.94 Hz | 3.34 Hz | 0.19 Hz | 1.08 Hz | 2.39 Hz | 90.82% | 83.40% |
+| **26** | `[Hyst + Energy + Viterbi]` | $0.4408$ | 4.84 Hz | 3.00 Hz | 0.76 Hz | 2.17 Hz | 2.69 Hz | **93.07%** | **85.25%** |
+| **27** | `[BP + Clip + Hyst + Energy]` | $0.3953$ | 4.91 Hz | 2.20 Hz | **0.05 Hz** | 0.55 Hz | 1.93 Hz | 91.00% | 83.48% |
+| **28** | `[BP + Clip + Hyst + Viterbi]` | $0.3953$ | 4.74 Hz | 2.68 Hz | 0.28 Hz | 0.45 Hz | 2.04 Hz | 89.98% | 82.65% |
+| **29** | `[BP + Clip + Energy + Viterbi]` | $0.3953$ | **4.35 Hz** | 2.38 Hz | 0.22 Hz | 0.64 Hz | **1.90 Hz** | 91.06% | 83.54% |
+| **30** | `[BP + Hyst + Energy + Viterbi]` | $0.4892$ | 4.40 Hz | 4.74 Hz | 0.12 Hz | **0.13 Hz** | 2.35 Hz | 91.64% | 83.95% |
+| **31** | `[Clip + Hyst + Energy + Viterbi]` | $0.3352$ | 7.16 Hz | 2.74 Hz | 0.34 Hz | 1.08 Hz | 2.83 Hz | 90.93% | 83.49% |
+| **32** | `[Cả 5 Plugins]` | $0.3953$ | 4.96 Hz | 2.39 Hz | 0.22 Hz | 0.64 Hz | 2.05 Hz | 91.00% | 83.48% |
 
-* **Kỷ lục tuyệt đối về độ chính xác $F_0$:** **Cấu hình 15 `[Bandpass + Center Clip + Energy]`** giảm sai số từ $3.17\text{ Hz} \rightarrow \mathbf{1.92\text{ Hz}}$ (giảm tới $39.4\%$ sai số, chính thức vượt qua mốc $2\text{ Hz}$).
-* **Hiệu ứng cộng hưởng tiền xử lý:** Bộ đôi `Bandpass` và `Center Clip` khi đi cùng nhau đã giải quyết triệt để cả nhiễu cao tần lẫn dao động Formant, giúp sai số file khó `phone_F2` hạ từ $7.77\text{ Hz}$ xuống **$4.73\text{ Hz}$**.
-* **Quán quân về phân loại V/UV:** **Cấu hình 06 `[Hyst + Energy Ext]`** duy trì **F1 = 93.07%** và **Acc = 85.25%**.
+* **Cấu hình có sai số thấp nhất:** **Cấu hình 29 `[BP + Clip + Energy + Viterbi]`** đạt sai số tuyệt đối trung bình thấp nhất là **$1.90\text{ Hz}$** (giảm 40.1% so với Baseline 3.17 Hz). Trên file kênh thoại khó nhất `phone_F2`, sai số giảm từ $7.77\text{ Hz}$ xuống **$4.35\text{ Hz}$**.
+* **Cấu hình có F1-Score phân loại V/UV cao nhất:** **Cấu hình 14 `[Hyst + Energy]`** và **Cấu hình 26 `[Hyst + Energy + Viterbi]`** đạt **F1 = 93.07%** và **Acc = 85.25%**.
+* **Nhận xét kỹ thuật:**
+  * Việc kết hợp tiền xử lý `Bandpass Filter` và `Center Clipping` giúp loại bỏ can nhiễu dải dừng và triệt tiêu ảnh hưởng của formant, giúp sai số giảm đáng kể (Cấu hình 07 đạt $2.25\text{ Hz}$).
+  * Khi bổ sung `Energy Extension` và `Viterbi Tracking`, đường pitch được mở rộng đúng biên và làm mịn tối ưu, hạn chế các điểm nhảy cực đại cục bộ.
 
-### Biểu đồ cột xếp hạng 16 tổ hợp ACF:
+### Biểu đồ cột xếp hạng toàn bộ 32 cấu hình ACF:
 ![05_all_combinations_ranking.png](outputs/figures/05_all_combinations_ranking.png)
 
-### Biểu đồ trực quan đối sánh Baseline vs Enhanced (Cấu hình 15):
+### Biểu đồ trực quan đối sánh Baseline vs Cấu hình tối ưu sai số (Cấu hình 29):
 
 | `phone_F2.wav` | `phone_M2.wav` |
 | :---: | :---: |
@@ -487,40 +526,55 @@ Chạy kiểm thử tự động toàn bộ 4 file kiểm thử với thuật to
 
 ---
 
-## II.5. Khảo Sát & Xếp Hạng Toàn Bộ 16 Tổ Hợp Cải Tiến Cho AMDF ($2^4$)
+## II.5. Khảo Sát & Xếp Hạng Toàn Bộ 32 Tổ Hợp Cải Tiến Cho AMDF
 
-### Bảng kết quả đối sánh toàn diện 16 cấu hình Plugins trên AMDF:
+### Bảng kết quả đối sánh toàn diện 32 cấu hình trên tập kiểm thử (AMDF):
 
 | STT | Cấu hình Plugin | Ngưỡng $T$ | `phone_F2` (145Hz) | `phone_M2` (129Hz) | `studio_F2` (200Hz) | `studio_M2` (155Hz) | Sai số TB $\lvert\Delta F_0\rvert$ | F1-Score TB | V/UV Acc TB |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **01** | **Baseline (Gốc)** | $0.4380$ | 5.19 Hz | 0.48 Hz | 0.20 Hz | 0.52 Hz | 1.60 Hz | 92.30% | 84.65% |
-| **02** | `[Hysteresis]` | $0.4380$ | 5.59 Hz | 0.76 Hz | 0.45 Hz | 0.67 Hz | 1.87 Hz | 91.04% | 83.56% |
-| **03** | `[Energy Ext]` 🏆 | $0.4380$ | 4.58 Hz | 0.80 Hz | 0.50 Hz | 0.42 Hz | 1.57 Hz | **93.86%** | **85.95%** |
-| **04** | `[Center Clip]` | $0.6488$ | 5.96 Hz | 1.34 Hz | 0.07 Hz | 0.49 Hz | 1.97 Hz | 91.42% | 83.88% |
-| **05** | `[Bandpass Filter]` | $0.3734$ | 4.32 Hz | 1.66 Hz | 1.82 Hz | 0.95 Hz | 2.19 Hz | 90.93% | 83.38% |
-| **06** | `[Hyst + Energy Ext]` | $0.4380$ | 5.02 Hz | 1.04 Hz | 0.50 Hz | 0.33 Hz | 1.72 Hz | 93.23% | 85.41% |
-| **07** | `[Center Clip + Hyst]` | $0.6488$ | 5.85 Hz | **0.09 Hz** | **0.01 Hz** | 0.48 Hz | 1.61 Hz | 90.33% | 82.98% |
-| **08** | `[Center Clip + Energy Ext]` | $0.6488$ | 5.86 Hz | 1.47 Hz | 0.17 Hz | **0.04 Hz** | 1.89 Hz | 93.03% | 85.25% |
-| **09** | `[Bandpass + Hyst]` | $0.3734$ | 5.36 Hz | 1.85 Hz | 2.61 Hz | 1.73 Hz | 2.89 Hz | 89.99% | 82.64% |
-| **10** | `[Bandpass + Energy Ext]` 🌟 | $0.3734$ | **3.66 Hz** | 1.07 Hz | 1.90 Hz | 0.52 Hz | 1.79 Hz | 92.47% | 84.67% |
-| **11** | `[Bandpass + Center Clip]` | $0.5628$ | 5.05 Hz | 1.76 Hz | 0.99 Hz | 0.35 Hz | 2.04 Hz | 90.73% | 83.22% |
-| **12** | `[Center Clip + Hyst + Energy]` 🥇 | $0.6488$ | 5.66 Hz | **0.10 Hz** | 0.28 Hz | **0.04 Hz** | **1.52 Hz** | 92.28% | 84.62% |
-| **13** | `[Bandpass + Hyst + Energy]` | $0.3734$ | 4.11 Hz | 1.30 Hz | 1.90 Hz | 0.73 Hz | 2.01 Hz | 91.79% | 84.09% |
-| **14** | `[Bandpass + Center Clip + Hyst]` | $0.5628$ | 5.15 Hz | 1.33 Hz | 1.23 Hz | 0.24 Hz | 1.99 Hz | 89.44% | 82.18% |
-| **15** | `[Bandpass + Center Clip + Energy]` | $0.5628$ | 4.47 Hz | 1.30 Hz | 0.99 Hz | 0.30 Hz | 1.76 Hz | 92.66% | 84.84% |
-| **16** | `[Cả 4 Plugins]` | $0.5628$ | 4.49 Hz | 1.07 Hz | 0.99 Hz | 0.26 Hz | 1.70 Hz | 92.14% | 84.40% |
+| **02** | `[Bandpass Filter]` | $0.3734$ | 4.32 Hz | 1.66 Hz | 1.82 Hz | 0.95 Hz | 2.19 Hz | 90.93% | 83.38% |
+| **03** | `[Center Clip]` | $0.6488$ | 5.96 Hz | 1.34 Hz | 0.07 Hz | 0.49 Hz | 1.97 Hz | 91.42% | 83.88% |
+| **04** | `[Hysteresis]` | $0.4380$ | 5.59 Hz | 0.76 Hz | 0.45 Hz | 0.67 Hz | 1.87 Hz | 91.04% | 83.56% |
+| **05** | `[Energy Ext]` | $0.4380$ | 4.58 Hz | 0.80 Hz | 0.50 Hz | 0.42 Hz | 1.57 Hz | **93.86%** | **85.95%** |
+| **06** | `[Viterbi Tracking]` | $0.4380$ | 4.88 Hz | 0.68 Hz | 0.40 Hz | 0.18 Hz | 1.53 Hz | 92.30% | 84.65% |
+| **07** | `[BP + Clip]` | $0.5628$ | 5.05 Hz | 1.76 Hz | 0.99 Hz | 0.35 Hz | 2.04 Hz | 90.73% | 83.22% |
+| **08** | `[BP + Hyst]` | $0.3734$ | 5.36 Hz | 1.85 Hz | 2.61 Hz | 1.73 Hz | 2.89 Hz | 89.99% | 82.64% |
+| **09** | `[BP + Energy]` | $0.3734$ | **3.66 Hz** | 1.07 Hz | 1.90 Hz | 0.52 Hz | 1.79 Hz | 92.47% | 84.67% |
+| **10** | `[BP + Viterbi]` | $0.3734$ | 4.11 Hz | 1.61 Hz | 1.79 Hz | 1.00 Hz | 2.13 Hz | 90.93% | 83.38% |
+| **11** | `[Clip + Hyst]` | $0.6488$ | 5.85 Hz | 0.09 Hz | **0.01 Hz** | 0.48 Hz | 1.61 Hz | 90.33% | 82.98% |
+| **12** | `[Clip + Energy]` | $0.6488$ | 5.86 Hz | 1.47 Hz | 0.17 Hz | **0.04 Hz** | 1.89 Hz | 93.03% | 85.25% |
+| **13** | `[Clip + Viterbi]` | $0.6488$ | 4.05 Hz | 0.37 Hz | 0.34 Hz | 0.22 Hz | **1.24 Hz** | 91.42% | 83.88% |
+| **14** | `[Hyst + Energy]` | $0.4380$ | 5.02 Hz | 1.04 Hz | 0.50 Hz | 0.33 Hz | 1.72 Hz | 93.23% | 85.41% |
+| **15** | `[Hyst + Viterbi]` | $0.4380$ | 4.63 Hz | 0.66 Hz | 0.65 Hz | 1.48 Hz | 1.85 Hz | 91.04% | 83.56% |
+| **16** | `[Energy + Viterbi]` | $0.4380$ | 4.21 Hz | 1.09 Hz | 0.69 Hz | 0.20 Hz | 1.55 Hz | **93.86%** | **85.95%** |
+| **17** | `[BP + Clip + Hyst]` | $0.5628$ | 5.15 Hz | 1.33 Hz | 1.23 Hz | 0.24 Hz | 1.99 Hz | 89.44% | 82.18% |
+| **18** | `[BP + Clip + Energy]` | $0.5628$ | 4.47 Hz | 1.30 Hz | 0.99 Hz | 0.30 Hz | 1.76 Hz | 92.66% | 84.84% |
+| **19** | `[BP + Clip + Viterbi]` | $0.5628$ | 6.34 Hz | 1.89 Hz | 1.00 Hz | 0.20 Hz | 2.36 Hz | 90.73% | 83.22% |
+| **20** | `[BP + Hyst + Energy]` | $0.3734$ | 4.11 Hz | 1.30 Hz | 1.90 Hz | 0.73 Hz | 2.01 Hz | 91.79% | 84.09% |
+| **21** | `[BP + Hyst + Viterbi]` | $0.3734$ | 5.06 Hz | 1.66 Hz | 2.57 Hz | 1.58 Hz | 2.72 Hz | 89.99% | 82.64% |
+| **22** | `[BP + Energy + Viterbi]` | $0.3734$ | 3.77 Hz | 1.13 Hz | 1.87 Hz | 0.46 Hz | 1.81 Hz | 92.47% | 84.67% |
+| **23** | `[Clip + Hyst + Energy]` | $0.6488$ | 5.66 Hz | 0.10 Hz | 0.28 Hz | **0.04 Hz** | 1.52 Hz | 92.28% | 84.62% |
+| **24** | `[Clip + Hyst + Viterbi]` | $0.6488$ | 4.80 Hz | 0.24 Hz | 0.38 Hz | 0.63 Hz | 1.51 Hz | 90.33% | 82.98% |
+| **25** | `[Clip + Energy + Viterbi]` | $0.6488$ | 4.21 Hz | 0.11 Hz | 0.55 Hz | 0.26 Hz | 1.28 Hz | 93.03% | 85.25% |
+| **26** | `[Hyst + Energy + Viterbi]` | $0.4380$ | 4.32 Hz | 1.12 Hz | 0.69 Hz | **0.04 Hz** | 1.54 Hz | 93.23% | 85.41% |
+| **27** | `[BP + Clip + Hyst + Energy]` | $0.5628$ | 4.49 Hz | 1.07 Hz | 0.99 Hz | 0.26 Hz | 1.70 Hz | 92.14% | 84.40% |
+| **28** | `[BP + Clip + Hyst + Viterbi]` | $0.5628$ | 4.62 Hz | 1.25 Hz | 1.20 Hz | 0.20 Hz | 1.82 Hz | 89.44% | 82.18% |
+| **29** | `[BP + Clip + Energy + Viterbi]` | $0.5628$ | 5.68 Hz | 1.30 Hz | 1.00 Hz | 0.28 Hz | 2.06 Hz | 92.66% | 84.84% |
+| **30** | `[BP + Hyst + Energy + Viterbi]` | $0.3734$ | 4.18 Hz | 1.24 Hz | 1.87 Hz | 0.55 Hz | 1.96 Hz | 91.79% | 84.09% |
+| **31** | `[Clip + Hyst + Energy + Viterbi]` | $0.6488$ | 4.88 Hz | **0.01 Hz** | 0.29 Hz | 0.12 Hz | 1.32 Hz | 92.28% | 84.62% |
+| **32** | `[Cả 5 Plugins]` | $0.5628$ | 3.78 Hz | 1.02 Hz | 1.00 Hz | 0.10 Hz | 1.47 Hz | 92.14% | 84.40% |
 
-* **Quán quân sai số toàn dự án:** **Cấu hình 12 `[Center Clip + Hyst + Energy]`** đạt sai số trung bình thấp nhất toàn bộ nghiên cứu: **$1.52\text{ Hz}$** (vượt kỷ lục 1.60 Hz của AMDF Baseline và 1.92 Hz của ACF Enhanced). Đặc biệt:
-  * `phone_M2`: Lệch chỉ **0.10 Hz** (cấu hình 07 đạt **0.09 Hz**).
-  * `studio_M2`: Lệch chỉ **0.04 Hz**.
-  * `studio_F2`: Lệch chỉ **0.28 Hz** (cấu hình 07 đạt kỷ lục **0.01 Hz**).
-* **Quán quân phân loại V/UV:** **Cấu hình 03 `[Energy Ext]`** đạt **F1 = 93.86%** và **Acc = 85.95%** (cao nhất trong toàn bộ 32 lượt thử nghiệm của cả ACF và AMDF).
-* **Đột phá trên file khó nhất:** **Cấu hình 10 `[Bandpass + Energy Ext]`** giảm mạnh sai số trên `phone_F2` từ $5.19\text{ Hz} \rightarrow \mathbf{3.66\text{ Hz}}$ (giảm gần 30%).
+* **Cấu hình có sai số thấp nhất:** **Cấu hình 13 `[Clip + Viterbi]`** đạt sai số tuyệt đối trung bình thấp nhất là **$1.24\text{ Hz}$** (giảm 22.5% so với Baseline 1.60 Hz). Ngoài ra, **Cấu hình 25 `[Clip + Energy + Viterbi]`** đạt **$1.28\text{ Hz}$** (F1 = 93.03%) và **Cấu hình 31 `[Clip + Hyst + Energy + Viterbi]`** đạt **$1.32\text{ Hz}$** (trong đó sai số trên file `phone_M2` chỉ còn đúng **$0.01\text{ Hz}$**).
+* **Cấu hình có F1-Score phân loại V/UV cao nhất:** **Cấu hình 05 `[Energy Ext]`** và **Cấu hình 16 `[Energy + Viterbi]`** đạt **F1 = 93.86%** và **Acc = 85.95%**.
+* **Nhận xét kỹ thuật:**
+  * Việc áp dụng `Center Clipping` trên AMDF giúp loại bỏ các dao động đáy giả do formant $F_1, F_2$, đặc biệt hiệu quả trên các nguyên âm kéo dài.
+  * Bộ đôi `Energy Extension` và `Viterbi Tracking` hỗ trợ giữ trọn vẹn ranh giới nguyên âm và nắn chỉnh đường contour mịn màng, loại bỏ các bước nhảy cực tiểu sai lệch.
 
-### Biểu đồ cột xếp hạng 16 tổ hợp AMDF:
+### Biểu đồ cột xếp hạng toàn bộ 32 cấu hình AMDF:
 ![05_all_combinations_ranking_amdf.png](outputs/figures/05_all_combinations_ranking_amdf.png)
 
-### Biểu đồ trực quan đối sánh AMDF Baseline vs Enhanced (Cấu hình 12):
+### Biểu đồ trực quan đối sánh Baseline vs Cấu hình tối ưu sai số (Cấu hình 13):
 
 | `phone_F2.wav` | `phone_M2.wav` |
 | :---: | :---: |
@@ -545,30 +599,25 @@ Chạy kiểm thử tự động toàn bộ 4 file kiểm thử với thuật to
 | **Voiced F1-Score** | 91.03% | **92.30%** | AMDF nhỉnh hơn +1.27% |
 | **Chi phí tính toán** | Phép nhân $(x \cdot x)$ | Phép trừ ($\lvert x_1 - x_2 \rvert$) | **AMDF nhẹ hơn**, không cần bộ nhân phần cứng |
 
-### Bảng 2: So sánh đỉnh cao giữa Tổ hợp Nâng cao Tốt Nhất (Best Enhanced ACF vs Best Enhanced AMDF):
+### Bảng 2: So sánh cấu hình tối ưu giữa hai thuật toán (Best Enhanced ACF vs Best Enhanced AMDF):
 
-| Tiêu chí so sánh | Cấu hình ACF Tốt Nhất | Cấu hình AMDF Tốt Nhất | So sánh & Đánh giá đỉnh cao |
+| Tiêu chí so sánh | Cấu hình ACF Tối Ưu | Cấu hình AMDF Tối Ưu | So sánh & Đánh giá |
 | :--- | :---: | :---: | :--- |
-| **Cấu hình vô địch sai số $F_0$** | **Cấu hình 15 `[BP + Clip + Energy]`** | **Cấu hình 12 `[Clip + Hyst + Energy]`** | AMDF vượt trội hơn với kỷ lục toàn diện |
-| **Sai số tuyệt đối $\lvert\Delta F_0\rvert$ tối ưu** | **1.92 Hz** (giảm 39.4% từ 3.17 Hz) | **1.52 Hz** (giảm 5.0% từ 1.60 Hz) | **AMDF đạt độ chính xác cao hơn 0.40 Hz** |
-| **Cấu hình vô địch phân loại V/UV** | **Cấu hình 06 `[Hyst + Energy]`** | **Cấu hình 03 `[Energy Ext]`** | AMDF nhỉnh hơn ở cả F1 và Accuracy |
-| **F1-Score cao nhất đạt được** | 93.07% | **93.86%** | AMDF dẫn đầu bảng xếp hạng (+0.79%) |
-| **Độ chính xác Acc cao nhất** | 85.25% | **85.95%** | AMDF dẫn đầu bảng xếp hạng (+0.70%) |
-| **Sai số trên file khó `phone_F2`** | 4.73 Hz (Cấu hình 15) | **3.66 Hz** (Cấu hình 10: `[BP + Energy]`) | AMDF xử lý kênh thoại hẹp xuất sắc hơn |
-| **Sai số trên file thoại nam `phone_M2`** | 2.20 Hz (Cấu hình 16) | **0.09 Hz** (Cấu hình 07) / **0.10 Hz** (Cấu hình 12) | AMDF gần như tuyệt đối (lệch $\le 0.1\text{ Hz}$) |
-| **Sai số phòng thu nữ `studio_F2`** | 0.05 Hz (Cấu hình 16) | **0.01 Hz** (Cấu hình 07) / 0.07 Hz (Cấu hình 04) | Cả hai đều đạt mức gần như hoàn hảo |
-| **Sai số phòng thu nam `studio_M2`** | 0.17 Hz (Cấu hình 09/10/13) | **0.04 Hz** (Cấu hình 08 & 12) | AMDF tiệm cận 0 Hz |
+| **Cấu hình đạt sai số $F_0$ thấp nhất** | **Cấu hình 29 `[BP+Clip+Energy+Viterbi]`** | **Cấu hình 13 `[Clip+Viterbi]`** | AMDF cho sai số thấp hơn ($1.24\text{ Hz}$ vs $1.90\text{ Hz}$) |
+| **Sai số tuyệt đối $\lvert\Delta F_0\rvert$ tối ưu** | **1.90 Hz** (giảm 40.1% từ 3.17 Hz) | **1.24 Hz** (giảm 22.5% từ 1.60 Hz) | AMDF chính xác hơn $0.66\text{ Hz}$ |
+| **Cấu hình phân loại V/UV tốt nhất** | **Cấu hình 14 `[Hyst + Energy]`** | **Cấu hình 05 `[Energy Ext]`** | AMDF nhỉnh hơn cả F1 và Accuracy |
+| **F1-Score cao nhất đạt được** | 93.07% | **93.86%** | AMDF dẫn đầu (+0.79%) |
+| **Độ chính xác Acc cao nhất** | 85.25% | **85.95%** | AMDF dẫn đầu (+0.70%) |
+| **Sai số trên file khó `phone_F2`** | 4.35 Hz (Cấu hình 29) | **3.66 Hz** (Cấu hình 09) / 4.05 Hz (Cấu hình 13) | AMDF đạt độ lệch thấp hơn |
+| **Sai số trên file thoại nam `phone_M2`** | 1.44 Hz (Cấu hình 23) / 2.38 Hz | **0.01 Hz** (Cấu hình 31) / 0.37 Hz (Cấu hình 13) | AMDF bám sát tần số thực của giọng nam trầm |
+| **Sai số phòng thu nữ `studio_F2`** | 0.05 Hz (Cấu hình 27) / 0.22 Hz | **0.01 Hz** (Cấu hình 11) / 0.34 Hz (Cấu hình 13) | Cả hai phương pháp đều đạt độ chính xác cao |
+| **Sai số phòng thu nam `studio_M2`** | 0.13 Hz (Cấu hình 21/22/30) / 0.64 Hz | **0.04 Hz** (Cấu hình 12 & 23) / 0.22 Hz (Cấu hình 13) | Cả hai phương pháp đều tiệm cận 0 Hz |
 
 $\implies$ **Tổng kết đối sánh kỹ thuật:**
-1. **AMDF giữ vị thế dẫn đầu tuyệt đối:** Ở cả chế độ Baseline lẫn 16 tổ hợp nâng cao, AMDF luôn cho sai số thấp hơn và chỉ số phân loại V/UV cao hơn ACF.
-2. **Sức mạnh then chốt của Center Clipping:** Khi kết hợp kỹ thuật cắt gọt trung tâm (Sondhi 1968), cả hai thuật toán đều có bước nhảy vọt:
-   - Trên ACF: Phá vỡ rào cản $2\text{ Hz}$ (từ $3.17\text{ Hz} \rightarrow 1.92\text{ Hz}$).
-   - Trên AMDF: Đạt kỷ lục $1.52\text{ Hz}$, xóa bỏ hoàn toàn hiện tượng bắt nhầm đáy giả ở giọng nam trầm (`phone_M2` chỉ còn lệch $0.09\text{ Hz}$).
-3. **Hiệu ứng hiệp đồng của bộ 4 Plugins:**
-   - `Bandpass Filter` loại bỏ can nhiễu dải dừng ngoài giọng nói ($< 70\text{ Hz}, > 450\text{ Hz}$).
-   - `Center Clipping` triệt tiêu cộng hưởng formant $F_1, F_2$, làm phẳng phổ tần số.
-   - `Hysteresis Schmitt Trigger` ổn định trạng thái, chống nhiễu loạn nhấp nháy tại vùng chuyển tiếp.
-   - `Energy Extension` bù đắp các khung biên bị suy giảm năng lượng, giữ trọn vẹn đường pitch contour.
+1. **Hiệu năng của AMDF:** Ở cả cấu hình cơ bản lẫn các tổ hợp nâng cao, AMDF luôn đạt sai số tuyệt đối thấp hơn và chỉ số phân loại V/UV nhạy hơn so với ACF.
+2. **Vai trò của Center Clipping:** Cắt gọt biên độ trung tâm giúp triệt tiêu thành phần cộng hưởng formant $F_1, F_2$, làm phẳng phổ, hỗ trợ cả ACF và AMDF giảm mạnh sai số trên các nguyên âm phức tạp.
+3. **Vai trò của Hysteresis và Energy Extension:** Bộ đôi này giúp ổn định quá trình phân loại V/UV tại các vùng chuyển tiếp, bù đắp các khung biên có năng lượng suy giảm, nâng F1-Score lên mức 93–94%.
+4. **Vai trò của Quy hoạch động Viterbi Tracking:** Tối ưu hóa chuỗi cao độ trên toàn bộ phân đoạn hữu thanh thông qua lưới Trellis, phạt các bước nhảy tần số đột ngột và hiện tượng nhảy quãng tám (Octave jumps), giúp làm mượt pitch contour hiệu quả.
 
 ---
 

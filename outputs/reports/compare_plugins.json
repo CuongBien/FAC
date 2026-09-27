@@ -1,6 +1,7 @@
 [
   {
     "config_name": "01. Baseline (Gốc)",
+    "threshold": 0.4408,
     "average_error_hz": 3.17,
     "average_accuracy_pct": 83.58,
     "average_voiced_f1_pct": 91.03,
@@ -36,115 +37,8 @@
     }
   },
   {
-    "config_name": "02. [Hysteresis]",
-    "average_error_hz": 2.81,
-    "average_accuracy_pct": 84.24,
-    "average_voiced_f1_pct": 91.82,
-    "files": {
-      "phone_F2": {
-        "pred_f0_mean": 152.52,
-        "abs_error_mean": 7.52,
-        "rel_error_mean_pct": 5.19,
-        "accuracy": 78.66,
-        "voiced_f1": 87.83
-      },
-      "phone_M2": {
-        "pred_f0_mean": 131.4,
-        "abs_error_mean": 2.4,
-        "rel_error_mean_pct": 1.86,
-        "accuracy": 78.78,
-        "voiced_f1": 91.06
-      },
-      "studio_F2": {
-        "pred_f0_mean": 200.06,
-        "abs_error_mean": 0.06,
-        "rel_error_mean_pct": 0.03,
-        "accuracy": 91.37,
-        "voiced_f1": 95.45
-      },
-      "studio_M2": {
-        "pred_f0_mean": 156.27,
-        "abs_error_mean": 1.27,
-        "rel_error_mean_pct": 0.82,
-        "accuracy": 88.14,
-        "voiced_f1": 92.95
-      }
-    }
-  },
-  {
-    "config_name": "03. [Energy Ext]",
-    "average_error_hz": 2.83,
-    "average_accuracy_pct": 85.09,
-    "average_voiced_f1_pct": 92.89,
-    "files": {
-      "phone_F2": {
-        "pred_f0_mean": 151.8,
-        "abs_error_mean": 6.8,
-        "rel_error_mean_pct": 4.69,
-        "accuracy": 79.71,
-        "voiced_f1": 89.15
-      },
-      "phone_M2": {
-        "pred_f0_mean": 131.88,
-        "abs_error_mean": 2.88,
-        "rel_error_mean_pct": 2.23,
-        "accuracy": 80.94,
-        "voiced_f1": 93.65
-      },
-      "studio_F2": {
-        "pred_f0_mean": 200.65,
-        "abs_error_mean": 0.65,
-        "rel_error_mean_pct": 0.32,
-        "accuracy": 92.01,
-        "voiced_f1": 96.27
-      },
-      "studio_M2": {
-        "pred_f0_mean": 155.97,
-        "abs_error_mean": 0.97,
-        "rel_error_mean_pct": 0.63,
-        "accuracy": 87.71,
-        "voiced_f1": 92.5
-      }
-    }
-  },
-  {
-    "config_name": "04. [Center Clip]",
-    "average_error_hz": 2.62,
-    "average_accuracy_pct": 82.14,
-    "average_voiced_f1_pct": 89.23,
-    "files": {
-      "phone_F2": {
-        "pred_f0_mean": 151.59,
-        "abs_error_mean": 6.59,
-        "rel_error_mean_pct": 4.55,
-        "accuracy": 78.03,
-        "voiced_f1": 87.02
-      },
-      "phone_M2": {
-        "pred_f0_mean": 131.15,
-        "abs_error_mean": 2.15,
-        "rel_error_mean_pct": 1.67,
-        "accuracy": 75.9,
-        "voiced_f1": 87.5
-      },
-      "studio_F2": {
-        "pred_f0_mean": 201.03,
-        "abs_error_mean": 1.03,
-        "rel_error_mean_pct": 0.52,
-        "accuracy": 88.18,
-        "voiced_f1": 91.34
-      },
-      "studio_M2": {
-        "pred_f0_mean": 155.72,
-        "abs_error_mean": 0.72,
-        "rel_error_mean_pct": 0.46,
-        "accuracy": 86.44,
-        "voiced_f1": 91.06
-      }
-    }
-  },
-  {
-    "config_name": "05. [Bandpass Filter]",
+    "config_name": "02. [Bandpass Filter]",
+    "threshold": 0.4892,
     "average_error_hz": 3.52,
     "average_accuracy_pct": 82.28,
     "average_voiced_f1_pct": 89.51,
@@ -180,31 +74,69 @@
     }
   },
   {
-    "config_name": "06. [Hyst + Energy Ext]",
-    "average_error_hz": 2.85,
-    "average_accuracy_pct": 85.25,
-    "average_voiced_f1_pct": 93.07,
+    "config_name": "03. [Center Clip]",
+    "threshold": 0.3352,
+    "average_error_hz": 2.62,
+    "average_accuracy_pct": 82.14,
+    "average_voiced_f1_pct": 89.23,
     "files": {
       "phone_F2": {
-        "pred_f0_mean": 151.75,
-        "abs_error_mean": 6.75,
-        "rel_error_mean_pct": 4.65,
-        "accuracy": 79.92,
-        "voiced_f1": 89.41
+        "pred_f0_mean": 151.59,
+        "abs_error_mean": 6.59,
+        "rel_error_mean_pct": 4.55,
+        "accuracy": 78.03,
+        "voiced_f1": 87.02
       },
       "phone_M2": {
-        "pred_f0_mean": 131.73,
-        "abs_error_mean": 2.73,
-        "rel_error_mean_pct": 2.12,
-        "accuracy": 80.94,
-        "voiced_f1": 93.65
+        "pred_f0_mean": 131.15,
+        "abs_error_mean": 2.15,
+        "rel_error_mean_pct": 1.67,
+        "accuracy": 75.9,
+        "voiced_f1": 87.5
       },
       "studio_F2": {
-        "pred_f0_mean": 200.65,
-        "abs_error_mean": 0.65,
-        "rel_error_mean_pct": 0.32,
-        "accuracy": 92.01,
-        "voiced_f1": 96.27
+        "pred_f0_mean": 201.03,
+        "abs_error_mean": 1.03,
+        "rel_error_mean_pct": 0.52,
+        "accuracy": 88.18,
+        "voiced_f1": 91.34
+      },
+      "studio_M2": {
+        "pred_f0_mean": 155.72,
+        "abs_error_mean": 0.72,
+        "rel_error_mean_pct": 0.46,
+        "accuracy": 86.44,
+        "voiced_f1": 91.06
+      }
+    }
+  },
+  {
+    "config_name": "04. [Hysteresis]",
+    "threshold": 0.4408,
+    "average_error_hz": 2.81,
+    "average_accuracy_pct": 84.24,
+    "average_voiced_f1_pct": 91.82,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 152.52,
+        "abs_error_mean": 7.52,
+        "rel_error_mean_pct": 5.19,
+        "accuracy": 78.66,
+        "voiced_f1": 87.83
+      },
+      "phone_M2": {
+        "pred_f0_mean": 131.4,
+        "abs_error_mean": 2.4,
+        "rel_error_mean_pct": 1.86,
+        "accuracy": 78.78,
+        "voiced_f1": 91.06
+      },
+      "studio_F2": {
+        "pred_f0_mean": 200.06,
+        "abs_error_mean": 0.06,
+        "rel_error_mean_pct": 0.03,
+        "accuracy": 91.37,
+        "voiced_f1": 95.45
       },
       "studio_M2": {
         "pred_f0_mean": 156.27,
@@ -216,151 +148,82 @@
     }
   },
   {
-    "config_name": "07. [Center Clip + Hyst]",
-    "average_error_hz": 2.3,
-    "average_accuracy_pct": 82.63,
-    "average_voiced_f1_pct": 89.84,
+    "config_name": "05. [Energy Ext]",
+    "threshold": 0.4408,
+    "average_error_hz": 2.83,
+    "average_accuracy_pct": 85.09,
+    "average_voiced_f1_pct": 92.89,
     "files": {
       "phone_F2": {
-        "pred_f0_mean": 151.64,
-        "abs_error_mean": 6.64,
-        "rel_error_mean_pct": 4.58,
-        "accuracy": 77.82,
-        "voiced_f1": 86.75
+        "pred_f0_mean": 151.8,
+        "abs_error_mean": 6.8,
+        "rel_error_mean_pct": 4.69,
+        "accuracy": 79.71,
+        "voiced_f1": 89.15
       },
       "phone_M2": {
-        "pred_f0_mean": 130.58,
-        "abs_error_mean": 1.58,
-        "rel_error_mean_pct": 1.22,
+        "pred_f0_mean": 131.88,
+        "abs_error_mean": 2.88,
+        "rel_error_mean_pct": 2.23,
+        "accuracy": 80.94,
+        "voiced_f1": 93.65
+      },
+      "studio_F2": {
+        "pred_f0_mean": 200.65,
+        "abs_error_mean": 0.65,
+        "rel_error_mean_pct": 0.32,
+        "accuracy": 92.01,
+        "voiced_f1": 96.27
+      },
+      "studio_M2": {
+        "pred_f0_mean": 155.97,
+        "abs_error_mean": 0.97,
+        "rel_error_mean_pct": 0.63,
+        "accuracy": 87.71,
+        "voiced_f1": 92.5
+      }
+    }
+  },
+  {
+    "config_name": "06. [Viterbi Tracking]",
+    "threshold": 0.4408,
+    "average_error_hz": 3.43,
+    "average_accuracy_pct": 83.58,
+    "average_voiced_f1_pct": 91.03,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 152.89,
+        "abs_error_mean": 7.89,
+        "rel_error_mean_pct": 5.44,
+        "accuracy": 78.24,
+        "voiced_f1": 87.29
+      },
+      "phone_M2": {
+        "pred_f0_mean": 132.05,
+        "abs_error_mean": 3.05,
+        "rel_error_mean_pct": 2.36,
         "accuracy": 77.34,
-        "voiced_f1": 89.34
+        "voiced_f1": 89.26
       },
       "studio_F2": {
-        "pred_f0_mean": 200.49,
-        "abs_error_mean": 0.49,
-        "rel_error_mean_pct": 0.25,
-        "accuracy": 88.5,
-        "voiced_f1": 91.76
+        "pred_f0_mean": 199.04,
+        "abs_error_mean": 0.96,
+        "rel_error_mean_pct": 0.48,
+        "accuracy": 91.05,
+        "voiced_f1": 95.06
       },
       "studio_M2": {
-        "pred_f0_mean": 155.48,
-        "abs_error_mean": 0.48,
-        "rel_error_mean_pct": 0.31,
-        "accuracy": 86.86,
-        "voiced_f1": 91.53
+        "pred_f0_mean": 156.84,
+        "abs_error_mean": 1.84,
+        "rel_error_mean_pct": 1.19,
+        "accuracy": 87.71,
+        "voiced_f1": 92.5
       }
     }
   },
   {
-    "config_name": "08. [Center Clip + Energy Ext]",
-    "average_error_hz": 2.37,
-    "average_accuracy_pct": 83.4,
-    "average_voiced_f1_pct": 90.82,
-    "files": {
-      "phone_F2": {
-        "pred_f0_mean": 151.3,
-        "abs_error_mean": 6.3,
-        "rel_error_mean_pct": 4.35,
-        "accuracy": 78.87,
-        "voiced_f1": 88.1
-      },
-      "phone_M2": {
-        "pred_f0_mean": 131.06,
-        "abs_error_mean": 2.06,
-        "rel_error_mean_pct": 1.59,
-        "accuracy": 77.34,
-        "voiced_f1": 89.34
-      },
-      "studio_F2": {
-        "pred_f0_mean": 200.21,
-        "abs_error_mean": 0.21,
-        "rel_error_mean_pct": 0.1,
-        "accuracy": 90.1,
-        "voiced_f1": 93.85
-      },
-      "studio_M2": {
-        "pred_f0_mean": 155.9,
-        "abs_error_mean": 0.9,
-        "rel_error_mean_pct": 0.58,
-        "accuracy": 87.29,
-        "voiced_f1": 91.98
-      }
-    }
-  },
-  {
-    "config_name": "09. [Bandpass + Hyst]",
-    "average_error_hz": 3.2,
-    "average_accuracy_pct": 82.97,
-    "average_voiced_f1_pct": 90.38,
-    "files": {
-      "phone_F2": {
-        "pred_f0_mean": 152.28,
-        "abs_error_mean": 7.28,
-        "rel_error_mean_pct": 5.02,
-        "accuracy": 76.99,
-        "voiced_f1": 86.05
-      },
-      "phone_M2": {
-        "pred_f0_mean": 133.27,
-        "abs_error_mean": 4.27,
-        "rel_error_mean_pct": 3.31,
-        "accuracy": 75.9,
-        "voiced_f1": 87.5
-      },
-      "studio_F2": {
-        "pred_f0_mean": 198.93,
-        "abs_error_mean": 1.07,
-        "rel_error_mean_pct": 0.54,
-        "accuracy": 91.69,
-        "voiced_f1": 95.85
-      },
-      "studio_M2": {
-        "pred_f0_mean": 155.17,
-        "abs_error_mean": 0.17,
-        "rel_error_mean_pct": 0.11,
-        "accuracy": 87.29,
-        "voiced_f1": 92.12
-      }
-    }
-  },
-  {
-    "config_name": "10. [Bandpass + Energy Ext]",
-    "average_error_hz": 3.13,
-    "average_accuracy_pct": 83.89,
-    "average_voiced_f1_pct": 91.53,
-    "files": {
-      "phone_F2": {
-        "pred_f0_mean": 152.58,
-        "abs_error_mean": 7.58,
-        "rel_error_mean_pct": 5.23,
-        "accuracy": 77.2,
-        "voiced_f1": 86.32
-      },
-      "phone_M2": {
-        "pred_f0_mean": 133.6,
-        "abs_error_mean": 4.6,
-        "rel_error_mean_pct": 3.57,
-        "accuracy": 78.42,
-        "voiced_f1": 90.69
-      },
-      "studio_F2": {
-        "pred_f0_mean": 199.81,
-        "abs_error_mean": 0.19,
-        "rel_error_mean_pct": 0.1,
-        "accuracy": 92.65,
-        "voiced_f1": 97.01
-      },
-      "studio_M2": {
-        "pred_f0_mean": 155.17,
-        "abs_error_mean": 0.17,
-        "rel_error_mean_pct": 0.11,
-        "accuracy": 87.29,
-        "voiced_f1": 92.12
-      }
-    }
-  },
-  {
-    "config_name": "11. [Bandpass + Center Clip]",
+    "config_name": "07. [BP + Clip]",
+    "threshold": 0.3953,
     "average_error_hz": 2.25,
     "average_accuracy_pct": 82.2,
     "average_voiced_f1_pct": 89.42,
@@ -396,60 +259,62 @@
     }
   },
   {
-    "config_name": "12. [Center Clip + Hyst + Energy]",
-    "average_error_hz": 2.23,
-    "average_accuracy_pct": 83.49,
-    "average_voiced_f1_pct": 90.93,
+    "config_name": "08. [BP + Hyst]",
+    "threshold": 0.4892,
+    "average_error_hz": 3.2,
+    "average_accuracy_pct": 82.97,
+    "average_voiced_f1_pct": 90.38,
     "files": {
       "phone_F2": {
-        "pred_f0_mean": 151.37,
-        "abs_error_mean": 6.37,
-        "rel_error_mean_pct": 4.39,
-        "accuracy": 78.87,
-        "voiced_f1": 88.1
+        "pred_f0_mean": 152.28,
+        "abs_error_mean": 7.28,
+        "rel_error_mean_pct": 5.02,
+        "accuracy": 76.99,
+        "voiced_f1": 86.05
       },
       "phone_M2": {
-        "pred_f0_mean": 130.44,
-        "abs_error_mean": 1.44,
-        "rel_error_mean_pct": 1.12,
-        "accuracy": 77.7,
-        "voiced_f1": 89.8
+        "pred_f0_mean": 133.27,
+        "abs_error_mean": 4.27,
+        "rel_error_mean_pct": 3.31,
+        "accuracy": 75.9,
+        "voiced_f1": 87.5
       },
       "studio_F2": {
-        "pred_f0_mean": 199.81,
-        "abs_error_mean": 0.19,
-        "rel_error_mean_pct": 0.1,
-        "accuracy": 90.1,
-        "voiced_f1": 93.85
+        "pred_f0_mean": 198.93,
+        "abs_error_mean": 1.07,
+        "rel_error_mean_pct": 0.54,
+        "accuracy": 91.69,
+        "voiced_f1": 95.85
       },
       "studio_M2": {
-        "pred_f0_mean": 155.91,
-        "abs_error_mean": 0.91,
-        "rel_error_mean_pct": 0.59,
+        "pred_f0_mean": 155.17,
+        "abs_error_mean": 0.17,
+        "rel_error_mean_pct": 0.11,
         "accuracy": 87.29,
-        "voiced_f1": 91.98
+        "voiced_f1": 92.12
       }
     }
   },
   {
-    "config_name": "13. [Bandpass + Hyst + Energy]",
-    "average_error_hz": 2.8,
-    "average_accuracy_pct": 83.95,
-    "average_voiced_f1_pct": 91.64,
+    "config_name": "09. [BP + Energy]",
+    "threshold": 0.4892,
+    "average_error_hz": 3.13,
+    "average_accuracy_pct": 83.89,
+    "average_voiced_f1_pct": 91.53,
     "files": {
       "phone_F2": {
-        "pred_f0_mean": 151.27,
-        "abs_error_mean": 6.27,
-        "rel_error_mean_pct": 4.32,
-        "accuracy": 77.82,
-        "voiced_f1": 87.18
+        "pred_f0_mean": 152.58,
+        "abs_error_mean": 7.58,
+        "rel_error_mean_pct": 5.23,
+        "accuracy": 77.2,
+        "voiced_f1": 86.32
       },
       "phone_M2": {
-        "pred_f0_mean": 133.59,
-        "abs_error_mean": 4.59,
-        "rel_error_mean_pct": 3.55,
-        "accuracy": 78.06,
-        "voiced_f1": 90.24
+        "pred_f0_mean": 133.6,
+        "abs_error_mean": 4.6,
+        "rel_error_mean_pct": 3.57,
+        "accuracy": 78.42,
+        "voiced_f1": 90.69
       },
       "studio_F2": {
         "pred_f0_mean": 199.81,
@@ -468,7 +333,267 @@
     }
   },
   {
-    "config_name": "14. [Bandpass + Center Clip + Hyst]",
+    "config_name": "10. [BP + Viterbi]",
+    "threshold": 0.4892,
+    "average_error_hz": 3.55,
+    "average_accuracy_pct": 82.28,
+    "average_voiced_f1_pct": 89.51,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 153.67,
+        "abs_error_mean": 8.67,
+        "rel_error_mean_pct": 5.98,
+        "accuracy": 76.15,
+        "voiced_f1": 84.89
+      },
+      "phone_M2": {
+        "pred_f0_mean": 133.31,
+        "abs_error_mean": 4.31,
+        "rel_error_mean_pct": 3.34,
+        "accuracy": 74.82,
+        "voiced_f1": 86.08
+      },
+      "studio_F2": {
+        "pred_f0_mean": 198.95,
+        "abs_error_mean": 1.05,
+        "rel_error_mean_pct": 0.52,
+        "accuracy": 91.69,
+        "voiced_f1": 95.85
+      },
+      "studio_M2": {
+        "pred_f0_mean": 155.18,
+        "abs_error_mean": 0.18,
+        "rel_error_mean_pct": 0.12,
+        "accuracy": 86.44,
+        "voiced_f1": 91.21
+      }
+    }
+  },
+  {
+    "config_name": "11. [Clip + Hyst]",
+    "threshold": 0.3352,
+    "average_error_hz": 2.3,
+    "average_accuracy_pct": 82.63,
+    "average_voiced_f1_pct": 89.84,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 151.64,
+        "abs_error_mean": 6.64,
+        "rel_error_mean_pct": 4.58,
+        "accuracy": 77.82,
+        "voiced_f1": 86.75
+      },
+      "phone_M2": {
+        "pred_f0_mean": 130.58,
+        "abs_error_mean": 1.58,
+        "rel_error_mean_pct": 1.22,
+        "accuracy": 77.34,
+        "voiced_f1": 89.34
+      },
+      "studio_F2": {
+        "pred_f0_mean": 200.49,
+        "abs_error_mean": 0.49,
+        "rel_error_mean_pct": 0.25,
+        "accuracy": 88.5,
+        "voiced_f1": 91.76
+      },
+      "studio_M2": {
+        "pred_f0_mean": 155.48,
+        "abs_error_mean": 0.48,
+        "rel_error_mean_pct": 0.31,
+        "accuracy": 86.86,
+        "voiced_f1": 91.53
+      }
+    }
+  },
+  {
+    "config_name": "12. [Clip + Energy]",
+    "threshold": 0.3352,
+    "average_error_hz": 2.37,
+    "average_accuracy_pct": 83.4,
+    "average_voiced_f1_pct": 90.82,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 151.3,
+        "abs_error_mean": 6.3,
+        "rel_error_mean_pct": 4.35,
+        "accuracy": 78.87,
+        "voiced_f1": 88.1
+      },
+      "phone_M2": {
+        "pred_f0_mean": 131.06,
+        "abs_error_mean": 2.06,
+        "rel_error_mean_pct": 1.59,
+        "accuracy": 77.34,
+        "voiced_f1": 89.34
+      },
+      "studio_F2": {
+        "pred_f0_mean": 200.21,
+        "abs_error_mean": 0.21,
+        "rel_error_mean_pct": 0.1,
+        "accuracy": 90.1,
+        "voiced_f1": 93.85
+      },
+      "studio_M2": {
+        "pred_f0_mean": 155.9,
+        "abs_error_mean": 0.9,
+        "rel_error_mean_pct": 0.58,
+        "accuracy": 87.29,
+        "voiced_f1": 91.98
+      }
+    }
+  },
+  {
+    "config_name": "13. [Clip + Viterbi]",
+    "threshold": 0.3352,
+    "average_error_hz": 2.5,
+    "average_accuracy_pct": 82.14,
+    "average_voiced_f1_pct": 89.23,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 150.24,
+        "abs_error_mean": 5.24,
+        "rel_error_mean_pct": 3.61,
+        "accuracy": 78.03,
+        "voiced_f1": 87.02
+      },
+      "phone_M2": {
+        "pred_f0_mean": 132.42,
+        "abs_error_mean": 3.42,
+        "rel_error_mean_pct": 2.65,
+        "accuracy": 75.9,
+        "voiced_f1": 87.5
+      },
+      "studio_F2": {
+        "pred_f0_mean": 200.58,
+        "abs_error_mean": 0.58,
+        "rel_error_mean_pct": 0.29,
+        "accuracy": 88.18,
+        "voiced_f1": 91.34
+      },
+      "studio_M2": {
+        "pred_f0_mean": 155.75,
+        "abs_error_mean": 0.75,
+        "rel_error_mean_pct": 0.48,
+        "accuracy": 86.44,
+        "voiced_f1": 91.06
+      }
+    }
+  },
+  {
+    "config_name": "14. [Hyst + Energy]",
+    "threshold": 0.4408,
+    "average_error_hz": 2.85,
+    "average_accuracy_pct": 85.25,
+    "average_voiced_f1_pct": 93.07,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 151.75,
+        "abs_error_mean": 6.75,
+        "rel_error_mean_pct": 4.65,
+        "accuracy": 79.92,
+        "voiced_f1": 89.41
+      },
+      "phone_M2": {
+        "pred_f0_mean": 131.73,
+        "abs_error_mean": 2.73,
+        "rel_error_mean_pct": 2.12,
+        "accuracy": 80.94,
+        "voiced_f1": 93.65
+      },
+      "studio_F2": {
+        "pred_f0_mean": 200.65,
+        "abs_error_mean": 0.65,
+        "rel_error_mean_pct": 0.32,
+        "accuracy": 92.01,
+        "voiced_f1": 96.27
+      },
+      "studio_M2": {
+        "pred_f0_mean": 156.27,
+        "abs_error_mean": 1.27,
+        "rel_error_mean_pct": 0.82,
+        "accuracy": 88.14,
+        "voiced_f1": 92.95
+      }
+    }
+  },
+  {
+    "config_name": "15. [Hyst + Viterbi]",
+    "threshold": 0.4408,
+    "average_error_hz": 3.13,
+    "average_accuracy_pct": 84.24,
+    "average_voiced_f1_pct": 91.82,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 152.65,
+        "abs_error_mean": 7.65,
+        "rel_error_mean_pct": 5.27,
+        "accuracy": 78.66,
+        "voiced_f1": 87.83
+      },
+      "phone_M2": {
+        "pred_f0_mean": 131.6,
+        "abs_error_mean": 2.6,
+        "rel_error_mean_pct": 2.01,
+        "accuracy": 78.78,
+        "voiced_f1": 91.06
+      },
+      "studio_F2": {
+        "pred_f0_mean": 200.12,
+        "abs_error_mean": 0.12,
+        "rel_error_mean_pct": 0.06,
+        "accuracy": 91.37,
+        "voiced_f1": 95.45
+      },
+      "studio_M2": {
+        "pred_f0_mean": 157.17,
+        "abs_error_mean": 2.17,
+        "rel_error_mean_pct": 1.4,
+        "accuracy": 88.14,
+        "voiced_f1": 92.95
+      }
+    }
+  },
+  {
+    "config_name": "16. [Energy + Viterbi]",
+    "threshold": 0.4408,
+    "average_error_hz": 2.62,
+    "average_accuracy_pct": 85.09,
+    "average_voiced_f1_pct": 92.89,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 149.88,
+        "abs_error_mean": 4.88,
+        "rel_error_mean_pct": 3.37,
+        "accuracy": 79.71,
+        "voiced_f1": 89.15
+      },
+      "phone_M2": {
+        "pred_f0_mean": 132.0,
+        "abs_error_mean": 3.0,
+        "rel_error_mean_pct": 2.33,
+        "accuracy": 80.94,
+        "voiced_f1": 93.65
+      },
+      "studio_F2": {
+        "pred_f0_mean": 200.76,
+        "abs_error_mean": 0.76,
+        "rel_error_mean_pct": 0.38,
+        "accuracy": 92.01,
+        "voiced_f1": 96.27
+      },
+      "studio_M2": {
+        "pred_f0_mean": 156.84,
+        "abs_error_mean": 1.84,
+        "rel_error_mean_pct": 1.19,
+        "accuracy": 87.71,
+        "voiced_f1": 92.5
+      }
+    }
+  },
+  {
+    "config_name": "17. [BP + Clip + Hyst]",
+    "threshold": 0.3953,
     "average_error_hz": 2.09,
     "average_accuracy_pct": 82.65,
     "average_voiced_f1_pct": 89.98,
@@ -504,7 +629,8 @@
     }
   },
   {
-    "config_name": "15. [Bandpass + Center Clip + Energy]",
+    "config_name": "18. [BP + Clip + Energy]",
+    "threshold": 0.3953,
     "average_error_hz": 1.92,
     "average_accuracy_pct": 83.54,
     "average_voiced_f1_pct": 91.06,
@@ -540,7 +666,304 @@
     }
   },
   {
-    "config_name": "16. [Cả 4 Plugins]",
+    "config_name": "19. [BP + Clip + Viterbi]",
+    "threshold": 0.3953,
+    "average_error_hz": 2.09,
+    "average_accuracy_pct": 82.2,
+    "average_voiced_f1_pct": 89.42,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 149.65,
+        "abs_error_mean": 4.65,
+        "rel_error_mean_pct": 3.21,
+        "accuracy": 77.82,
+        "voiced_f1": 87.0
+      },
+      "phone_M2": {
+        "pred_f0_mean": 131.69,
+        "abs_error_mean": 2.69,
+        "rel_error_mean_pct": 2.09,
+        "accuracy": 76.26,
+        "voiced_f1": 87.87
+      },
+      "studio_F2": {
+        "pred_f0_mean": 200.42,
+        "abs_error_mean": 0.42,
+        "rel_error_mean_pct": 0.21,
+        "accuracy": 89.14,
+        "voiced_f1": 92.61
+      },
+      "studio_M2": {
+        "pred_f0_mean": 155.6,
+        "abs_error_mean": 0.6,
+        "rel_error_mean_pct": 0.39,
+        "accuracy": 85.59,
+        "voiced_f1": 90.21
+      }
+    }
+  },
+  {
+    "config_name": "20. [BP + Hyst + Energy]",
+    "threshold": 0.4892,
+    "average_error_hz": 2.8,
+    "average_accuracy_pct": 83.95,
+    "average_voiced_f1_pct": 91.64,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 151.27,
+        "abs_error_mean": 6.27,
+        "rel_error_mean_pct": 4.32,
+        "accuracy": 77.82,
+        "voiced_f1": 87.18
+      },
+      "phone_M2": {
+        "pred_f0_mean": 133.59,
+        "abs_error_mean": 4.59,
+        "rel_error_mean_pct": 3.55,
+        "accuracy": 78.06,
+        "voiced_f1": 90.24
+      },
+      "studio_F2": {
+        "pred_f0_mean": 199.81,
+        "abs_error_mean": 0.19,
+        "rel_error_mean_pct": 0.1,
+        "accuracy": 92.65,
+        "voiced_f1": 97.01
+      },
+      "studio_M2": {
+        "pred_f0_mean": 155.17,
+        "abs_error_mean": 0.17,
+        "rel_error_mean_pct": 0.11,
+        "accuracy": 87.29,
+        "voiced_f1": 92.12
+      }
+    }
+  },
+  {
+    "config_name": "21. [BP + Hyst + Viterbi]",
+    "threshold": 0.4892,
+    "average_error_hz": 3.23,
+    "average_accuracy_pct": 82.97,
+    "average_voiced_f1_pct": 90.38,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 152.36,
+        "abs_error_mean": 7.36,
+        "rel_error_mean_pct": 5.08,
+        "accuracy": 76.99,
+        "voiced_f1": 86.05
+      },
+      "phone_M2": {
+        "pred_f0_mean": 133.39,
+        "abs_error_mean": 4.39,
+        "rel_error_mean_pct": 3.41,
+        "accuracy": 75.9,
+        "voiced_f1": 87.5
+      },
+      "studio_F2": {
+        "pred_f0_mean": 198.95,
+        "abs_error_mean": 1.05,
+        "rel_error_mean_pct": 0.52,
+        "accuracy": 91.69,
+        "voiced_f1": 95.85
+      },
+      "studio_M2": {
+        "pred_f0_mean": 155.13,
+        "abs_error_mean": 0.13,
+        "rel_error_mean_pct": 0.08,
+        "accuracy": 87.29,
+        "voiced_f1": 92.12
+      }
+    }
+  },
+  {
+    "config_name": "22. [BP + Energy + Viterbi]",
+    "threshold": 0.4892,
+    "average_error_hz": 3.14,
+    "average_accuracy_pct": 83.89,
+    "average_voiced_f1_pct": 91.53,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 152.69,
+        "abs_error_mean": 7.69,
+        "rel_error_mean_pct": 5.3,
+        "accuracy": 77.2,
+        "voiced_f1": 86.32
+      },
+      "phone_M2": {
+        "pred_f0_mean": 133.63,
+        "abs_error_mean": 4.63,
+        "rel_error_mean_pct": 3.59,
+        "accuracy": 78.42,
+        "voiced_f1": 90.69
+      },
+      "studio_F2": {
+        "pred_f0_mean": 199.88,
+        "abs_error_mean": 0.12,
+        "rel_error_mean_pct": 0.06,
+        "accuracy": 92.65,
+        "voiced_f1": 97.01
+      },
+      "studio_M2": {
+        "pred_f0_mean": 155.13,
+        "abs_error_mean": 0.13,
+        "rel_error_mean_pct": 0.08,
+        "accuracy": 87.29,
+        "voiced_f1": 92.12
+      }
+    }
+  },
+  {
+    "config_name": "23. [Clip + Hyst + Energy]",
+    "threshold": 0.3352,
+    "average_error_hz": 2.23,
+    "average_accuracy_pct": 83.49,
+    "average_voiced_f1_pct": 90.93,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 151.37,
+        "abs_error_mean": 6.37,
+        "rel_error_mean_pct": 4.39,
+        "accuracy": 78.87,
+        "voiced_f1": 88.1
+      },
+      "phone_M2": {
+        "pred_f0_mean": 130.44,
+        "abs_error_mean": 1.44,
+        "rel_error_mean_pct": 1.12,
+        "accuracy": 77.7,
+        "voiced_f1": 89.8
+      },
+      "studio_F2": {
+        "pred_f0_mean": 199.81,
+        "abs_error_mean": 0.19,
+        "rel_error_mean_pct": 0.1,
+        "accuracy": 90.1,
+        "voiced_f1": 93.85
+      },
+      "studio_M2": {
+        "pred_f0_mean": 155.91,
+        "abs_error_mean": 0.91,
+        "rel_error_mean_pct": 0.59,
+        "accuracy": 87.29,
+        "voiced_f1": 91.98
+      }
+    }
+  },
+  {
+    "config_name": "24. [Clip + Hyst + Viterbi]",
+    "threshold": 0.3352,
+    "average_error_hz": 2.52,
+    "average_accuracy_pct": 82.63,
+    "average_voiced_f1_pct": 89.84,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 151.4,
+        "abs_error_mean": 6.4,
+        "rel_error_mean_pct": 4.41,
+        "accuracy": 77.82,
+        "voiced_f1": 86.75
+      },
+      "phone_M2": {
+        "pred_f0_mean": 131.92,
+        "abs_error_mean": 2.92,
+        "rel_error_mean_pct": 2.26,
+        "accuracy": 77.34,
+        "voiced_f1": 89.34
+      },
+      "studio_F2": {
+        "pred_f0_mean": 200.29,
+        "abs_error_mean": 0.29,
+        "rel_error_mean_pct": 0.15,
+        "accuracy": 88.5,
+        "voiced_f1": 91.76
+      },
+      "studio_M2": {
+        "pred_f0_mean": 155.46,
+        "abs_error_mean": 0.46,
+        "rel_error_mean_pct": 0.3,
+        "accuracy": 86.86,
+        "voiced_f1": 91.53
+      }
+    }
+  },
+  {
+    "config_name": "25. [Clip + Energy + Viterbi]",
+    "threshold": 0.3352,
+    "average_error_hz": 2.39,
+    "average_accuracy_pct": 83.4,
+    "average_voiced_f1_pct": 90.82,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 149.94,
+        "abs_error_mean": 4.94,
+        "rel_error_mean_pct": 3.41,
+        "accuracy": 78.87,
+        "voiced_f1": 88.1
+      },
+      "phone_M2": {
+        "pred_f0_mean": 132.34,
+        "abs_error_mean": 3.34,
+        "rel_error_mean_pct": 2.59,
+        "accuracy": 77.34,
+        "voiced_f1": 89.34
+      },
+      "studio_F2": {
+        "pred_f0_mean": 199.81,
+        "abs_error_mean": 0.19,
+        "rel_error_mean_pct": 0.09,
+        "accuracy": 90.1,
+        "voiced_f1": 93.85
+      },
+      "studio_M2": {
+        "pred_f0_mean": 156.08,
+        "abs_error_mean": 1.08,
+        "rel_error_mean_pct": 0.7,
+        "accuracy": 87.29,
+        "voiced_f1": 91.98
+      }
+    }
+  },
+  {
+    "config_name": "26. [Hyst + Energy + Viterbi]",
+    "threshold": 0.4408,
+    "average_error_hz": 2.69,
+    "average_accuracy_pct": 85.25,
+    "average_voiced_f1_pct": 93.07,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 149.84,
+        "abs_error_mean": 4.84,
+        "rel_error_mean_pct": 3.34,
+        "accuracy": 79.92,
+        "voiced_f1": 89.41
+      },
+      "phone_M2": {
+        "pred_f0_mean": 132.0,
+        "abs_error_mean": 3.0,
+        "rel_error_mean_pct": 2.33,
+        "accuracy": 80.94,
+        "voiced_f1": 93.65
+      },
+      "studio_F2": {
+        "pred_f0_mean": 200.76,
+        "abs_error_mean": 0.76,
+        "rel_error_mean_pct": 0.38,
+        "accuracy": 92.01,
+        "voiced_f1": 96.27
+      },
+      "studio_M2": {
+        "pred_f0_mean": 157.17,
+        "abs_error_mean": 2.17,
+        "rel_error_mean_pct": 1.4,
+        "accuracy": 88.14,
+        "voiced_f1": 92.95
+      }
+    }
+  },
+  {
+    "config_name": "27. [BP + Clip + Hyst + Energy]",
+    "threshold": 0.3953,
     "average_error_hz": 1.93,
     "average_accuracy_pct": 83.48,
     "average_voiced_f1_pct": 91.0,
@@ -570,6 +993,191 @@
         "pred_f0_mean": 155.55,
         "abs_error_mean": 0.55,
         "rel_error_mean_pct": 0.36,
+        "accuracy": 86.86,
+        "voiced_f1": 91.6
+      }
+    }
+  },
+  {
+    "config_name": "28. [BP + Clip + Hyst + Viterbi]",
+    "threshold": 0.3953,
+    "average_error_hz": 2.04,
+    "average_accuracy_pct": 82.65,
+    "average_voiced_f1_pct": 89.98,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 149.74,
+        "abs_error_mean": 4.74,
+        "rel_error_mean_pct": 3.27,
+        "accuracy": 77.82,
+        "voiced_f1": 87.0
+      },
+      "phone_M2": {
+        "pred_f0_mean": 131.68,
+        "abs_error_mean": 2.68,
+        "rel_error_mean_pct": 2.07,
+        "accuracy": 76.98,
+        "voiced_f1": 88.8
+      },
+      "studio_F2": {
+        "pred_f0_mean": 200.28,
+        "abs_error_mean": 0.28,
+        "rel_error_mean_pct": 0.14,
+        "accuracy": 89.78,
+        "voiced_f1": 93.44
+      },
+      "studio_M2": {
+        "pred_f0_mean": 155.45,
+        "abs_error_mean": 0.45,
+        "rel_error_mean_pct": 0.29,
+        "accuracy": 86.02,
+        "voiced_f1": 90.68
+      }
+    }
+  },
+  {
+    "config_name": "29. [BP + Clip + Energy + Viterbi]",
+    "threshold": 0.3953,
+    "average_error_hz": 1.9,
+    "average_accuracy_pct": 83.54,
+    "average_voiced_f1_pct": 91.06,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 149.35,
+        "abs_error_mean": 4.35,
+        "rel_error_mean_pct": 3.0,
+        "accuracy": 78.45,
+        "voiced_f1": 87.79
+      },
+      "phone_M2": {
+        "pred_f0_mean": 131.38,
+        "abs_error_mean": 2.38,
+        "rel_error_mean_pct": 1.84,
+        "accuracy": 78.42,
+        "voiced_f1": 90.61
+      },
+      "studio_F2": {
+        "pred_f0_mean": 199.78,
+        "abs_error_mean": 0.22,
+        "rel_error_mean_pct": 0.11,
+        "accuracy": 90.42,
+        "voiced_f1": 94.25
+      },
+      "studio_M2": {
+        "pred_f0_mean": 155.64,
+        "abs_error_mean": 0.64,
+        "rel_error_mean_pct": 0.41,
+        "accuracy": 86.86,
+        "voiced_f1": 91.6
+      }
+    }
+  },
+  {
+    "config_name": "30. [BP + Hyst + Energy + Viterbi]",
+    "threshold": 0.4892,
+    "average_error_hz": 2.35,
+    "average_accuracy_pct": 83.95,
+    "average_voiced_f1_pct": 91.64,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 149.4,
+        "abs_error_mean": 4.4,
+        "rel_error_mean_pct": 3.03,
+        "accuracy": 77.82,
+        "voiced_f1": 87.18
+      },
+      "phone_M2": {
+        "pred_f0_mean": 133.74,
+        "abs_error_mean": 4.74,
+        "rel_error_mean_pct": 3.67,
+        "accuracy": 78.06,
+        "voiced_f1": 90.24
+      },
+      "studio_F2": {
+        "pred_f0_mean": 199.88,
+        "abs_error_mean": 0.12,
+        "rel_error_mean_pct": 0.06,
+        "accuracy": 92.65,
+        "voiced_f1": 97.01
+      },
+      "studio_M2": {
+        "pred_f0_mean": 155.13,
+        "abs_error_mean": 0.13,
+        "rel_error_mean_pct": 0.08,
+        "accuracy": 87.29,
+        "voiced_f1": 92.12
+      }
+    }
+  },
+  {
+    "config_name": "31. [Clip + Hyst + Energy + Viterbi]",
+    "threshold": 0.3352,
+    "average_error_hz": 2.83,
+    "average_accuracy_pct": 83.49,
+    "average_voiced_f1_pct": 90.93,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 152.16,
+        "abs_error_mean": 7.16,
+        "rel_error_mean_pct": 4.94,
+        "accuracy": 78.87,
+        "voiced_f1": 88.1
+      },
+      "phone_M2": {
+        "pred_f0_mean": 131.74,
+        "abs_error_mean": 2.74,
+        "rel_error_mean_pct": 2.13,
+        "accuracy": 77.7,
+        "voiced_f1": 89.8
+      },
+      "studio_F2": {
+        "pred_f0_mean": 199.66,
+        "abs_error_mean": 0.34,
+        "rel_error_mean_pct": 0.17,
+        "accuracy": 90.1,
+        "voiced_f1": 93.85
+      },
+      "studio_M2": {
+        "pred_f0_mean": 156.08,
+        "abs_error_mean": 1.08,
+        "rel_error_mean_pct": 0.7,
+        "accuracy": 87.29,
+        "voiced_f1": 91.98
+      }
+    }
+  },
+  {
+    "config_name": "32. [Cả 5 Plugins]",
+    "threshold": 0.3953,
+    "average_error_hz": 2.05,
+    "average_accuracy_pct": 83.48,
+    "average_voiced_f1_pct": 91.0,
+    "files": {
+      "phone_F2": {
+        "pred_f0_mean": 149.96,
+        "abs_error_mean": 4.96,
+        "rel_error_mean_pct": 3.42,
+        "accuracy": 78.24,
+        "voiced_f1": 87.53
+      },
+      "phone_M2": {
+        "pred_f0_mean": 131.39,
+        "abs_error_mean": 2.39,
+        "rel_error_mean_pct": 1.86,
+        "accuracy": 78.42,
+        "voiced_f1": 90.61
+      },
+      "studio_F2": {
+        "pred_f0_mean": 199.78,
+        "abs_error_mean": 0.22,
+        "rel_error_mean_pct": 0.11,
+        "accuracy": 90.42,
+        "voiced_f1": 94.25
+      },
+      "studio_M2": {
+        "pred_f0_mean": 155.64,
+        "abs_error_mean": 0.64,
+        "rel_error_mean_pct": 0.41,
         "accuracy": 86.86,
         "voiced_f1": 91.6
       }
