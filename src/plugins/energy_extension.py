@@ -41,7 +41,16 @@ class EnergyExtensionPlugin(BasePlugin):
             return result
 
         num_frames = len(labels)
-        reduced_thresh = base_thresh * (1.0 - self.threshold_discount)
+        method = result.get("method", "acf").lower()
+        if method == "amdf":
+            # For AMDF: relaxing threshold means allowing slightly shallower dips (higher threshold)
+            relaxed_thresh = base_thresh * (1.0 + self.threshold_discount)
+            metric_check = lambda val: val <= relaxed_thresh
+        else:
+            # For ACF: relaxing threshold means allowing slightly lower peaks (lower threshold)
+            reduced_thresh = base_thresh * (1.0 - self.threshold_discount)
+            metric_check = lambda val: val >= reduced_thresh
+
         min_ste_required = self.ste_multiplier * ste_thresh
 
         # 1. Identify continuous voiced runs
@@ -68,7 +77,7 @@ class EnergyExtensionPlugin(BasePlugin):
             # Check preceding frame
             pre_idx = start_idx - 1
             if pre_idx >= 0 and labels[pre_idx] == "uv":
-                if ste[pre_idx] >= min_ste_required and peak_values[pre_idx] >= reduced_thresh:
+                if ste[pre_idx] >= min_ste_required and metric_check(peak_values[pre_idx]):
                     cand_f0 = candidate_f0[pre_idx]
                     adj_f0 = f0_contour[start_idx]
                     if cand_f0 > 0 and adj_f0 > 0 and abs(cand_f0 - adj_f0) <= self.max_pitch_diff:
@@ -79,7 +88,7 @@ class EnergyExtensionPlugin(BasePlugin):
             # Check succeeding frame
             post_idx = end_idx + 1
             if post_idx < num_frames and labels[post_idx] == "uv":
-                if ste[post_idx] >= min_ste_required and peak_values[post_idx] >= reduced_thresh:
+                if ste[post_idx] >= min_ste_required and metric_check(peak_values[post_idx]):
                     cand_f0 = candidate_f0[post_idx]
                     adj_f0 = f0_contour[end_idx]
                     if cand_f0 > 0 and adj_f0 > 0 and abs(cand_f0 - adj_f0) <= self.max_pitch_diff:

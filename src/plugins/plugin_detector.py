@@ -5,6 +5,7 @@ from scipy.ndimage import median_filter
 
 from src.core.audio import load_wav, frame_signal, compute_ste
 from src.core.acf import find_f0_acf
+from src.core.amdf import find_f0_amdf
 from src.core.pitch_detector import PitchDetector
 from .base import BasePlugin
 
@@ -81,6 +82,8 @@ class PluginPitchDetector:
 
         candidate_f0 = np.zeros(num_frames, dtype=np.float64)
 
+        method = getattr(self.base_detector, "method", "acf").lower()
+
         # 4. Frame-by-frame decision with plugin hook
         for i in range(num_frames):
             is_silence = ste[i] < ste_thresh
@@ -90,6 +93,7 @@ class PluginPitchDetector:
                 "ste": ste[i],
                 "sample_rate": sample_rate,
                 "frame": frames[i],
+                "method": method,
             }
 
             if is_silence:
@@ -101,25 +105,37 @@ class PluginPitchDetector:
                     p.adjust_frame_decision(i, 0.0, 0.0, False, context)
                 continue
 
-            # Compute ACF
-            f0_val, peak_val, lag = find_f0_acf(
-                frames[i],
-                sample_rate,
-                f0_min=self.base_detector.f0_min,
-                f0_max=self.base_detector.f0_max,
-                mode="normalized",
-            )
-            peak_values[i] = peak_val
-            lags[i] = lag
-            candidate_f0[i] = f0_val
-
-            # Baseline decision
-            is_voiced = peak_val >= self.base_detector.threshold
+            if method == "amdf":
+                f0_val, dip_val, lag = find_f0_amdf(
+                    frames[i],
+                    sample_rate,
+                    f0_min=self.base_detector.f0_min,
+                    f0_max=self.base_detector.f0_max,
+                    mode="normalized",
+                )
+                peak_values[i] = dip_val
+                lags[i] = lag
+                candidate_f0[i] = f0_val
+                is_voiced = dip_val <= self.base_detector.threshold
+                current_metric = dip_val
+            else:
+                f0_val, peak_val, lag = find_f0_acf(
+                    frames[i],
+                    sample_rate,
+                    f0_min=self.base_detector.f0_min,
+                    f0_max=self.base_detector.f0_max,
+                    mode="normalized",
+                )
+                peak_values[i] = peak_val
+                lags[i] = lag
+                candidate_f0[i] = f0_val
+                is_voiced = peak_val >= self.base_detector.threshold
+                current_metric = peak_val
 
             # Allow plugins to adjust decision (e.g. Hysteresis)
             for p in self.plugins:
                 is_voiced, f0_val = p.adjust_frame_decision(
-                    i, peak_val, f0_val, is_voiced, context
+                    i, current_metric, f0_val, is_voiced, context
                 )
 
             if is_voiced:
@@ -155,6 +171,7 @@ class PluginPitchDetector:
             "ste_thresh": ste_thresh,
             "threshold": self.base_detector.threshold,
             "num_frames": num_frames,
+            "method": method,
             "applied_plugins": [p.name for p in self.plugins],
         }
 

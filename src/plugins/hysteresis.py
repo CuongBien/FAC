@@ -31,7 +31,7 @@ class HysteresisPlugin(BasePlugin):
     def adjust_frame_decision(
         self,
         frame_idx: int,
-        peak_val: float,
+        metric_val: float,
         f0_val: float,
         is_voiced: bool,
         context: Dict[str, Any],
@@ -43,24 +43,55 @@ class HysteresisPlugin(BasePlugin):
             self._prev_f0 = 0.0
             return False, 0.0
 
-        if not self._in_voiced:
-            # Entering Voiced requires peak >= t_high
-            if peak_val >= self.t_high:
-                self._in_voiced = True
-                self._prev_f0 = f0_val
-                return True, f0_val
+        method = context.get("method", "acf").lower()
+
+        if method == "amdf":
+            # For AMDF: smaller dip means stronger periodicity
+            # Enter threshold (strict): lower value (e.g. 0.38 - 0.40)
+            # Exit threshold (relaxed): higher value (e.g. 0.44 - 0.48)
+            t_enter = min(self.t_high, self.t_low)
+            t_exit = max(self.t_high, self.t_low)
+
+            if not self._in_voiced:
+                if metric_val <= t_enter:
+                    self._in_voiced = True
+                    self._prev_f0 = f0_val
+                    return True, f0_val
+                else:
+                    self._in_voiced = False
+                    self._prev_f0 = 0.0
+                    return False, 0.0
             else:
-                self._in_voiced = False
-                self._prev_f0 = 0.0
-                return False, 0.0
+                continuity_ok = (self._prev_f0 == 0.0) or (abs(f0_val - self._prev_f0) <= self.max_pitch_jump)
+                if metric_val <= t_exit and continuity_ok:
+                    self._in_voiced = True
+                    self._prev_f0 = f0_val
+                    return True, f0_val
+                else:
+                    self._in_voiced = False
+                    self._prev_f0 = 0.0
+                    return False, 0.0
         else:
-            # Maintaining Voiced requires peak >= t_low and pitch continuity
-            continuity_ok = (self._prev_f0 == 0.0) or (abs(f0_val - self._prev_f0) <= self.max_pitch_jump)
-            if peak_val >= self.t_low and continuity_ok:
-                self._in_voiced = True
-                self._prev_f0 = f0_val
-                return True, f0_val
+            # For ACF: larger peak means stronger periodicity
+            t_enter = max(self.t_high, self.t_low)
+            t_exit = min(self.t_high, self.t_low)
+
+            if not self._in_voiced:
+                if metric_val >= t_enter:
+                    self._in_voiced = True
+                    self._prev_f0 = f0_val
+                    return True, f0_val
+                else:
+                    self._in_voiced = False
+                    self._prev_f0 = 0.0
+                    return False, 0.0
             else:
-                self._in_voiced = False
-                self._prev_f0 = 0.0
-                return False, 0.0
+                continuity_ok = (self._prev_f0 == 0.0) or (abs(f0_val - self._prev_f0) <= self.max_pitch_jump)
+                if metric_val >= t_exit and continuity_ok:
+                    self._in_voiced = True
+                    self._prev_f0 = f0_val
+                    return True, f0_val
+                else:
+                    self._in_voiced = False
+                    self._prev_f0 = 0.0
+                    return False, 0.0

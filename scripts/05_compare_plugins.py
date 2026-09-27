@@ -12,6 +12,7 @@ import argparse
 import json
 import os
 import sys
+from typing import Optional
 import numpy as np
 
 # Ensure UTF-8 output on Windows console
@@ -38,81 +39,99 @@ from src.visualization.plotter import plot_plugin_contour_comparison, plot_combi
 
 def run_all_combinations(
     test_dir: str = "TinHieuKiemThu",
-    output_json: str = "outputs/reports/compare_plugins.json",
-    output_csv: str = "outputs/reports/compare_plugins.csv",
-    output_ranking_fig: str = "outputs/figures/05_all_combinations_ranking.png",
+    method: str = "acf",
+    output_json: Optional[str] = None,
+    output_csv: Optional[str] = None,
+    output_ranking_fig: Optional[str] = None,
 ):
+    method = method.lower()
     files = ["phone_F2", "phone_M2", "studio_F2", "studio_M2"]
 
+    if output_json is None:
+        output_json = f"outputs/reports/compare_plugins_{method}.json" if method != "acf" else "outputs/reports/compare_plugins.json"
+    if output_csv is None:
+        output_csv = f"outputs/reports/compare_plugins_{method}.csv" if method != "acf" else "outputs/reports/compare_plugins.csv"
+    if output_ranking_fig is None:
+        output_ranking_fig = f"outputs/figures/05_all_combinations_ranking_{method}.png" if method != "acf" else "outputs/figures/05_all_combinations_ranking.png"
+
     # 1. Tải ngưỡng tối ưu tương ứng: Baseline (chưa lọc) vs Bandpass (đã lọc)
-    t_base = 0.4408
-    t_bp = 0.4892
-    if os.path.exists("outputs/reports/threshold_acf.json"):
+    if method == "amdf":
+        t_base_file = "outputs/reports/threshold_amdf.json"
+        t_bp_file = "outputs/reports/threshold_amdf_bandpassprefilter.json"
+        t_base = 0.4380
+        t_bp = 0.3734
+        hyst_t_low_base = 0.380
+        hyst_t_low_bp = 0.320
+    else:
+        t_base_file = "outputs/reports/threshold_acf.json"
+        t_bp_file = "outputs/reports/threshold_acf_bandpassprefilter.json"
+        t_base = 0.4408
+        t_bp = 0.4892
+        hyst_t_low_base = 0.400
+        hyst_t_low_bp = 0.420
+
+    if os.path.exists(t_base_file):
         try:
-            with open("outputs/reports/threshold_acf.json", "r", encoding="utf-8") as f:
-                t_base = float(json.load(f).get("threshold_T", 0.4408))
+            with open(t_base_file, "r", encoding="utf-8") as f:
+                t_base = float(json.load(f).get("threshold_T", t_base))
         except Exception:
             pass
 
-    if os.path.exists("outputs/reports/threshold_acf_bandpassprefilter.json"):
+    if os.path.exists(t_bp_file):
         try:
-            with open("outputs/reports/threshold_acf_bandpassprefilter.json", "r", encoding="utf-8") as f:
-                t_bp = float(json.load(f).get("threshold_T", 0.4892))
+            with open(t_bp_file, "r", encoding="utf-8") as f:
+                t_bp = float(json.load(f).get("threshold_T", t_bp))
         except Exception:
             pass
-
-    # Bộ nhận diện cơ sở cho nhóm chưa lọc và nhóm đã lọc
-    base_raw = PitchDetector(threshold=t_base)
-    base_filtered = PitchDetector(threshold=t_bp)
 
     # Định nghĩa toàn bộ 8 tổ hợp (2^3) theo đúng phân phối ngưỡng
     configs = {
-        "1. Baseline (Gốc)": PitchDetector(threshold=t_base),
+        "1. Baseline (Gốc)": PitchDetector(method=method, threshold=t_base),
         "2. [Hysteresis]": PluginPitchDetector(
-            base_detector=PitchDetector(threshold=t_base),
-            plugins=[HysteresisPlugin(t_high=t_base, t_low=0.40)],
+            base_detector=PitchDetector(method=method, threshold=t_base),
+            plugins=[HysteresisPlugin(t_high=t_base, t_low=hyst_t_low_base)],
         ),
         "3. [Energy Ext]": PluginPitchDetector(
-            base_detector=PitchDetector(threshold=t_base),
+            base_detector=PitchDetector(method=method, threshold=t_base),
             plugins=[EnergyExtensionPlugin(threshold_discount=0.20)],
         ),
         "4. [Bandpass Filter]": PluginPitchDetector(
-            base_detector=PitchDetector(threshold=t_bp),
+            base_detector=PitchDetector(method=method, threshold=t_bp),
             plugins=[BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0)],
         ),
         "5. [Hysteresis + Energy Ext]": PluginPitchDetector(
-            base_detector=PitchDetector(threshold=t_base),
+            base_detector=PitchDetector(method=method, threshold=t_base),
             plugins=[
-                HysteresisPlugin(t_high=t_base, t_low=0.40),
+                HysteresisPlugin(t_high=t_base, t_low=hyst_t_low_base),
                 EnergyExtensionPlugin(threshold_discount=0.20),
             ],
         ),
         "6. [Bandpass + Hysteresis]": PluginPitchDetector(
-            base_detector=PitchDetector(threshold=t_bp),
+            base_detector=PitchDetector(method=method, threshold=t_bp),
             plugins=[
                 BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
-                HysteresisPlugin(t_high=t_bp, t_low=0.42),
+                HysteresisPlugin(t_high=t_bp, t_low=hyst_t_low_bp),
             ],
         ),
         "7. [Bandpass + Energy Ext]": PluginPitchDetector(
-            base_detector=PitchDetector(threshold=t_bp),
+            base_detector=PitchDetector(method=method, threshold=t_bp),
             plugins=[
                 BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
                 EnergyExtensionPlugin(threshold_discount=0.20),
             ],
         ),
         "8. [Cả 3 Plugins]": PluginPitchDetector(
-            base_detector=PitchDetector(threshold=t_bp),
+            base_detector=PitchDetector(method=method, threshold=t_bp),
             plugins=[
                 BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
-                HysteresisPlugin(t_high=t_bp, t_low=0.42),
+                HysteresisPlugin(t_high=t_bp, t_low=hyst_t_low_bp),
                 EnergyExtensionPlugin(threshold_discount=0.20),
             ],
         ),
     }
 
     print("=" * 125)
-    print("                 BẢNG ĐỐI SÁNH TOÀN BỘ 8 TỔ HỢP PLUGINS TRÊN TẬP KIỂM THỬ")
+    print(f"       BẢNG ĐỐI SÁNH TOÀN BỘ 8 TỔ HỢP PLUGINS TRÊN TẬP KIỂM THỬ (METHOD = {method.upper()})")
     print("=" * 125)
     header = f"{'Cấu hình':<32} | {'phone_F2 (|Δ|)':<16} | {'phone_M2 (|Δ|)':<16} | {'studio_F2 (|Δ|)':<16} | {'studio_M2 (|Δ|)':<16} | {'Sai số TB':<10} | {'F1 TB':<8} | {'Acc TB':<8}"
     print(header)
@@ -198,7 +217,8 @@ def run_all_combinations(
         ev_base = evaluate_against_ground_truth(res_base, lab_path)
         ev_best = evaluate_against_ground_truth(res_best, lab_path)
 
-        fig_path = os.path.join(fig_dir, f"05_compare_plugin_{f_id}.png")
+        fig_prefix = f"05_compare_plugin_{method}_{f_id}.png" if method != "acf" else f"05_compare_plugin_{f_id}.png"
+        fig_path = os.path.join(fig_dir, fig_prefix)
         time_sig = np.arange(len(res_base["signal"])) / res_base["sample_rate"]
 
         plot_plugin_contour_comparison(
@@ -211,7 +231,7 @@ def run_all_combinations(
             eval_enhanced=ev_best,
             ground_truth_segments=ev_base["gt_segments"],
             file_name=f"{f_id}.wav",
-            plugin_names_str="Bandpass + Hysteresis + EnergyExt",
+            plugin_names_str=f"{method.upper()} (Bandpass + Hysteresis + EnergyExt)",
             save_path=fig_path,
         )
 
@@ -232,13 +252,15 @@ def run_all_combinations(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate all 8 plugin combinations.")
     parser.add_argument("--test_dir", type=str, default="TinHieuKiemThu", help="Test directory")
-    parser.add_argument("--out_json", type=str, default="outputs/reports/compare_plugins.json", help="JSON output")
-    parser.add_argument("--out_csv", type=str, default="outputs/reports/compare_plugins.csv", help="CSV output")
-    parser.add_argument("--out_fig", type=str, default="outputs/figures/05_all_combinations_ranking.png", help="Ranking plot")
+    parser.add_argument("--method", type=str, default="acf", choices=["acf", "amdf"], help="Pitch detection method (acf or amdf)")
+    parser.add_argument("--out_json", type=str, default=None, help="JSON output")
+    parser.add_argument("--out_csv", type=str, default=None, help="CSV output")
+    parser.add_argument("--out_fig", type=str, default=None, help="Ranking plot")
 
     args = parser.parse_args()
     run_all_combinations(
         test_dir=args.test_dir,
+        method=args.method,
         output_json=args.out_json,
         output_csv=args.out_csv,
         output_ranking_fig=args.out_fig,
