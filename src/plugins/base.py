@@ -1,13 +1,25 @@
-"""Base class and interface for pitch detection plugins."""
-from typing import Any, Dict, Tuple
+"""Base classes and interfaces for pitch detection plugins categorized by pipeline stage."""
+from enum import Enum
+from typing import Any, Dict, Optional, Tuple
 import numpy as np
+
+
+class PluginStage(str, Enum):
+    """Pipeline stages where enhancement plugins operate."""
+    PRE_PROCESSING = "pre_processing"
+    DECISION = "decision"
+    POST_PROCESSING = "post_processing"
 
 
 class BasePlugin:
     """Abstract plugin interface allowing pre-processing, decision adjustment, and post-processing."""
 
-    def __init__(self, name: str = "BasePlugin"):
+    stage: PluginStage = PluginStage.PRE_PROCESSING
+
+    def __init__(self, name: str = "BasePlugin", stage: Optional[PluginStage] = None):
         self.name = name
+        if stage is not None:
+            self.stage = stage
 
     def reset(self) -> None:
         """Reset internal state before processing a new audio file."""
@@ -49,7 +61,7 @@ class BasePlugin:
 
         Args:
             frame_idx: Index of current frame.
-            peak_val: ACF peak amplitude for current frame.
+            peak_val: ACF peak amplitude or AMDF dip depth for current frame.
             f0_val: Estimated F0 in Hz for current frame.
             is_voiced: Current decision (True for voiced, False for unvoiced).
             context: Shared processing context (sample_rate, ste, frames, etc.).
@@ -60,7 +72,7 @@ class BasePlugin:
         return is_voiced, f0_val
 
     def post_process_results(self, result: Dict[str, Any]) -> Dict[str, Any]:
-        """Hook executed after framing and initial contour generation (e.g., energy boundary extension).
+        """Hook executed after framing and initial contour generation (e.g., energy boundary extension, Viterbi tracking).
 
         Args:
             result: Result dictionary from pitch detector.
@@ -69,3 +81,27 @@ class BasePlugin:
             dict: Modified result dictionary.
         """
         return result
+
+
+class PreProcessingPlugin(BasePlugin):
+    """Base class for plugins operating in the Pre-processing Stage (signal filtering, frame clipping)."""
+    stage: PluginStage = PluginStage.PRE_PROCESSING
+
+    def __init__(self, name: str = "PreProcessingPlugin"):
+        super().__init__(name=name, stage=PluginStage.PRE_PROCESSING)
+
+
+class DecisionPlugin(BasePlugin):
+    """Base class for plugins operating in the Decision Stage (hysteresis, adaptive thresholds)."""
+    stage: PluginStage = PluginStage.DECISION
+
+    def __init__(self, name: str = "DecisionPlugin"):
+        super().__init__(name=name, stage=PluginStage.DECISION)
+
+
+class PostProcessingPlugin(BasePlugin):
+    """Base class for plugins operating in the Post-processing Stage (edge extension, Viterbi tracking)."""
+    stage: PluginStage = PluginStage.POST_PROCESSING
+
+    def __init__(self, name: str = "PostProcessingPlugin"):
+        super().__init__(name=name, stage=PluginStage.POST_PROCESSING)

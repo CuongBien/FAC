@@ -1,4 +1,8 @@
-"""Plugin-enabled Pitch Detector wrapper extending baseline PitchDetector without modifying core code."""
+"""Plugin-enabled Pitch Detector wrapper coordinating the three pipeline stages:
+1. Pre-processing: Signal filtering & frame spectral flattening
+2. Detection & In-Loop Decision: Metric evaluation & adaptive hysteresis thresholding
+3. Post-processing: Boundary energy extension & Viterbi tracking
+"""
 from typing import Dict, List, Optional
 import numpy as np
 from scipy.ndimage import median_filter
@@ -7,32 +11,68 @@ from src.core.audio import load_wav, frame_signal, compute_ste
 from src.core.acf import find_f0_acf
 from src.core.amdf import find_f0_amdf
 from src.core.pitch_detector import PitchDetector
-from .base import BasePlugin
+from .base import (
+    BasePlugin,
+    PluginStage,
+    PreProcessingPlugin,
+    DecisionPlugin,
+    PostProcessingPlugin,
+)
 
 
 class PluginPitchDetector:
-    """Wrapper that executes a pipeline of plugins around baseline PitchDetector logic.
-
-    Enables adding/removing plugins dynamically without altering core PitchDetector files.
+    """Wrapper that executes a pipeline of plugins around baseline PitchDetector logic,
+    strictly organized by pipeline stages:
+    - pre_processors: Stage 1 plugins (Bandpass filter, Center clipping)
+    - decision_modifiers: Stage 2 plugins (Hysteresis thresholding)
+    - post_processors: Stage 3 plugins (Energy edge extension, Viterbi tracking)
     """
 
     def __init__(
         self,
         base_detector: Optional[PitchDetector] = None,
         plugins: Optional[List[BasePlugin]] = None,
+        pre_processing: Optional[List[BasePlugin]] = None,
+        decision: Optional[List[BasePlugin]] = None,
+        post_processing: Optional[List[BasePlugin]] = None,
     ):
         self.base_detector = base_detector if base_detector is not None else PitchDetector()
-        self.plugins: List[BasePlugin] = list(plugins) if plugins is not None else []
+
+        self.pre_processors: List[BasePlugin] = list(pre_processing) if pre_processing is not None else []
+        self.decision_modifiers: List[BasePlugin] = list(decision) if decision is not None else []
+        self.post_processors: List[BasePlugin] = list(post_processing) if post_processing is not None else []
+
+        if plugins is not None:
+            for p in plugins:
+                self.add_plugin(p)
+
+    @property
+    def plugins(self) -> List[BasePlugin]:
+        """All registered plugins in pipeline execution order."""
+        return self.pre_processors + self.decision_modifiers + self.post_processors
 
     def add_plugin(self, plugin: BasePlugin) -> "PluginPitchDetector":
-        self.plugins.append(plugin)
+        """Add a plugin to its corresponding stage in the pipeline."""
+        stage = getattr(plugin, "stage", PluginStage.PRE_PROCESSING)
+        if stage == PluginStage.PRE_PROCESSING or isinstance(plugin, PreProcessingPlugin):
+            self.pre_processors.append(plugin)
+        elif stage == PluginStage.DECISION or isinstance(plugin, DecisionPlugin):
+            self.decision_modifiers.append(plugin)
+        elif stage == PluginStage.POST_PROCESSING or isinstance(plugin, PostProcessingPlugin):
+            self.post_processors.append(plugin)
+        else:
+            self.pre_processors.append(plugin)
         return self
 
     def clear_plugins(self) -> "PluginPitchDetector":
-        self.plugins.clear()
+        """Clear all registered plugins across all pipeline stages."""
+        self.pre_processors.clear()
+        self.decision_modifiers.clear()
+        self.post_processors.clear()
         return self
 
     def process_file(self, wav_path: str) -> Dict:
+        """Process a WAV file and return F0 contour, frame times, and labels."""
         sr, signal, duration = load_wav(wav_path)
         return self.process_signal(signal, sr, wav_path=wav_path, duration=duration)
 
@@ -43,19 +83,22 @@ class PluginPitchDetector:
         wav_path: Optional[str] = None,
         duration: Optional[float] = None,
     ) -> Dict:
+        """Process an in-memory 1D audio array through the 3-stage plugin pipeline."""
         if duration is None:
             duration = len(signal) / sample_rate
 
-        # 1. Reset all plugins
+        # 1. Reset all plugins in all stages
         for p in self.plugins:
             p.reset()
 
-        # 2. Pre-processing hook (e.g. bandpass filtering)
+        # =========================================================================
+        # STAGE 1: PRE-PROCESSING (Signal-level filtering)
+        # =========================================================================
         processed_signal = np.copy(signal)
-        for p in self.plugins:
+        for p in self.pre_processors:
             processed_signal = p.pre_process_signal(processed_signal, sample_rate)
 
-        # 3. Framing
+        # 2. Framing
         frames, frame_times = frame_signal(
             processed_signal,
             sample_rate,
@@ -79,12 +122,13 @@ class PluginPitchDetector:
         labels = np.full(num_frames, "sil", dtype=object)
         peak_values = np.zeros(num_frames, dtype=np.float64)
         lags = np.zeros(num_frames, dtype=int)
-
         candidate_f0 = np.zeros(num_frames, dtype=np.float64)
 
         method = getattr(self.base_detector, "method", "acf").lower()
 
-        # 4. Frame-by-frame decision with plugin hook
+        # =========================================================================
+        # STAGE 2: PITCH DETECTION & IN-LOOP DECISION (Frame-level)
+        # =========================================================================
         for i in range(num_frames):
             is_silence = ste[i] < ste_thresh
             context = {
@@ -100,16 +144,17 @@ class PluginPitchDetector:
                 labels[i] = "sil"
                 f0_raw[i] = 0.0
                 candidate_f0[i] = 0.0
-                # Notify plugins of silence frame
-                for p in self.plugins:
+                # Notify decision modifiers of silence frame
+                for p in self.decision_modifiers:
                     p.adjust_frame_decision(i, 0.0, 0.0, False, context)
                 continue
 
-            # Apply frame-level pre-processing plugins (e.g. Center Clipping)
+            # Stage 1 (cont.): Frame-level pre-processing (Center Clipping)
             pitch_frame = np.copy(frames[i])
-            for p in self.plugins:
+            for p in self.pre_processors:
                 pitch_frame = p.pre_process_frame(pitch_frame, sample_rate)
 
+            # Core pitch extraction
             if method == "amdf":
                 f0_val, dip_val, lag = find_f0_amdf(
                     pitch_frame,
@@ -137,8 +182,8 @@ class PluginPitchDetector:
                 is_voiced = peak_val >= self.base_detector.threshold
                 current_metric = peak_val
 
-            # Allow plugins to adjust decision (e.g. Hysteresis)
-            for p in self.plugins:
+            # Stage 2: Decision adjustment hooks (Hysteresis thresholding)
+            for p in self.decision_modifiers:
                 is_voiced, f0_val = p.adjust_frame_decision(
                     i, current_metric, f0_val, is_voiced, context
                 )
@@ -150,7 +195,7 @@ class PluginPitchDetector:
                 labels[i] = "uv"
                 f0_raw[i] = 0.0
 
-        # 5. Median filter smoothing
+        # Baseline Median filter smoothing
         f0_contour = np.copy(f0_raw)
         if self.base_detector.use_median_filter:
             voiced_idx = np.where(f0_contour > 0)[0]
@@ -180,12 +225,14 @@ class PluginPitchDetector:
             "applied_plugins": [p.name for p in self.plugins],
         }
 
-        # 6. Post-processing hook (e.g. edge extension)
+        # =========================================================================
+        # STAGE 3: POST-PROCESSING (Boundary extension & Viterbi tracking)
+        # =========================================================================
         result = initial_result
-        for p in self.plugins:
+        for p in self.post_processors:
             result = p.post_process_results(result)
 
-        # 7. Final statistics recalculation
+        # Final statistics recalculation
         v_f0 = result["f0_contour"][result["f0_contour"] > 0]
         result["f0_mean"] = float(np.mean(v_f0)) if len(v_f0) > 0 else 0.0
         result["f0_std"] = float(np.std(v_f0)) if len(v_f0) > 0 else 0.0

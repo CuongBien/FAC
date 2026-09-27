@@ -61,14 +61,17 @@ D:\SP\
 │   │   ├── amdf.py              # Thuật toán Hàm hiệu biên độ trung bình (AMDF) & dò cực tiểu
 │   │   └── pitch_detector.py    # Bộ phát hiện Baseline PitchDetector (cố định, không sửa đổi)
 │   │
-│   ├── plugins/                 # Hệ thống Plugin mở rộng (Plug-and-Play)
-│   │   ├── base.py              # Interface cơ sở BasePlugin (pre-process, post-process)
-│   │   ├── plugin_detector.py   # Bộ bao bọc (Wrapper) gắn kết các plugin vào pipeline xử lý
-│   │   ├── hysteresis.py        # Cải tiến 1: Ngưỡng trễ kép Schmitt Trigger
-│   │   ├── energy_extension.py  # Cải tiến 2: Mở rộng vùng hữu thanh theo STE khung biên
-│   │   ├── bandpass_filter.py   # Cải tiến 3: Bộ lọc thông dải Butterworth bậc 2 Zero-Phase
-│   │   ├── center_clipping.py   # Cải tiến 4: Cắt gọt trung tâm Sondhi (Spectral Flattening)
-│   │   └── viterbi_tracking.py  # Cải tiến 5: Quy hoạch động Viterbi Tracking làm mượt cao độ
+│   ├── plugins/                 # Hệ thống Plugin cải tiến phân lập theo 3 chặng Pipeline
+│   │   ├── base.py              # Interface cơ sở (PreProcessingPlugin, DecisionPlugin, PostProcessingPlugin)
+│   │   ├── plugin_detector.py   # Bộ điều phối (Coordinator) thực thi tuần tự theo 3 chặng pipeline
+│   │   ├── pre_processing/      # Chặng 1: Tiền xử lý tín hiệu & khung
+│   │   │   ├── bandpass_filter.py  # Lọc thông dải Butterworth bậc 2 Zero-Phase
+│   │   │   └── center_clipping.py  # Cắt gọt trung tâm Sondhi (Spectral Flattening)
+│   │   ├── decision/            # Chặng 2: Ra quyết định phân loại V/UV & ngưỡng thích nghi
+│   │   │   └── hysteresis.py       # Ngưỡng trễ kép Schmitt Trigger chống nhấp nháy
+│   │   └── post_processing/     # Chặng 3: Hậu xử lý đường pitch contour & tối ưu chuỗi
+│   │       ├── energy_extension.py # Bù đắp ranh giới âm tiết theo năng lượng STE
+│   │       └── viterbi_tracking.py # Quy hoạch động Viterbi Trellis triệt tiêu nhảy quãng tám
 │   │
 │   ├── analysis/                # Phân tích thống kê & đánh giá sai số
 │   │   ├── threshold.py         # Trích xuất phân bố Gauss (mean, std), giải phương trình tìm T
