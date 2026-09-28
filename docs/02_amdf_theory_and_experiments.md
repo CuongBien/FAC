@@ -242,6 +242,21 @@ Nếu bước nhảy rơi vào vùng nhảy quãng tám ($[0.8, 1.2]\text{ octav
   * Việc áp dụng `Center Clipping` trên AMDF giúp loại bỏ các dao động đáy giả do formant $F_1, F_2$, đặc biệt hiệu quả trên các nguyên âm kéo dài.
   * Bộ đôi `Energy Extension` và `Viterbi Tracking` hỗ trợ giữ trọn vẹn ranh giới nguyên âm và nắn chỉnh đường contour mịn màng, loại bỏ các bước nhảy cực tiểu sai lệch.
 
+### Bảng đối sánh chi tiết 4 file kiểm thử: Baseline vs Enhanced (All Plugins):
+
+| File kiểm thử | Cấu hình | Ref {0\text{-mean}}$ | Pred {0\text{-mean}}$ | $\lvert\Delta F_0\rvert$ (Hz) | Sai số % | Ref {0\text{-std}}$ | Pred {0\text{-std}}$ | $\lvert\Delta\text{std}\rvert$ | V/UV Acc | F1-Score |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| phone_F2.wav | Baseline | 145.00 Hz | 150.19 Hz | 5.19 Hz | 3.58% | 33.70 | 32.46 | 1.24 | 78.45% | 87.56% |
+| | **Enhanced** | 145.00 Hz | 148.72 Hz | **3.72 Hz** | **2.56%** | 33.70 | 32.12 | 1.58 | 77.41% | 86.65% |
+| phone_M2.wav | Baseline | 129.00 Hz | 129.48 Hz | 0.48 Hz | 0.37% | 18.60 | 15.58 | 3.02 | 80.22% | 92.86% |
+| | **Enhanced** | 129.00 Hz | 130.43 Hz | 1.43 Hz | 1.10% | 18.60 | 15.27 | 3.33 | **81.29%** | **94.07%** |
+| studio_F2.wav| Baseline | 200.00 Hz | 199.80 Hz | 0.20 Hz | 0.10% | 46.10 | 44.93 | 1.17 | 91.37% | 95.45% |
+| | **Enhanced** | 200.00 Hz | 198.10 Hz | 1.90 Hz | 0.95% | 46.10 | 42.84 | 3.26 | **92.01%** | **96.24%** |
+| studio_M2.wav| Baseline | 155.00 Hz | 155.52 Hz | 0.52 Hz | 0.33% | 30.80 | 30.55 | 0.25 | 88.56% | 93.33% |
+| | **Enhanced** | 155.00 Hz | 154.27 Hz | 0.73 Hz | 0.47% | 30.80 | 30.10 | 0.70 | 86.44% | 91.21% |
+| **TRUNG BÌNH** | Baseline | — | — | 1.60 Hz | 1.09% | — | — | 1.42 | 84.65% | 92.30% |
+| | **Enhanced** | — | — | 1.95 Hz | 1.27% | — | — | 2.22 | 84.29% | 92.04% |
+
 ### Biểu đồ cột xếp hạng toàn bộ 32 cấu hình AMDF:
 ![05_all_combinations_ranking_amdf.png](../outputs/figures/05_all_combinations_ranking_amdf.png)
 
