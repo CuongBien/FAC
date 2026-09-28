@@ -811,3 +811,50 @@ def plot_ptdb_benchmark_summary(
     plt.close(fig)
     return fig
 
+
+def plot_ptdb_noise_robustness_curves(
+    snr_results: list,
+    save_path: Optional[str] = "outputs/figures/09_ptdb_noise_robustness_curves.png",
+    title: str = "ĐÁNH GIÁ ĐỘ BỀN VỮNG KHÁNG NHIỄU TRÊN PTDB-TUG (LARYNGOGRAPH EGG GROUND TRUTH)",
+):
+    """Plot 3-panel degradation curves (GPE %, VDE %, FFE %) across SNR levels on PTDB-TUG."""
+    plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
+    labels = [r["snr_label"] for r in snr_results]
+    x = np.arange(len(labels))
+
+    fig, axes = plt.subplots(1, 3, figsize=(18, 5.5))
+    fig.suptitle(title, fontsize=13, fontweight="bold", y=0.98)
+
+    metrics = [
+        ("gpe", "1. Gross Pitch Error (GPE %)\n(Lỗi thô > 20%, càng thấp càng tốt)", axes[0]),
+        ("vde", "2. Voicing Decision Error (VDE %)\n(Lỗi phân loại V/UV, càng thấp càng tốt)", axes[1]),
+        ("ffe", "3. F0 Frame Error (FFE %)\n(Tổng hợp lỗi VDE + GPE)", axes[2]),
+    ]
+
+    for key, panel_title, ax in metrics:
+        y_acf_b = [r["Baseline ACF"][key] for r in snr_results]
+        y_acf_e = [r["Enhanced ACF"][key] for r in snr_results]
+        y_amdf_b = [r["Baseline AMDF"][key] for r in snr_results]
+        y_amdf_e = [r["Enhanced AMDF"][key] for r in snr_results]
+
+        ax.plot(x, y_acf_b, "o--", color="#1f77b4", linewidth=2.0, markersize=7, label="ACF Baseline")
+        ax.plot(x, y_acf_e, "^-", color="#08519c", linewidth=2.5, markersize=8, label="ACF Enhanced (All Plugins)")
+        ax.plot(x, y_amdf_b, "s--", color="#d62728", linewidth=2.0, markersize=7, label="AMDF Baseline")
+        ax.plot(x, y_amdf_e, "v-", color="#800026", linewidth=2.5, markersize=8, label="AMDF Enhanced (All Plugins)")
+
+        ax.set_xticks(x)
+        ax.set_xticklabels(labels, fontsize=10, fontweight="bold")
+        ax.set_xlabel("Mức tỷ số Tín hiệu trên Nhiễu (SNR)", fontsize=10, fontweight="bold")
+        ax.set_ylabel(f"{key.upper()} (%)", fontsize=10, fontweight="bold")
+        ax.set_title(panel_title, fontsize=11, fontweight="bold")
+        ax.grid(True, linestyle="--", alpha=0.5)
+        ax.legend(loc="upper left", frameon=True, fontsize=9)
+
+    plt.tight_layout(rect=[0, 0, 1, 0.94])
+    if save_path:
+        os.makedirs(os.path.dirname(os.path.abspath(save_path)), exist_ok=True)
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+    plt.close(fig)
+    return fig
+
+

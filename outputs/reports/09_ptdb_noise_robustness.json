@@ -1,0 +1,198 @@
+[
+  {
+    "snr_label": "Clean",
+    "snr_val": null,
+    "Baseline ACF": {
+      "vde": 6.8,
+      "gpe": 2.98,
+      "ffe": 7.32,
+      "fpe": 4.35
+    },
+    "Enhanced ACF": {
+      "vde": 6.38,
+      "gpe": 2.5,
+      "ffe": 6.81,
+      "fpe": 4.35
+    },
+    "Baseline AMDF": {
+      "vde": 6.11,
+      "gpe": 1.37,
+      "ffe": 6.38,
+      "fpe": 4.29
+    },
+    "Enhanced AMDF": {
+      "vde": 5.88,
+      "gpe": 1.12,
+      "ffe": 6.08,
+      "fpe": 4.31
+    }
+  },
+  {
+    "snr_label": "+20 dB",
+    "snr_val": 20.0,
+    "Baseline ACF": {
+      "vde": 6.81,
+      "gpe": 2.87,
+      "ffe": 7.3,
+      "fpe": 4.37
+    },
+    "Enhanced ACF": {
+      "vde": 6.28,
+      "gpe": 2.57,
+      "ffe": 6.73,
+      "fpe": 4.36
+    },
+    "Baseline AMDF": {
+      "vde": 6.16,
+      "gpe": 1.2,
+      "ffe": 6.38,
+      "fpe": 4.33
+    },
+    "Enhanced AMDF": {
+      "vde": 5.91,
+      "gpe": 1.12,
+      "ffe": 6.12,
+      "fpe": 4.31
+    }
+  },
+  {
+    "snr_label": "+15 dB",
+    "snr_val": 15.0,
+    "Baseline ACF": {
+      "vde": 6.82,
+      "gpe": 2.63,
+      "ffe": 7.26,
+      "fpe": 4.37
+    },
+    "Enhanced ACF": {
+      "vde": 6.19,
+      "gpe": 2.84,
+      "ffe": 6.7,
+      "fpe": 4.38
+    },
+    "Baseline AMDF": {
+      "vde": 6.03,
+      "gpe": 1.19,
+      "ffe": 6.26,
+      "fpe": 4.44
+    },
+    "Enhanced AMDF": {
+      "vde": 5.88,
+      "gpe": 1.22,
+      "ffe": 6.11,
+      "fpe": 4.3
+    }
+  },
+  {
+    "snr_label": "+10 dB",
+    "snr_val": 10.0,
+    "Baseline ACF": {
+      "vde": 7.2,
+      "gpe": 2.44,
+      "ffe": 7.58,
+      "fpe": 4.38
+    },
+    "Enhanced ACF": {
+      "vde": 6.28,
+      "gpe": 2.56,
+      "ffe": 6.75,
+      "fpe": 4.4
+    },
+    "Baseline AMDF": {
+      "vde": 6.52,
+      "gpe": 0.89,
+      "ffe": 6.69,
+      "fpe": 4.53
+    },
+    "Enhanced AMDF": {
+      "vde": 5.91,
+      "gpe": 1.34,
+      "ffe": 6.16,
+      "fpe": 4.3
+    }
+  },
+  {
+    "snr_label": "+5 dB",
+    "snr_val": 5.0,
+    "Baseline ACF": {
+      "vde": 8.27,
+      "gpe": 2.19,
+      "ffe": 8.57,
+      "fpe": 4.46
+    },
+    "Enhanced ACF": {
+      "vde": 7.44,
+      "gpe": 2.61,
+      "ffe": 7.91,
+      "fpe": 4.39
+    },
+    "Baseline AMDF": {
+      "vde": 8.21,
+      "gpe": 0.27,
+      "ffe": 8.26,
+      "fpe": 4.89
+    },
+    "Enhanced AMDF": {
+      "vde": 6.59,
+      "gpe": 0.66,
+      "ffe": 6.72,
+      "fpe": 4.25
+    }
+  },
+  {
+    "snr_label": "+0 dB",
+    "snr_val": 0.0,
+    "Baseline ACF": {
+      "vde": 11.41,
+      "gpe": 1.37,
+      "ffe": 11.57,
+      "fpe": 4.54
+    },
+    "Enhanced ACF": {
+      "vde": 7.69,
+      "gpe": 1.71,
+      "ffe": 7.99,
+      "fpe": 4.38
+    },
+    "Baseline AMDF": {
+      "vde": 12.84,
+      "gpe": 0.64,
+      "ffe": 12.88,
+      "fpe": 5.05
+    },
+    "Enhanced AMDF": {
+      "vde": 6.85,
+      "gpe": 0.58,
+      "ffe": 6.96,
+      "fpe": 4.26
+    }
+  },
+  {
+    "snr_label": "-5 dB",
+    "snr_val": -5.0,
+    "Baseline ACF": {
+      "vde": 18.01,
+      "gpe": 2.78,
+      "ffe": 18.09,
+      "fpe": 4.41
+    },
+    "Enhanced ACF": {
+      "vde": 7.86,
+      "gpe": 1.5,
+      "ffe": 8.11,
+      "fpe": 4.39
+    },
+    "Baseline AMDF": {
+      "vde": 20.03,
+      "gpe": 0.93,
+      "ffe": 20.05,
+      "fpe": 4.11
+    },
+    "Enhanced AMDF": {
+      "vde": 7.74,
+      "gpe": 1.84,
+      "ffe": 8.07,
+      "fpe": 4.35
+    }
+  }
+]

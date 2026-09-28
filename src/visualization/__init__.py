@@ -7,6 +7,7 @@ from .plotter import (
     plot_plugin_contour_comparison,
     plot_combinations_ranking,
     plot_ptdb_benchmark_summary,
+    plot_ptdb_noise_robustness_curves,
 )
 
 # Alias for generic frame analysis
@@ -21,5 +22,7 @@ __all__ = [
     "plot_plugin_contour_comparison",
     "plot_combinations_ranking",
     "plot_ptdb_benchmark_summary",
+    "plot_ptdb_noise_robustness_curves",
 ]
+
 

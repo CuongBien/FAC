@@ -1,0 +1,337 @@
+snr,speaker,gender,sentence_id,system,vde,gpe,ffe,fpe_mae
+Clean,F01,female,sa1,Baseline ACF,6.81,0.0,6.81,5.85
+Clean,F01,female,sa1,Enhanced ACF,6.81,0.0,6.81,5.52
+Clean,F01,female,sa1,Baseline AMDF,7.19,0.0,7.19,5.5
+Clean,F01,female,sa1,Enhanced AMDF,6.81,0.0,6.81,5.54
+Clean,F01,female,sa2,Baseline ACF,4.97,0.0,4.97,5.79
+Clean,F01,female,sa2,Enhanced ACF,5.11,0.0,5.11,5.68
+Clean,F01,female,sa2,Baseline AMDF,5.39,0.0,5.39,5.61
+Clean,F01,female,sa2,Enhanced AMDF,4.56,0.0,4.56,5.66
+Clean,F01,female,si453,Baseline ACF,3.14,0.67,3.27,5.21
+Clean,F01,female,si453,Enhanced ACF,3.14,0.67,3.27,5.21
+Clean,F01,female,si453,Baseline AMDF,2.86,2.0,3.27,5.25
+Clean,F01,female,si453,Enhanced AMDF,3.0,1.34,3.27,5.26
+Clean,F02,female,sa1,Baseline ACF,4.09,1.14,4.34,4.92
+Clean,F02,female,sa1,Enhanced ACF,3.7,1.12,3.96,5.0
+Clean,F02,female,sa1,Baseline AMDF,3.83,1.71,4.21,4.78
+Clean,F02,female,sa1,Enhanced AMDF,4.09,3.98,4.98,5.0
+Clean,F02,female,sa2,Baseline ACF,4.4,8.2,5.87,4.86
+Clean,F02,female,sa2,Enhanced ACF,3.23,12.21,5.57,4.85
+Clean,F02,female,sa2,Baseline AMDF,3.96,9.45,5.72,4.88
+Clean,F02,female,sa2,Enhanced AMDF,3.08,0.0,3.08,4.62
+Clean,F02,female,si642,Baseline ACF,4.11,0.0,4.11,4.41
+Clean,F02,female,si642,Enhanced ACF,4.67,0.72,4.82,4.32
+Clean,F02,female,si642,Baseline AMDF,3.82,0.71,3.97,4.64
+Clean,F02,female,si642,Enhanced AMDF,4.39,0.72,4.53,4.35
+Clean,M01,male,sa1,Baseline ACF,6.46,8.78,8.01,3.62
+Clean,M01,male,sa1,Enhanced ACF,7.89,0.67,8.01,4.02
+Clean,M01,male,sa1,Baseline AMDF,6.22,0.0,6.22,3.98
+Clean,M01,male,sa1,Enhanced AMDF,6.34,0.66,6.46,4.19
+Clean,M01,male,sa2,Baseline ACF,5.32,10.07,7.23,3.09
+Clean,M01,male,sa2,Enhanced ACF,5.73,1.43,6.0,3.32
+Clean,M01,male,sa2,Baseline AMDF,5.46,0.0,5.46,3.33
+Clean,M01,male,sa2,Enhanced AMDF,4.77,0.7,4.91,3.46
+Clean,M01,male,si453,Baseline ACF,4.27,4.39,5.03,3.89
+Clean,M01,male,si453,Enhanced ACF,4.12,0.87,4.27,4.15
+Clean,M01,male,si453,Baseline AMDF,3.81,0.85,3.96,3.88
+Clean,M01,male,si453,Enhanced AMDF,4.12,0.87,4.27,3.97
+Clean,M02,male,sa1,Baseline ACF,9.97,0.0,9.97,3.19
+Clean,M02,male,sa1,Enhanced ACF,7.62,1.53,7.92,3.42
+Clean,M02,male,sa1,Baseline AMDF,7.33,0.0,7.33,3.09
+Clean,M02,male,sa1,Enhanced AMDF,7.18,0.0,7.18,3.23
+Clean,M02,male,sa2,Baseline ACF,9.24,0.0,9.24,3.48
+Clean,M02,male,sa2,Enhanced ACF,7.92,5.41,8.8,3.06
+Clean,M02,male,sa2,Baseline AMDF,6.3,1.75,6.6,3.03
+Clean,M02,male,sa2,Enhanced AMDF,6.89,2.68,7.33,3.04
+Clean,M02,male,si642,Baseline ACF,18.8,2.56,18.94,3.91
+Clean,M02,male,si642,Enhanced ACF,16.59,5.33,17.18,3.7
+Clean,M02,male,si642,Baseline AMDF,17.18,0.0,17.18,3.51
+Clean,M02,male,si642,Enhanced AMDF,15.27,2.44,15.57,3.45
++20 dB,F01,female,sa1,Baseline ACF,7.06,0.0,7.06,5.82
++20 dB,F01,female,sa1,Enhanced ACF,6.81,0.0,6.81,5.53
++20 dB,F01,female,sa1,Baseline AMDF,7.31,0.0,7.31,5.59
++20 dB,F01,female,sa1,Enhanced AMDF,6.94,0.0,6.94,5.56
++20 dB,F01,female,sa2,Baseline ACF,4.97,0.0,4.97,5.77
++20 dB,F01,female,sa2,Enhanced ACF,4.97,0.0,4.97,5.62
++20 dB,F01,female,sa2,Baseline AMDF,5.39,0.0,5.39,5.63
++20 dB,F01,female,sa2,Enhanced AMDF,4.56,0.0,4.56,5.72
++20 dB,F01,female,si453,Baseline ACF,3.14,0.68,3.27,5.23
++20 dB,F01,female,si453,Enhanced ACF,2.86,0.66,3.0,5.19
++20 dB,F01,female,si453,Baseline AMDF,2.86,2.0,3.27,5.27
++20 dB,F01,female,si453,Enhanced AMDF,3.0,1.34,3.27,5.23
++20 dB,F02,female,sa1,Baseline ACF,4.09,1.14,4.34,4.94
++20 dB,F02,female,sa1,Enhanced ACF,3.58,1.12,3.83,5.01
++20 dB,F02,female,sa1,Baseline AMDF,3.83,1.71,4.21,4.84
++20 dB,F02,female,sa1,Enhanced AMDF,3.96,3.98,4.85,5.04
++20 dB,F02,female,sa2,Baseline ACF,4.4,8.2,5.87,4.88
++20 dB,F02,female,sa2,Enhanced ACF,2.79,14.18,5.57,4.85
++20 dB,F02,female,sa2,Baseline AMDF,4.11,8.0,5.57,4.9
++20 dB,F02,female,sa2,Enhanced AMDF,3.23,0.0,3.23,4.67
++20 dB,F02,female,si642,Baseline ACF,4.11,0.0,4.11,4.47
++20 dB,F02,female,si642,Enhanced ACF,4.82,0.72,4.96,4.31
++20 dB,F02,female,si642,Baseline AMDF,4.11,0.0,4.11,4.57
++20 dB,F02,female,si642,Enhanced AMDF,4.53,0.72,4.67,4.35
++20 dB,M01,male,sa1,Baseline ACF,6.34,8.72,7.89,3.64
++20 dB,M01,male,sa1,Enhanced ACF,7.42,1.32,7.66,4.12
++20 dB,M01,male,sa1,Baseline AMDF,5.98,0.0,5.98,4.03
++20 dB,M01,male,sa1,Enhanced AMDF,6.34,0.66,6.46,4.15
++20 dB,M01,male,sa2,Baseline ACF,5.32,8.63,6.96,3.08
++20 dB,M01,male,sa2,Enhanced ACF,5.73,1.43,6.0,3.32
++20 dB,M01,male,sa2,Baseline AMDF,5.18,0.0,5.18,3.41
++20 dB,M01,male,sa2,Enhanced AMDF,4.77,0.7,4.91,3.49
++20 dB,M01,male,si453,Baseline ACF,4.27,4.39,5.03,3.89
++20 dB,M01,male,si453,Enhanced ACF,3.96,0.86,4.12,4.15
++20 dB,M01,male,si453,Baseline AMDF,4.12,0.87,4.27,3.86
++20 dB,M01,male,si453,Enhanced AMDF,4.12,0.87,4.27,3.96
++20 dB,M02,male,sa1,Baseline ACF,9.82,0.0,9.82,3.28
++20 dB,M02,male,sa1,Enhanced ACF,7.62,1.52,7.92,3.48
++20 dB,M02,male,sa1,Baseline AMDF,7.04,0.0,7.04,3.11
++20 dB,M02,male,sa1,Enhanced AMDF,7.04,0.0,7.04,3.26
++20 dB,M02,male,sa2,Baseline ACF,9.24,0.0,9.24,3.44
++20 dB,M02,male,sa2,Enhanced ACF,7.77,3.64,8.36,3.06
++20 dB,M02,male,sa2,Baseline AMDF,6.16,1.77,6.45,3.04
++20 dB,M02,male,sa2,Enhanced AMDF,6.89,2.68,7.33,3.06
++20 dB,M02,male,si642,Baseline ACF,18.94,2.7,19.09,4.04
++20 dB,M02,male,si642,Enhanced ACF,17.03,5.41,17.62,3.72
++20 dB,M02,male,si642,Baseline AMDF,17.77,0.0,17.77,3.66
++20 dB,M02,male,si642,Enhanced AMDF,15.57,2.5,15.86,3.25
++15 dB,F01,female,sa1,Baseline ACF,6.94,0.0,6.94,5.81
++15 dB,F01,female,sa1,Enhanced ACF,7.06,0.0,7.06,5.54
++15 dB,F01,female,sa1,Baseline AMDF,7.19,0.0,7.19,6.1
++15 dB,F01,female,sa1,Enhanced AMDF,7.06,0.0,7.06,5.56
++15 dB,F01,female,sa2,Baseline ACF,5.11,0.0,5.11,5.76
++15 dB,F01,female,sa2,Enhanced ACF,4.7,0.0,4.7,5.79
++15 dB,F01,female,sa2,Baseline AMDF,5.39,0.0,5.39,5.81
++15 dB,F01,female,sa2,Enhanced AMDF,4.7,0.0,4.7,5.74
++15 dB,F01,female,si453,Baseline ACF,3.14,0.67,3.27,5.28
++15 dB,F01,female,si453,Enhanced ACF,2.32,1.95,2.73,5.21
++15 dB,F01,female,si453,Baseline AMDF,2.32,1.96,2.73,5.3
++15 dB,F01,female,si453,Enhanced AMDF,2.46,2.61,3.0,5.16
++15 dB,F02,female,sa1,Baseline ACF,3.83,0.0,3.83,4.86
++15 dB,F02,female,sa1,Enhanced ACF,3.58,1.11,3.83,4.88
++15 dB,F02,female,sa1,Baseline AMDF,3.32,1.7,3.7,5.13
++15 dB,F02,female,sa1,Enhanced AMDF,4.21,3.98,5.11,4.84
++15 dB,F02,female,sa2,Baseline ACF,4.55,6.67,5.72,4.82
++15 dB,F02,female,sa2,Enhanced ACF,2.93,14.18,5.72,4.86
++15 dB,F02,female,sa2,Baseline AMDF,3.81,8.0,5.28,4.94
++15 dB,F02,female,sa2,Enhanced AMDF,3.23,0.0,3.23,4.71
++15 dB,F02,female,si642,Baseline ACF,4.39,0.0,4.39,4.51
++15 dB,F02,female,si642,Enhanced ACF,4.67,0.72,4.82,4.39
++15 dB,F02,female,si642,Baseline AMDF,3.82,0.0,3.82,4.53
++15 dB,F02,female,si642,Enhanced AMDF,4.67,0.72,4.82,4.37
++15 dB,M01,male,sa1,Baseline ACF,6.46,8.16,7.89,3.55
++15 dB,M01,male,sa1,Enhanced ACF,7.06,3.31,7.66,4.14
++15 dB,M01,male,sa1,Baseline AMDF,5.86,0.0,5.86,4.2
++15 dB,M01,male,sa1,Enhanced AMDF,5.98,0.65,6.1,4.29
++15 dB,M01,male,sa2,Baseline ACF,5.46,8.7,7.09,3.05
++15 dB,M01,male,sa2,Enhanced ACF,5.59,1.42,5.87,3.31
++15 dB,M01,male,sa2,Baseline AMDF,5.32,0.0,5.32,3.36
++15 dB,M01,male,sa2,Enhanced AMDF,4.64,0.69,4.77,3.48
++15 dB,M01,male,si453,Baseline ACF,4.27,4.39,5.03,3.89
++15 dB,M01,male,si453,Enhanced ACF,3.81,0.85,3.96,4.17
++15 dB,M01,male,si453,Baseline AMDF,4.42,0.88,4.57,3.96
++15 dB,M01,male,si453,Enhanced AMDF,4.12,0.87,4.27,3.95
++15 dB,M02,male,sa1,Baseline ACF,10.26,0.0,10.26,3.21
++15 dB,M02,male,sa1,Enhanced ACF,7.62,1.52,7.92,3.47
++15 dB,M02,male,sa1,Baseline AMDF,6.89,0.0,6.89,3.11
++15 dB,M02,male,sa1,Enhanced AMDF,7.04,0.0,7.04,3.25
++15 dB,M02,male,sa2,Baseline ACF,8.94,0.0,8.94,3.41
++15 dB,M02,male,sa2,Enhanced ACF,7.77,3.64,8.36,3.05
++15 dB,M02,male,sa2,Baseline AMDF,6.01,1.77,6.3,3.18
++15 dB,M02,male,sa2,Enhanced AMDF,6.89,2.68,7.33,3.05
++15 dB,M02,male,si642,Baseline ACF,18.5,2.94,18.65,4.25
++15 dB,M02,male,si642,Enhanced ACF,17.18,5.41,17.77,3.71
++15 dB,M02,male,si642,Baseline AMDF,18.06,0.0,18.06,3.64
++15 dB,M02,male,si642,Enhanced AMDF,15.57,2.5,15.86,3.25
++10 dB,F01,female,sa1,Baseline ACF,6.94,0.0,6.94,5.88
++10 dB,F01,female,sa1,Enhanced ACF,7.44,0.0,7.44,5.57
++10 dB,F01,female,sa1,Baseline AMDF,7.57,0.0,7.57,6.26
++10 dB,F01,female,sa1,Enhanced AMDF,7.19,0.0,7.19,5.52
++10 dB,F01,female,sa2,Baseline ACF,5.25,0.0,5.25,5.88
++10 dB,F01,female,sa2,Enhanced ACF,4.14,0.0,4.14,5.86
++10 dB,F01,female,sa2,Baseline AMDF,5.94,0.0,5.94,6.03
++10 dB,F01,female,sa2,Enhanced AMDF,4.14,0.0,4.14,5.85
++10 dB,F01,female,si453,Baseline ACF,3.55,0.0,3.55,5.3
++10 dB,F01,female,si453,Enhanced ACF,2.32,1.95,2.73,5.21
++10 dB,F01,female,si453,Baseline AMDF,3.14,1.36,3.41,5.26
++10 dB,F01,female,si453,Enhanced AMDF,2.32,2.6,2.86,5.37
++10 dB,F02,female,sa1,Baseline ACF,4.21,0.0,4.21,4.89
++10 dB,F02,female,sa1,Enhanced ACF,3.83,1.11,4.09,4.93
++10 dB,F02,female,sa1,Baseline AMDF,4.34,1.2,4.6,5.36
++10 dB,F02,female,sa1,Enhanced AMDF,4.09,3.95,4.98,4.97
++10 dB,F02,female,sa2,Baseline ACF,4.25,6.67,5.43,4.83
++10 dB,F02,female,sa2,Enhanced ACF,3.23,14.18,6.01,4.88
++10 dB,F02,female,sa2,Baseline AMDF,3.67,6.5,4.84,4.93
++10 dB,F02,female,sa2,Enhanced AMDF,3.37,0.0,3.37,4.69
++10 dB,F02,female,si642,Baseline ACF,4.11,0.0,4.11,4.44
++10 dB,F02,female,si642,Enhanced ACF,5.24,0.0,5.24,4.45
++10 dB,F02,female,si642,Baseline AMDF,4.11,0.0,4.11,4.71
++10 dB,F02,female,si642,Enhanced AMDF,4.67,0.7,4.82,4.26
++10 dB,M01,male,sa1,Baseline ACF,7.3,7.97,8.61,3.38
++10 dB,M01,male,sa1,Enhanced ACF,7.3,3.31,7.89,4.07
++10 dB,M01,male,sa1,Baseline AMDF,6.94,0.0,6.94,3.95
++10 dB,M01,male,sa1,Enhanced AMDF,6.46,1.32,6.7,4.04
++10 dB,M01,male,sa2,Baseline ACF,6.14,6.77,7.37,3.05
++10 dB,M01,male,sa2,Enhanced ACF,5.59,1.42,5.87,3.29
++10 dB,M01,male,sa2,Baseline AMDF,5.87,0.0,5.87,3.31
++10 dB,M01,male,sa2,Enhanced AMDF,4.64,0.69,4.77,3.45
++10 dB,M01,male,si453,Baseline ACF,4.73,4.5,5.49,3.93
++10 dB,M01,male,si453,Enhanced ACF,3.66,0.85,3.81,4.23
++10 dB,M01,male,si453,Baseline AMDF,4.42,0.88,4.57,4.24
++10 dB,M01,male,si453,Enhanced AMDF,3.96,0.86,4.12,4.04
++10 dB,M02,male,sa1,Baseline ACF,11.88,0.0,11.88,3.18
++10 dB,M02,male,sa1,Enhanced ACF,7.62,1.5,7.92,3.47
++10 dB,M02,male,sa1,Baseline AMDF,7.48,0.79,7.62,3.34
++10 dB,M02,male,sa1,Enhanced AMDF,6.74,0.72,6.89,3.15
++10 dB,M02,male,sa2,Baseline ACF,9.24,0.0,9.24,3.44
++10 dB,M02,male,sa2,Enhanced ACF,7.62,3.64,8.21,3.07
++10 dB,M02,male,sa2,Baseline AMDF,6.74,0.0,6.74,3.18
++10 dB,M02,male,sa2,Enhanced AMDF,6.89,2.68,7.33,3.04
++10 dB,M02,male,si642,Baseline ACF,18.8,3.33,18.94,4.36
++10 dB,M02,male,si642,Enhanced ACF,17.33,2.74,17.62,3.79
++10 dB,M02,male,si642,Baseline AMDF,18.06,0.0,18.06,3.79
++10 dB,M02,male,si642,Enhanced AMDF,16.45,2.5,16.74,3.23
++5 dB,F01,female,sa1,Baseline ACF,7.57,0.0,7.57,5.58
++5 dB,F01,female,sa1,Enhanced ACF,7.69,0.0,7.69,5.63
++5 dB,F01,female,sa1,Baseline AMDF,8.45,0.0,8.45,6.62
++5 dB,F01,female,sa1,Enhanced AMDF,7.69,0.0,7.69,5.51
++5 dB,F01,female,sa2,Baseline ACF,6.77,0.0,6.77,5.63
++5 dB,F01,female,sa2,Enhanced ACF,5.66,0.0,5.66,5.8
++5 dB,F01,female,sa2,Baseline AMDF,7.87,0.0,7.87,6.49
++5 dB,F01,female,sa2,Enhanced AMDF,4.14,0.0,4.14,5.64
++5 dB,F01,female,si453,Baseline ACF,4.77,0.0,4.77,5.26
++5 dB,F01,female,si453,Enhanced ACF,3.27,1.94,3.68,5.18
++5 dB,F01,female,si453,Baseline AMDF,6.0,0.8,6.14,5.75
++5 dB,F01,female,si453,Enhanced AMDF,2.86,1.91,3.27,5.43
++5 dB,F02,female,sa1,Baseline ACF,4.85,0.0,4.85,4.96
++5 dB,F02,female,sa1,Enhanced ACF,4.34,1.11,4.6,4.94
++5 dB,F02,female,sa1,Baseline AMDF,5.87,0.66,6.0,6.13
++5 dB,F02,female,sa1,Enhanced AMDF,4.73,1.16,4.98,4.87
++5 dB,F02,female,sa2,Baseline ACF,4.25,4.27,4.99,4.79
++5 dB,F02,female,sa2,Enhanced ACF,5.13,14.18,7.92,4.78
++5 dB,F02,female,sa2,Baseline AMDF,4.55,1.77,4.84,5.15
++5 dB,F02,female,sa2,Enhanced AMDF,4.4,0.0,4.4,4.64
++5 dB,F02,female,si642,Baseline ACF,5.1,0.0,5.1,4.73
++5 dB,F02,female,si642,Enhanced ACF,6.8,0.71,6.94,4.36
++5 dB,F02,female,si642,Baseline AMDF,6.52,0.0,6.52,4.93
++5 dB,F02,female,si642,Enhanced AMDF,4.96,0.7,5.1,4.31
++5 dB,M01,male,sa1,Baseline ACF,8.01,7.63,9.21,3.46
++5 dB,M01,male,sa1,Enhanced ACF,8.01,2.67,8.49,4.11
++5 dB,M01,male,sa1,Baseline AMDF,7.89,0.0,7.89,4.1
++5 dB,M01,male,sa1,Enhanced AMDF,6.7,0.66,6.82,3.84
++5 dB,M01,male,sa2,Baseline ACF,7.78,5.04,8.59,3.15
++5 dB,M01,male,sa2,Enhanced ACF,6.96,1.41,7.23,3.26
++5 dB,M01,male,sa2,Baseline AMDF,7.37,0.0,7.37,3.46
++5 dB,M01,male,sa2,Enhanced AMDF,6.14,0.0,6.14,3.42
++5 dB,M01,male,si453,Baseline ACF,6.86,5.15,7.62,4.26
++5 dB,M01,male,si453,Enhanced ACF,5.18,0.0,5.18,4.12
++5 dB,M01,male,si453,Baseline AMDF,7.01,0.0,7.01,4.77
++5 dB,M01,male,si453,Enhanced AMDF,5.34,0.0,5.34,3.99
++5 dB,M02,male,sa1,Baseline ACF,14.22,0.0,14.22,3.56
++5 dB,M02,male,sa1,Enhanced ACF,8.36,1.5,8.65,3.52
++5 dB,M02,male,sa1,Baseline AMDF,10.56,0.0,10.56,4.05
++5 dB,M02,male,sa1,Enhanced AMDF,7.92,0.73,8.06,3.13
++5 dB,M02,male,sa2,Baseline ACF,10.26,0.0,10.26,3.68
++5 dB,M02,male,sa2,Enhanced ACF,9.24,3.67,9.82,3.06
++5 dB,M02,male,sa2,Baseline AMDF,7.48,0.0,7.48,3.26
++5 dB,M02,male,sa2,Enhanced AMDF,7.33,2.73,7.77,2.99
++5 dB,M02,male,si642,Baseline ACF,18.8,4.17,18.94,4.41
++5 dB,M02,male,si642,Enhanced ACF,18.65,4.11,19.09,3.93
++5 dB,M02,male,si642,Baseline AMDF,18.94,0.0,18.94,3.92
++5 dB,M02,male,si642,Enhanced AMDF,16.89,0.0,16.89,3.19
++0 dB,F01,female,sa1,Baseline ACF,10.97,0.0,10.97,5.55
++0 dB,F01,female,sa1,Enhanced ACF,7.31,0.0,7.31,5.66
++0 dB,F01,female,sa1,Baseline AMDF,15.89,0.0,15.89,6.75
++0 dB,F01,female,sa1,Enhanced AMDF,7.31,0.0,7.31,5.54
++0 dB,F01,female,sa2,Baseline ACF,10.5,0.0,10.5,5.16
++0 dB,F01,female,sa2,Enhanced ACF,5.94,0.0,5.94,5.77
++0 dB,F01,female,sa2,Baseline AMDF,14.92,2.47,15.19,5.67
++0 dB,F01,female,sa2,Enhanced AMDF,4.83,0.0,4.83,5.66
++0 dB,F01,female,si453,Baseline ACF,7.64,0.0,7.64,5.44
++0 dB,F01,female,si453,Enhanced ACF,4.23,0.66,4.37,5.17
++0 dB,F01,female,si453,Baseline AMDF,11.32,0.0,11.32,7.11
++0 dB,F01,female,si453,Enhanced AMDF,3.55,0.66,3.68,5.22
++0 dB,F02,female,sa1,Baseline ACF,8.05,0.0,8.05,5.15
++0 dB,F02,female,sa1,Enhanced ACF,4.47,1.69,4.85,4.87
++0 dB,F02,female,sa1,Baseline AMDF,10.98,0.0,10.98,6.05
++0 dB,F02,female,sa1,Enhanced AMDF,5.36,3.03,6.0,5.08
++0 dB,F02,female,sa2,Baseline ACF,4.84,0.0,4.84,4.88
++0 dB,F02,female,sa2,Enhanced ACF,6.01,5.43,7.04,4.64
++0 dB,F02,female,sa2,Baseline AMDF,6.74,0.0,6.74,5.7
++0 dB,F02,female,sa2,Enhanced AMDF,4.69,0.0,4.69,4.58
++0 dB,F02,female,si642,Baseline ACF,7.65,0.0,7.65,4.4
++0 dB,F02,female,si642,Enhanced ACF,6.23,0.7,6.37,4.34
++0 dB,F02,female,si642,Baseline AMDF,10.06,1.2,10.2,4.88
++0 dB,F02,female,si642,Enhanced AMDF,4.96,0.0,4.96,4.42
++0 dB,M01,male,sa1,Baseline ACF,12.08,9.38,13.16,3.93
++0 dB,M01,male,sa1,Enhanced ACF,8.37,2.74,8.85,4.0
++0 dB,M01,male,sa1,Baseline AMDF,12.44,0.0,12.44,4.19
++0 dB,M01,male,sa1,Enhanced AMDF,7.42,0.68,7.54,3.89
++0 dB,M01,male,sa2,Baseline ACF,10.5,3.09,10.91,3.35
++0 dB,M01,male,sa2,Enhanced ACF,7.23,0.71,7.37,3.38
++0 dB,M01,male,sa2,Baseline AMDF,10.78,0.0,10.78,3.52
++0 dB,M01,male,sa2,Enhanced AMDF,6.0,0.0,6.0,3.31
++0 dB,M01,male,si453,Baseline ACF,10.21,4.0,10.67,4.28
++0 dB,M01,male,si453,Enhanced ACF,5.79,0.0,5.79,4.1
++0 dB,M01,male,si453,Baseline AMDF,12.2,0.0,12.2,4.53
++0 dB,M01,male,si453,Enhanced AMDF,5.18,0.0,5.18,3.95
++0 dB,M02,male,sa1,Baseline ACF,19.65,0.0,19.65,4.21
++0 dB,M02,male,sa1,Enhanced ACF,8.94,2.27,9.38,3.5
++0 dB,M02,male,sa1,Baseline AMDF,17.89,0.0,17.89,5.19
++0 dB,M02,male,sa1,Enhanced AMDF,7.92,0.74,8.06,3.11
++0 dB,M02,male,sa2,Baseline ACF,14.81,0.0,14.81,3.15
++0 dB,M02,male,sa2,Enhanced ACF,9.38,3.64,9.97,3.2
++0 dB,M02,male,sa2,Baseline AMDF,11.29,0.0,11.29,3.6
++0 dB,M02,male,sa2,Enhanced AMDF,7.77,1.8,8.06,3.03
++0 dB,M02,male,si642,Baseline ACF,19.97,0.0,19.97,5.01
++0 dB,M02,male,si642,Enhanced ACF,18.36,2.74,18.65,3.88
++0 dB,M02,male,si642,Baseline AMDF,19.53,4.0,19.68,3.36
++0 dB,M02,male,si642,Enhanced AMDF,17.18,0.0,17.18,3.35
+-5 dB,F01,female,sa1,Baseline ACF,19.67,0.0,19.67,3.62
+-5 dB,F01,female,sa1,Enhanced ACF,7.31,0.0,7.31,5.61
+-5 dB,F01,female,sa1,Baseline AMDF,22.32,0.0,22.32,3.32
+-5 dB,F01,female,sa1,Enhanced AMDF,8.45,0.0,8.45,5.26
+-5 dB,F01,female,sa2,Baseline ACF,18.78,0.0,18.78,4.57
+-5 dB,F01,female,sa2,Enhanced ACF,7.6,0.0,7.6,5.36
+-5 dB,F01,female,sa2,Baseline AMDF,21.41,0.0,21.41,4.74
+-5 dB,F01,female,sa2,Enhanced AMDF,5.52,0.0,5.52,5.37
+-5 dB,F01,female,si453,Baseline ACF,15.14,0.0,15.14,5.23
+-5 dB,F01,female,si453,Enhanced ACF,4.5,0.68,4.64,5.09
+-5 dB,F01,female,si453,Baseline AMDF,19.24,0.0,19.24,4.12
+-5 dB,F01,female,si453,Enhanced AMDF,4.5,2.1,4.91,5.35
+-5 dB,F02,female,sa1,Baseline ACF,15.58,0.0,15.58,4.5
+-5 dB,F02,female,sa1,Enhanced ACF,4.98,0.0,4.98,4.98
+-5 dB,F02,female,sa1,Baseline AMDF,20.18,0.0,20.18,3.95
+-5 dB,F02,female,sa1,Enhanced AMDF,6.77,7.14,8.17,5.21
+-5 dB,F02,female,sa2,Baseline ACF,9.24,0.0,9.24,4.77
+-5 dB,F02,female,sa2,Enhanced ACF,6.3,6.45,7.48,4.8
+-5 dB,F02,female,sa2,Baseline AMDF,15.69,0.0,15.69,4.77
+-5 dB,F02,female,sa2,Enhanced AMDF,5.28,8.73,6.89,4.87
+-5 dB,F02,female,si642,Baseline ACF,12.04,0.0,12.04,4.35
+-5 dB,F02,female,si642,Enhanced ACF,5.95,0.0,5.95,4.55
+-5 dB,F02,female,si642,Baseline AMDF,15.16,0.0,15.16,6.03
+-5 dB,F02,female,si642,Enhanced AMDF,5.95,0.0,5.95,4.62
+-5 dB,M01,male,sa1,Baseline ACF,20.69,33.33,21.65,2.67
+-5 dB,M01,male,sa1,Enhanced ACF,8.37,0.7,8.49,4.16
+-5 dB,M01,male,sa1,Baseline AMDF,21.41,11.11,21.65,4.03
+-5 dB,M01,male,sa1,Enhanced AMDF,8.25,0.0,8.25,3.91
+-5 dB,M01,male,sa2,Baseline ACF,21.69,0.0,21.69,5.31
+-5 dB,M01,male,sa2,Enhanced ACF,6.96,2.19,7.37,3.26
+-5 dB,M01,male,sa2,Baseline AMDF,21.15,0.0,21.15,3.12
+-5 dB,M01,male,sa2,Enhanced AMDF,7.23,0.0,7.23,3.31
+-5 dB,M01,male,si453,Baseline ACF,18.14,0.0,18.14,3.65
+-5 dB,M01,male,si453,Enhanced ACF,6.71,0.0,6.71,4.05
+-5 dB,M01,male,si453,Baseline AMDF,19.05,0.0,19.05,2.92
+-5 dB,M01,male,si453,Enhanced AMDF,7.01,0.0,7.01,4.04
+-5 dB,M02,male,sa1,Baseline ACF,23.9,0.0,23.9,2.28
+-5 dB,M02,male,sa1,Enhanced ACF,8.65,3.1,9.24,3.31
+-5 dB,M02,male,sa1,Baseline AMDF,23.9,0.0,23.9,3.08
+-5 dB,M02,male,sa1,Enhanced AMDF,8.5,0.77,8.65,3.15
+-5 dB,M02,male,sa2,Baseline ACF,19.94,0.0,19.94,8.63
+-5 dB,M02,male,sa2,Enhanced ACF,8.65,1.85,8.94,3.17
+-5 dB,M02,male,sa2,Baseline AMDF,19.79,0.0,19.79,5.42
+-5 dB,M02,male,sa2,Enhanced AMDF,7.77,1.83,8.06,3.11
+-5 dB,M02,male,si642,Baseline ACF,21.29,0.0,21.29,3.35
+-5 dB,M02,male,si642,Enhanced ACF,18.36,3.03,18.65,4.29
+-5 dB,M02,male,si642,Baseline AMDF,21.0,0.0,21.0,3.82
+-5 dB,M02,male,si642,Enhanced AMDF,17.62,1.54,17.77,3.97
