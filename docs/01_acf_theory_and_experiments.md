@@ -306,20 +306,20 @@ Nếu bước nhảy rơi vào vùng nhảy quãng tám ($[0.8, 1.2]\text{ octav
   * Việc kết hợp tiền xử lý `Bandpass Filter` và `Center Clipping` giúp loại bỏ can nhiễu dải dừng và triệt tiêu ảnh hưởng của formant, giúp sai số giảm đáng kể (Cấu hình 07 đạt $2.25\text{ Hz}$).
   * Khi bổ sung `Energy Extension` và `Viterbi Tracking`, đường pitch được mở rộng đúng biên và làm mịn tối ưu, hạn chế các điểm nhảy cực đại cục bộ.
 
-### Bảng đối sánh chi tiết 4 file kiểm thử: Baseline vs Enhanced (All Plugins):
+### Bảng đối sánh chi tiết 4 file kiểm thử: Baseline vs Cấu hình tối ưu 29 [BP + Clip + Energy + Viterbi]:
 
 | File kiểm thử | Cấu hình | Ref $F_{0\text{-mean}}$ | Pred $F_{0\text{-mean}}$ | $\lvert\Delta F_0\rvert$ (Hz) | Sai số % | Ref $F_{0\text{-std}}$ | Pred $F_{0\text{-std}}$ | $\lvert\Delta\text{std}\rvert$ | V/UV Acc | F1-Score |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | phone_F2.wav | Baseline | 145.00 Hz | 152.77 Hz | 7.77 Hz | 5.36% | 33.70 | 31.44 | 2.26 | 78.24% | 87.29% |
-| | **Enhanced** | 145.00 Hz | 151.11 Hz | **6.11 Hz** | **4.21%** | 33.70 | 31.52 | **2.18** | **77.82%** | **87.24%** |
+| | **Enhanced (Cfg 29)** | 145.00 Hz | 149.53 Hz | **4.53 Hz** | **3.12%** | 33.70 | 31.86 | **1.84** | **78.45%** | **87.79%** |
 | phone_M2.wav | Baseline | 129.00 Hz | 131.92 Hz | 2.92 Hz | 2.26% | 18.60 | 14.07 | 4.53 | 77.34% | 89.26% |
-| | **Enhanced** | 129.00 Hz | 133.27 Hz | 4.27 Hz | 3.31% | 18.60 | 14.01 | **4.59** | **78.42%** | **90.69%** |
-| studio_F2.wav| Baseline | 200.00 Hz | 198.98 Hz | 1.02 Hz | 0.51% | 46.10 | 43.35 | 2.75 | 91.05% | 95.06% |
-| | **Enhanced** | 200.00 Hz | 199.79 Hz | **0.21 Hz** | **0.10%** | 46.10 | 43.88 | **2.22** | **92.33%** | **96.65%** |
-| studio_M2.wav| Baseline | 155.00 Hz | 155.97 Hz | 0.97 Hz | 0.63% | 30.80 | 30.24 | 0.56 | 87.71% | 92.50% |
-| | **Enhanced** | 155.00 Hz | 156.15 Hz | 1.15 Hz | 0.75% | 30.80 | 30.17 | 0.63 | **87.71%** | **92.62%** |
-| **TRUNG BÌNH** | Baseline | — | — | 3.17 Hz | 2.19% | — | — | 2.53 | 83.58% | 91.03% |
-| | **Enhanced** | — | — | **2.94 Hz** | **2.09%** | — | — | **2.41** | **84.07%** | **91.80%** |
+| | **Enhanced (Cfg 29)** | 129.00 Hz | 131.24 Hz | **2.24 Hz** | **1.73%** | 18.60 | 16.28 | **2.32** | **79.14%** | **91.50%** |
+| studio_F2.wav| Baseline | 200.00 Hz | 198.98 Hz | 1.02 Hz | 0.51% | 46.10 | 43.35 | 2.75 | **91.05%** | **95.06%** |
+| | **Enhanced (Cfg 29)** | 200.00 Hz | 199.99 Hz | **0.01 Hz** | **0.01%** | 46.10 | 42.70 | 3.40 | 90.73% | 94.66% |
+| studio_M2.wav| Baseline | 155.00 Hz | 155.97 Hz | 0.97 Hz | 0.63% | 30.80 | 30.24 | 0.56 | **87.71%** | **92.50%** |
+| | **Enhanced (Cfg 29)** | 155.00 Hz | 155.65 Hz | **0.65 Hz** | **0.42%** | 30.80 | 30.28 | **0.52** | 86.86% | 91.60% |
+| **TRUNG BÌNH** | Baseline | — | — | 3.17 Hz | 2.19% | — | — | 2.52 | 83.58% | 91.03% |
+| | **Enhanced (Cfg 29)** | — | — | **1.86 Hz** | **1.32%** | — | — | **2.02** | **83.80%** | **91.39%** |
 
 ### Biểu đồ cột xếp hạng toàn bộ 32 cấu hình ACF:
 ![05_all_combinations_ranking.png](../outputs/figures/05_all_combinations_ranking.png)
