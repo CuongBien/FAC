@@ -19,6 +19,10 @@ ENV/
 !outputs/figures/.gitkeep
 !outputs/reports/.gitkeep
 
+# Datasets (Downloaded benchmarks)
+data/ptdb_tug/
+
+
 # IDE / Editor
 .vscode/
 .idea/

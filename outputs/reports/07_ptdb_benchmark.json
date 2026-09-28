@@ -1,0 +1,82 @@
+{
+  "Baseline ACF": {
+    "vde": 5.92,
+    "vde_std": 2.51,
+    "gpe": 3.11,
+    "gpe_std": 3.62,
+    "ffe": 6.47,
+    "ffe_std": 2.68,
+    "fpe_mae": 4.8,
+    "fpe_std": 0.96,
+    "female": {
+      "vde": 5.35,
+      "gpe": 0.13,
+      "ffe": 5.38
+    },
+    "male": {
+      "vde": 6.49,
+      "gpe": 6.09,
+      "ffe": 7.56
+    }
+  },
+  "Enhanced ACF": {
+    "vde": 5.98,
+    "vde_std": 2.39,
+    "gpe": 0.43,
+    "gpe_std": 0.48,
+    "ffe": 6.05,
+    "ffe_std": 2.38,
+    "fpe_mae": 4.85,
+    "fpe_std": 0.75,
+    "female": {
+      "vde": 5.31,
+      "gpe": 0.25,
+      "ffe": 5.35
+    },
+    "male": {
+      "vde": 6.65,
+      "gpe": 0.6,
+      "ffe": 6.75
+    }
+  },
+  "Baseline AMDF": {
+    "vde": 5.71,
+    "vde_std": 2.31,
+    "gpe": 0.43,
+    "gpe_std": 0.63,
+    "ffe": 5.79,
+    "ffe_std": 2.25,
+    "fpe_mae": 4.82,
+    "fpe_std": 0.82,
+    "female": {
+      "vde": 5.41,
+      "gpe": 0.68,
+      "ffe": 5.54
+    },
+    "male": {
+      "vde": 6.0,
+      "gpe": 0.17,
+      "ffe": 6.03
+    }
+  },
+  "Enhanced AMDF": {
+    "vde": 5.62,
+    "vde_std": 2.35,
+    "gpe": 0.48,
+    "gpe_std": 0.44,
+    "ffe": 5.71,
+    "ffe_std": 2.36,
+    "fpe_mae": 4.87,
+    "fpe_std": 0.72,
+    "female": {
+      "vde": 5.19,
+      "gpe": 0.38,
+      "ffe": 5.27
+    },
+    "male": {
+      "vde": 6.04,
+      "gpe": 0.58,
+      "ffe": 6.15
+    }
+  }
+}

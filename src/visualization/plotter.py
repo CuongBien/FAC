@@ -721,3 +721,93 @@ def plot_noise_mechanism_demo(
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
     plt.close(fig)
     return fig
+
+
+def plot_ptdb_benchmark_summary(
+    summary_metrics: dict,
+    sample_contour: Optional[dict] = None,
+    save_path: Optional[str] = "outputs/figures/06_ptdb_benchmark.png",
+):
+    """Plot PTDB-TUG benchmark summary: VDE, GPE, FFE bar charts and representative pitch contour overlay."""
+    plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
+
+    fig = plt.figure(figsize=(15, 10))
+    gs = fig.add_gridspec(2, 3, height_ratios=[1.1, 1.0], hspace=0.35, wspace=0.25)
+
+    systems = list(summary_metrics.keys())
+    vde_vals = [summary_metrics[s]["vde"] for s in systems]
+    gpe_vals = [summary_metrics[s]["gpe"] for s in systems]
+    ffe_vals = [summary_metrics[s]["ffe"] for s in systems]
+
+    colors = ["#9ecae1", "#2171b5", "#fc9272", "#cb181d"]
+    if len(colors) < len(systems):
+        colors = plt.cm.tab10(np.linspace(0, 1, len(systems)))
+
+    # Ax0: VDE
+    ax0 = fig.add_subplot(gs[0, 0])
+    bars0 = ax0.bar(systems, vde_vals, color=colors, width=0.55, edgecolor="black", linewidth=0.8)
+    ax0.set_title("1. Voicing Decision Error (VDE %)\n(Càng thấp càng tốt)", fontsize=11, fontweight="bold")
+    ax0.set_ylabel("VDE (%)", fontsize=10, fontweight="bold")
+    ax0.tick_params(axis="x", rotation=20)
+    for b in bars0:
+        h = b.get_height()
+        ax0.annotate(f"{h:.2f}%", (b.get_x() + b.get_width() / 2.0, h),
+                     ha="center", va="bottom", fontsize=9, fontweight="bold")
+    ax0.grid(True, linestyle="--", alpha=0.5)
+
+    # Ax1: GPE
+    ax1 = fig.add_subplot(gs[0, 1])
+    bars1 = ax1.bar(systems, gpe_vals, color=colors, width=0.55, edgecolor="black", linewidth=0.8)
+    ax1.set_title("2. Gross Pitch Error (GPE %)\n(Sai số pitch > 20%, càng thấp càng tốt)", fontsize=11, fontweight="bold")
+    ax1.set_ylabel("GPE (%)", fontsize=10, fontweight="bold")
+    ax1.tick_params(axis="x", rotation=20)
+    for b in bars1:
+        h = b.get_height()
+        ax1.annotate(f"{h:.2f}%", (b.get_x() + b.get_width() / 2.0, h),
+                     ha="center", va="bottom", fontsize=9, fontweight="bold")
+    ax1.grid(True, linestyle="--", alpha=0.5)
+
+    # Ax2: FFE
+    ax2 = fig.add_subplot(gs[0, 2])
+    bars2 = ax2.bar(systems, ffe_vals, color=colors, width=0.55, edgecolor="black", linewidth=0.8)
+    ax2.set_title("3. F0 Frame Error (FFE %)\n(Tổng hợp lỗi VDE + GPE)", fontsize=11, fontweight="bold")
+    ax2.set_ylabel("FFE (%)", fontsize=10, fontweight="bold")
+    ax2.tick_params(axis="x", rotation=20)
+    for b in bars2:
+        h = b.get_height()
+        ax2.annotate(f"{h:.2f}%", (b.get_x() + b.get_width() / 2.0, h),
+                     ha="center", va="bottom", fontsize=9, fontweight="bold")
+    ax2.grid(True, linestyle="--", alpha=0.5)
+
+    # Row 1: Pitch contour overlay
+    if sample_contour is not None:
+        ax_cont = fig.add_subplot(gs[1, :])
+        t = sample_contour["times"]
+        gt_f0 = sample_contour["gt_f0"]
+        base_f0 = sample_contour["base_f0"]
+        enh_f0 = sample_contour["enh_f0"]
+        title_cont = sample_contour.get("title", "Đối sánh Quỹ đạo Pitch trên câu mẫu PTDB-TUG")
+
+        gt_mask = gt_f0 > 0
+        ax_cont.scatter(t[gt_mask], gt_f0[gt_mask], color="#2ca02c", s=18, label="Ground Truth (Laryngograph EGG)", zorder=3)
+
+        base_mask = base_f0 > 0
+        ax_cont.plot(t[base_mask], base_f0[base_mask], color="#d62728", linestyle="--", linewidth=1.5, alpha=0.8, label="Baseline (No plugins)", zorder=2)
+
+        enh_mask = enh_f0 > 0
+        ax_cont.plot(t[enh_mask], enh_f0[enh_mask], color="#1f77b4", linewidth=2.0, alpha=0.9, label="Enhanced (With plugins)", zorder=4)
+
+        ax_cont.set_title(title_cont, fontsize=12, fontweight="bold")
+        ax_cont.set_xlabel("Thời gian (s)", fontsize=10, fontweight="bold")
+        ax_cont.set_ylabel("Tần số F0 (Hz)", fontsize=10, fontweight="bold")
+        ax_cont.set_ylim(50, 420)
+        ax_cont.legend(loc="upper right", frameon=True, fontsize=10)
+        ax_cont.grid(True, linestyle="--", alpha=0.5)
+
+    plt.suptitle("ĐÁNH GIÁ CHUẨN QUỐC TẾ TRÊN CƠ SỞ DỮ LIỆU PTDB-TUG (LARYNGOGRAPH GROUND TRUTH)", fontsize=14, fontweight="bold", y=0.98)
+    if save_path:
+        os.makedirs(os.path.dirname(os.path.abspath(save_path)), exist_ok=True)
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+    plt.close(fig)
+    return fig
+

@@ -1,0 +1,13 @@
+"=== 1. KIEM THU CHÉO TRÊN PTDB-TUG UNSEEN SPEAKERS (F02, M02) ==="
+System,VDE_VN (%),VDE_PTDB (%),VDE_Diff (%),GPE_VN (%),GPE_PTDB (%),FFE_VN (%),FFE_PTDB (%),FFE_Diff (%)
+ACF Baseline,7.89,8.69,0.8,0.71,0.63,7.99,8.77,0.78
+ACF Enhanced,6.78,6.76,-0.02,1.59,1.74,7.03,7.04,0.01
+AMDF Baseline,6.61,6.84,0.23,1.35,1.24,6.83,7.03,0.2
+AMDF Enhanced,6.63,6.65,0.02,2.2,2.19,6.99,7.0,0.02
+
+=== 2. KIEM THU CHÉO TRÊN TIẾNG VIỆT TINHIEUKIEMTHU (4 FILES) ===
+System,Acc_VN (%),Acc_PTDB (%),Acc_Diff (%),F1_VN (%),F1_PTDB (%),F0_Err_VN (Hz),F0_Err_PTDB (Hz)
+ACF Baseline,83.58,82.42,-1.17,91.03,89.55,3.17,3.78
+ACF Enhanced,83.74,84.11,0.36,91.32,91.77,1.89,1.87
+AMDF Baseline,84.65,82.74,-1.91,92.3,90.03,1.6,2.32
+AMDF Enhanced,84.36,84.45,0.09,92.11,92.2,1.69,1.74
