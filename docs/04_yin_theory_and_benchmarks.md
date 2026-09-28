@@ -1,8 +1,10 @@
-# CHƯƠNG VI: THUẬT TOÁN YIN & ĐỐI SÁNH TAM GIÁC MIỀN THỜI GIAN (ACF - AMDF - YIN)
+# CHƯƠNG IV: THUẬT TOÁN YIN & ĐỐI SÁNH TAM GIÁC MIỀN THỜI GIAN (ACF - AMDF - YIN)
+
+> **Dẫn hướng tài liệu:** [Trang chủ README](../README.md) > **Chương IV: Thuật toán YIN**
 
 ---
 
-## VI.1. Tổng Quan & Nguồn Gốc Thuật Toán YIN
+## IV.1. Tổng Quan & Nguồn Gốc Thuật Toán YIN
 
 Thuật toán **YIN** được đề xuất vào năm 2002 bởi **Alain de Cheveigné** và **Hideki Kawahara** (*"YIN, a fundamental frequency estimator for speech and music"*, Journal of the Acoustical Society of America - JASA). 
 
@@ -14,7 +16,7 @@ YIN ra đời nhằm khắc phục triệt để các cạm bẫy kinh điển c
 
 ---
 
-## VI.2. Cơ Sở Toán Học: 6 Bước Liên Hoàn của YIN
+## IV.2. Cơ Sở Toán Học: Các Bước Liên Hoàn của YIN
 
 ### Bước 1: Hàm hiệu bình phương (Squared Difference Function)
 
@@ -83,7 +85,7 @@ $$
 
 ---
 
-## VI.3. Kết Quả Thực Nghiệm Đối Sánh Tam Giác Miền Thời Gian (ACF vs. AMDF vs. YIN)
+## IV.3. Kết Quả Thực Nghiệm Đối Sánh Tam Giác Miền Thời Gian (ACF vs. AMDF vs. YIN)
 
 Thực nghiệm được thực hiện trên tập kiểm thử độc lập gồm 4 file `TinHieuKiemThu` với chiều dài khung chuẩn $25\text{ ms}$ (hop $10\text{ ms}$):
 
@@ -98,7 +100,9 @@ Thực nghiệm được thực hiện trên tập kiểm thử độc lập g�
 ### Biểu đồ đối sánh định lượng 3 thuật toán:
 ![11_compare_acf_amdf_yin.png](../outputs/figures/11_compare_acf_amdf_yin.png)
 
-## VI.4. Khảo Sát & Đánh Giá Các Cấu Hình Enhanced Trên Nền Tảng YIN
+---
+
+## IV.4. Khảo Sát & Đánh Giá Các Cấu Hình Enhanced Trên Nền Tảng YIN
 
 Để kiểm chứng xem liệu kiến trúc đa tầng Plugin (Pre-processing, Decision, Post-processing) có thể nâng cao hơn nữa hiệu năng của YIN hay không, chúng tôi đã tiến hành thử nghiệm các tổ hợp Plugin tương thích trên YIN qua kiểm thử với 4 file `TinHieuKiemThu`:
 
@@ -130,7 +134,7 @@ Thực nghiệm được thực hiện trên tập kiểm thử độc lập g�
 
 ---
 
-## VI.5. Đối Sánh Trực Diện Tam Đại Quán Quân (ACF vs. AMDF vs. YIN)
+## IV.5. Đối Sánh Trực Diện Tam Đại Quán Quân (ACF vs. AMDF vs. YIN)
 
 Dưới đây là bảng đối sánh trực diện giữa 3 cấu hình xuất sắc nhất đại diện cho 3 trường phái thuật toán trên cùng tập kiểm thử độc lập:
 1. **ACF Champion (Config 29):** `[Bandpass + Center Clipping + Energy Extension + Viterbi Tracking]`
@@ -152,7 +156,7 @@ Dưới đây là bảng đối sánh trực diện giữa 3 cấu hình xuất 
 
 ---
 
-## VI.6. Đánh Giá Toàn Diện & Khuyến Nghị Kỹ Thuật
+## IV.6. Đánh Giá Toàn Diện & Khuyến Nghị Kỹ Thuật
 
 * **1. Về độ chính xác F0 (Pitch Estimation Accuracy):**
   * **YIN áp đảo hoàn toàn:** Cả hai phiên bản YIN Champion ($1.27\text{ Hz}$) và YIN Bandpass ($1.08\text{ Hz}$) đều vượt xa ACF Champion ($1.86\text{ Hz}$) và AMDF Champion ($1.50\text{ Hz}$).
@@ -172,5 +176,4 @@ Dưới đây là bảng đối sánh trực diện giữa 3 cấu hình xuất 
 
 ---
 
-**Dẫn hướng:** [← Chương V: Benchmark Quốc Tế PTDB-TUG](05_ptdb_tug_international_benchmark.md) | [Trang chủ README](../README.md)
-
+**Dẫn hướng:** [← Chương III: Phân Tích Lỗi & Hiện Tượng Âm Học](03_error_analysis_and_phenomena.md) | [Chương V: Khảo Sát Kháng Nhiễu →](05_noise_robustness_study.md) | [Trang chủ README](../README.md)

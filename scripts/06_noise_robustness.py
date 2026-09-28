@@ -79,6 +79,7 @@ def run_noise_robustness_benchmark(
     detectors = {
         "acf_base": PitchDetector(method="acf", threshold=t_acf_raw),
         "amdf_base": PitchDetector(method="amdf", threshold=t_amdf_raw),
+        "yin_base": PitchDetector(method="yin", threshold=0.25),
         "acf_enh": PluginPitchDetector(
             base_detector=PitchDetector(method="acf", threshold=t_acf_bp_clip),
             plugins=[
@@ -95,20 +96,25 @@ def run_noise_robustness_benchmark(
                 ViterbiTrackingPlugin(3.0, 2.0),
             ],
         ),
+        "yin_enh": PluginPitchDetector(
+            base_detector=PitchDetector(method="yin", threshold=0.25),
+            plugins=[
+                ViterbiTrackingPlugin(3.0, 2.0),
+            ],
+        ),
     }
 
-    print("=" * 125)
-    print("     KHẢO SÁT ĐỘ BỀN VỮNG KHÁNG NHIỄU (NOISE ROBUSTNESS BENCHMARK): ACF VS. AMDF TRÊN NHIỀU MỨC SNR")
-    print("=" * 125)
+    print("=" * 135)
+    print("  KHẢO SÁT ĐỘ BỀN VỮNG KHÁNG NHIỄU (NOISE ROBUSTNESS BENCHMARK): ACF VS. AMDF VS. YIN TRÊN NHIỀU MỨC SNR")
+    print("=" * 135)
     header = (
         f"{'SNR (dB)':<10} | "
-        f"{'ACF Base Err':<14} | {'AMDF Base Err':<14} | "
-        f"{'ACF Enh Err':<14} | {'AMDF Enh Err':<14} | "
-        f"{'ACF Base F1':<12} | {'AMDF Base F1':<12} | "
+        f"{'ACF Base':<11} | {'AMDF Base':<11} | {'YIN Base':<11} | "
+        f"{'ACF Enh':<11} | {'AMDF Enh':<11} | {'YIN Enh':<11} | "
         f"{'Winner':<10}"
     )
     print(header)
-    print("-" * 125)
+    print("-" * 135)
 
     results_list = []
 
@@ -153,19 +159,25 @@ def run_noise_robustness_benchmark(
         # Determine winner for this SNR
         err_acf_b = snr_summary["acf_base"]["average_error_hz"]
         err_amdf_b = snr_summary["amdf_base"]["average_error_hz"]
-        winner = "AMDF" if err_amdf_b < err_acf_b else "ACF"
+        err_yin_b = snr_summary["yin_base"]["average_error_hz"]
+        min_b = min(err_acf_b, err_amdf_b, err_yin_b)
+        if min_b == err_yin_b:
+            winner = "YIN"
+        elif min_b == err_amdf_b:
+            winner = "AMDF"
+        else:
+            winner = "ACF"
 
         row_str = (
             f"{snr_label:<10} | "
-            f"{err_acf_b:6.2f} Hz       | {err_amdf_b:6.2f} Hz       | "
-            f"{snr_summary['acf_enh']['average_error_hz']:6.2f} Hz       | {snr_summary['amdf_enh']['average_error_hz']:6.2f} Hz       | "
-            f"{snr_summary['acf_base']['average_voiced_f1_pct']:5.2f}%       | {snr_summary['amdf_base']['average_voiced_f1_pct']:5.2f}%       | "
+            f"{err_acf_b:6.2f} Hz  | {err_amdf_b:6.2f} Hz  | {err_yin_b:6.2f} Hz  | "
+            f"{snr_summary['acf_enh']['average_error_hz']:6.2f} Hz  | {snr_summary['amdf_enh']['average_error_hz']:6.2f} Hz  | {snr_summary['yin_enh']['average_error_hz']:6.2f} Hz  | "
             f"{winner:<10}"
         )
         print(row_str)
         results_list.append(snr_summary)
 
-    print("=" * 125)
+    print("=" * 135)
 
     # 1. Plot degradation curves
     curves_fig_path = os.path.join(out_dir_fig, "06_noise_robustness_curves.png")

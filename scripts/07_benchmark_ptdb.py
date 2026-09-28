@@ -118,12 +118,16 @@ def run_ptdb_benchmark(
     print(f"[*] GPE Tolerance: {tolerance * 100:.0f}%")
     print("-" * 80)
 
-    # Khởi tạo 4 detectors
     systems = {
         "Baseline ACF": PitchDetector(method="acf", threshold=thresholds["acf"]["raw"]),
         "Enhanced ACF": build_enhanced_detector("acf", thresholds["acf"]["enhanced"]),
         "Baseline AMDF": PitchDetector(method="amdf", threshold=thresholds["amdf"]["raw"]),
         "Enhanced AMDF": build_enhanced_detector("amdf", thresholds["amdf"]["enhanced"]),
+        "Baseline YIN": PitchDetector(method="yin", threshold=0.25),
+        "Enhanced YIN": PluginPitchDetector(
+            base_detector=PitchDetector(method="yin", threshold=0.25),
+            plugins=[ViterbiTrackingPlugin(f0_min=70.0, f0_max=400.0)],
+        ),
     }
 
     results_by_utt = []

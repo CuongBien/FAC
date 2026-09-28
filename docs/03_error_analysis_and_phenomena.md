@@ -59,4 +59,4 @@ $$
 
 ---
 
-**Dẫn hướng:** [← Chương II: Thuật toán AMDF](02_amdf_theory_and_experiments.md) | [Trang chủ README](../README.md) | [Chương IV: Khảo sát kháng nhiễu →](04_noise_robustness_study.md)
+**Dẫn hướng:** [← Chương II: Thuật toán AMDF](02_amdf_theory_and_experiments.md) | [Trang chủ README](../README.md) | [Chương IV: Thuật toán YIN & Đối Sánh Tam Giác →](04_yin_theory_and_benchmarks.md)
