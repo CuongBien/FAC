@@ -108,7 +108,7 @@ $\implies$ **Luận điểm khoa học cho việc chốt chuẩn 25 ms:**
 ### Bảng kết quả kiểm thử định lượng Baseline ($T = 0.4408$, Frame = 25 ms):
 
 | File kiểm thử | Kênh / Giới tính | Ref $F_{0\text{-mean}}$ | Pred $F_{0\text{-mean}}$ | $\lvert\Delta F_0\rvert$ (Hz) | Sai số % | Ref $F_{0\text{-std}}$ | Pred $F_{0\text{-std}}$ | $\lvert\Delta\text{std}\rvert$ | V/UV Acc | F1-Score |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | `phone_F2.wav` | Điện thoại / Nữ | 145.00 Hz | 152.77 Hz | 7.77 Hz | 5.36% | 33.70 | 31.44 | 2.26 | 78.24% | 87.29% |
 | `phone_M2.wav` | Điện thoại / Nam | 129.00 Hz | 131.92 Hz | 2.92 Hz | 2.26% | 18.60 | 14.07 | 4.53 | 77.34% | 89.26% |
 | `studio_F2.wav`| Studio / Nữ | 200.00 Hz | 198.98 Hz | 1.02 Hz | 0.51% | 46.10 | 43.35 | 2.75 | 91.05% | 95.06% |
@@ -242,11 +242,20 @@ Các thuật toán dò cực trị cục bộ (ACF, AMDF) chỉ xét từng khun
 Dây thanh âm là cơ quan cơ học sinh học có quán tính, không thể biến thiên tần số đột ngột trong $10\text{ ms}$. Tại mỗi khung hữu thanh, plugin trích xuất Top-5 cực trị tốt nhất ($K=5$) để xây dựng lưới không gian trạng thái.
 
 **Hàm chi phí Trellis (Cost Function):**
-1. **Chi phí cục bộ ($C_{\text{local}}$):** Đo lường độ tin cậy của ứng viên tại khung $t$:
-   $$C_{\text{local}}(\tau) = 1.0 - R_{\text{norm}}(\tau) \quad (\text{với ACF})$$
-2. **Chi phí chuyển tiếp ($C_{\text{trans}}$):** Phạt bước nhảy tần số theo thang Logarithm cơ số 2 (Octave):
-   $$C_{\text{trans}}(s_{t-1}, s_t) = w_{\text{freq}} \cdot \left( \log_2(F_{0, t}) - \log_2(F_{0, t-1}) \right)^2$$
-   Nếu bước nhảy rơi vào vùng nhảy quãng tám ($[0.8, 1.2]\text{ octave}$), áp dụng mức phạt bổ sung $w_{\text{octave}} = 2.0$.
+
+* **Chi phí cục bộ ($C_{\text{local}}$):** Đo lường độ tin cậy của ứng viên tại khung $t$:
+
+$$
+C_{\text{local}}(\tau) = 1.0 - R_{\text{norm}}(\tau) \quad (\text{với ACF})
+$$
+
+* **Chi phí chuyển tiếp ($C_{\text{trans}}$):** Phạt bước nhảy tần số theo thang Logarithm cơ số 2 (Octave):
+
+$$
+C_{\text{trans}}(s_{t-1}, s_t) = w_{\text{freq}} \cdot \left( \log_2(F_{0, t}) - \log_2(F_{0, t-1}) \right)^2
+$$
+
+Nếu bước nhảy rơi vào vùng nhảy quãng tám ($[0.8, 1.2]\text{ octave}$), áp dụng mức phạt bổ sung $w_{\text{octave}} = 2.0$.
 
 **Thuật toán Viterbi:** Lan truyền tiến tìm đường đi có tổng chi phí nhỏ nhất và truy vết ngược (Backtracking) để thu được chuỗi cao độ tối ưu toàn cục.
 

@@ -110,6 +110,7 @@ Hệ thống tài liệu nghiên cứu chi tiết được cấu trúc thành 5 
    * Minh họa khung Voiced vs Unvoiced với đáy cực tiểu (Deep Dip).
    * Huấn luyện ngưỡng Gauss AMDF theo các điều kiện tiền xử lý ($T = 0.4380$).
    * Kết quả Baseline AMDF trên 4 file kiểm thử (sai số chỉ $1.60\text{ Hz}$).
+   * Chi tiết thiết kế toán học của 5 Plugins thích ứng riêng cho cực tiểu AMDF.
    * Bảng xếp hạng toàn bộ 32 tổ hợp AMDF (cấu hình tối ưu đạt $1.24\text{ Hz}$).
    * Bảng đối sánh trực tiếp toàn diện: **ACF vs AMDF**.
 

@@ -46,12 +46,16 @@ Trong quá trình thực nghiệm đối sánh trên cả hai miền thuật to�
 
 ## III.4. Hiệu Quả của Bộ Lọc Trung Vị (Median Filter 3 khung)
 
-* **Cơ chế:**
-  * Tại mỗi khung $i$, giá trị cao độ được lọc theo cửa sổ trượt kích thước 3:
-    $$\hat{F}_{0, i}^{\text{med}} = \text{median}\left(\hat{F}_{0, i-1}, \hat{F}_{0, i}, \hat{F}_{0, i+1}\right)$$
-* **Ưu điểm:**
-  * Khử triệt để các xung lỗi cô lập (Impulsive Spike) sinh ra do chuyển âm nhanh hoặc bắt nhầm đỉnh nhiễu trong 1 khung duy nhất.
-  * Khác với các bộ lọc thông thấp IIR/FIR làm trễ pha và làm tù các đỉnh nhọn cao độ tự nhiên, bộ lọc trung vị bảo toàn trọn vẹn ranh giới bước nhảy thực của ngôn điệu.
+### 1. Cơ chế hoạt động
+Tại mỗi khung $i$, giá trị cao độ được làm mịn theo cửa sổ trượt kích thước 3:
+
+$$
+\hat{F}_{0, i}^{\text{med}} = \text{median}\left(\hat{F}_{0, i-1}, \hat{F}_{0, i}, \hat{F}_{0, i+1}\right)
+$$
+
+### 2. Ưu điểm nổi bật
+* **Khử xung lỗi đột biến:** Loại bỏ triệt để các xung lỗi cô lập (Impulsive Spike) sinh ra do chuyển âm nhanh hoặc bắt nhầm đỉnh nhiễu trong 1 khung đơn lẻ.
+* **Bảo toàn pha thời gian:** Khác với các bộ lọc thông thấp IIR/FIR gây trễ pha thời gian và làm tù các biến thiên cao độ tự nhiên, bộ lọc trung vị bảo toàn nguyên vẹn ranh giới bước nhảy thực của ngôn điệu.
 
 ---
 
