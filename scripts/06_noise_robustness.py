@@ -213,14 +213,14 @@ def run_noise_robustness_benchmark(
     # 4. Save CSV report
     csv_path = os.path.join(out_dir_rep, "noise_robustness_results.csv")
     with open(csv_path, "w", encoding="utf-8") as f:
-        f.write("SNR_Label,SNR_dB,ACF_Base_Err,AMDF_Base_Err,ACF_Enh_Err,AMDF_Enh_Err,ACF_Base_F1,AMDF_Base_F1,ACF_Enh_F1,AMDF_Enh_F1\n")
+        f.write("SNR_Label,SNR_dB,ACF_Base_Err,AMDF_Base_Err,YIN_Base_Err,ACF_Enh_Err,AMDF_Enh_Err,YIN_Enh_Err,ACF_Base_F1,AMDF_Base_F1,YIN_Base_F1,ACF_Enh_F1,AMDF_Enh_F1,YIN_Enh_F1\n")
         for r in results_list:
             f.write(
                 f"{r['snr_label']},{r['snr_db']},"
-                f"{r['acf_base']['average_error_hz']},{r['amdf_base']['average_error_hz']},"
-                f"{r['acf_enh']['average_error_hz']},{r['amdf_enh']['average_error_hz']},"
-                f"{r['acf_base']['average_voiced_f1_pct']},{r['amdf_base']['average_voiced_f1_pct']},"
-                f"{r['acf_enh']['average_voiced_f1_pct']},{r['amdf_enh']['average_voiced_f1_pct']}\n"
+                f"{r['acf_base']['average_error_hz']},{r['amdf_base']['average_error_hz']},{r['yin_base']['average_error_hz']},"
+                f"{r['acf_enh']['average_error_hz']},{r['amdf_enh']['average_error_hz']},{r['yin_enh']['average_error_hz']},"
+                f"{r['acf_base']['average_voiced_f1_pct']},{r['amdf_base']['average_voiced_f1_pct']},{r['yin_base']['average_voiced_f1_pct']},"
+                f"{r['acf_enh']['average_voiced_f1_pct']},{r['amdf_enh']['average_voiced_f1_pct']},{r['yin_enh']['average_voiced_f1_pct']}\n"
             )
     print(f"[*] Đã lưu báo cáo CSV: {csv_path}")
 

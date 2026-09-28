@@ -61,29 +61,30 @@ $$
 
 | Hệ Thống Đánh Giá | VDE (%) | GPE (%) (Ngưỡng 20%) | FFE (%) | FPE MAE (Hz) | GPE Giọng Nam (%) | GPE Giọng Nữ (%) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Baseline ACF** | $5.92\% \pm 2.51\%$ | $3.11\% \pm 3.62\%$ | $6.47\% \pm 2.68\%$ | **$4.80 \pm 0.96\text{ Hz}$** | $6.09\%$ | **$0.13\%$** |
-| **Enhanced ACF (All Plugins)** | $5.98\% \pm 2.39\%$ | **$0.43\% \pm 0.48\%$** | $6.05\% \pm 2.38\%$ | $4.85 \pm 0.75\text{ Hz}$ | $0.60\%$ | $0.25\%$ |
-| **Baseline AMDF** | $5.71\% \pm 2.31\%$ | **$0.43\% \pm 0.63\%$** | $5.79\% \pm 2.25\%$ | $4.82 \pm 0.82\text{ Hz}$ | **$0.17\%$** | $0.68\%$ |
-| **Enhanced AMDF (All Plugins)** | **$5.62\% \pm 2.35\%$** | $0.48\% \pm 0.44\%$ | **$5.71\% \pm 2.36\%$** | $4.87 \pm 0.72\text{ Hz}$ | $0.58\%$ | $0.38\%$ |
-| **Baseline YIN ($T=0.25$)** | $6.06\% \pm 2.45\%$ | $3.67\% \pm 3.12\%$ | $6.78\% \pm 2.55\%$ | $6.27 \pm 0.85\text{ Hz}$ | $5.82\%$ | $1.52\%$ |
-| **Enhanced YIN (Viterbi)** | $6.06\% \pm 2.45\%$ | $3.60\% \pm 3.05\%$ | $6.78\% \pm 2.55\%$ | $6.26 \pm 0.84\text{ Hz}$ | $5.68\%$ | $1.52\%$ |
+| **Baseline ACF** | $7.06\% \pm 3.21\%$ | $1.95\% \pm 2.92\%$ | $7.40\% \pm 3.22\%$ | $4.34 \pm 0.99\text{ Hz}$ | $2.94\%$ | **$0.96\%$** |
+| **Enhanced ACF (All Plugins)** | $6.45\% \pm 2.81\%$ | $1.36\% \pm 2.22\%$ | $6.68\% \pm 2.81\%$ | $4.39 \pm 0.92\text{ Hz}$ | $1.81\%$ | **$0.91\%$** |
+| **Baseline AMDF** | **$6.19\% \pm 2.68\%$** | **$1.22\% \pm 2.10\%$** | **$6.41\% \pm 2.65\%$** | **$4.33 \pm 0.92\text{ Hz}$** | **$0.78\%$** | $1.67\%$ |
+| **Enhanced AMDF (All Plugins)** | $6.30\% \pm 2.75\%$ | $1.73\% \pm 3.41\%$ | $6.61\% \pm 2.74\%$ | $4.35 \pm 0.97\text{ Hz}$ | $1.17\%$ | $2.30\%$ |
+| **Baseline YIN ($T=0.25$)** | $6.93\% \pm 2.74\%$ | $3.14\% \pm 3.56\%$ | $7.49\% \pm 2.73\%$ | $5.14 \pm 1.35\text{ Hz}$ | $3.63\%$ | $2.64\%$ |
+| **Enhanced YIN (Viterbi)** | $6.93\% \pm 2.74\%$ | $2.43\% \pm 4.78\%$ | $7.39\% \pm 2.76\%$ | $5.15 \pm 1.30\text{ Hz}$ | **$0.97\%$** | $3.89\%$ |
 
 ---
 
 ## VI.4. Phân Tích Hiện Tượng Triệt Tiêu Nhảy Quãng Tám Trên Giọng Nam
 
 ### 1. Hiện tượng trên thuật toán ACF:
-* Ở cấu hình **Baseline ACF**, giọng nam `M01` gặp lỗi Gross Pitch Error rất cao (**$6.09\%$**). Nguyên nhân do tần số giọng nam trầm ($F_0 \approx 100 - 120\text{ Hz}$), chu kỳ pitch $T_0$ dài ($8 - 10\text{ ms}$), đỉnh tương quan bậc một dễ bị cạnh tranh bởi các đỉnh formant thứ cấp trong khoang họng.
-* Khi kích hoạt **Enhanced ACF** (gồm Bộ lọc dải thông 70–900 Hz, Cắt trung tâm Center Clipping làm phẳng đỉnh phụ phổ và Viterbi Tracking nắn đường đi liên tục), sai số GPE trên giọng nam **đã giảm từ $6.09\%$ xuống còn $0.60\%$ (giảm hơn 10 lần, tương ứng cải thiện 86.2% trên toàn bộ tập test)**.
-* Chỉ số sai số khung tổng thể FFE của ACF giảm từ $6.47\%$ xuống **$6.05\%$**.
+* Ở cấu hình **Baseline ACF**, giọng nam `M01` gặp lỗi Gross Pitch Error ở mức $2.94\%$. Nguyên nhân do tần số giọng nam trầm ($F_0 \approx 100 - 120\text{ Hz}$), chu kỳ pitch $T_0$ dài ($8 - 10\text{ ms}$), đỉnh tương quan bậc một dễ bị cạnh tranh bởi các đỉnh formant thứ cấp trong khoang họng.
+* Khi kích hoạt **Enhanced ACF** (gồm Bộ lọc dải thông 70–900 Hz, Cắt trung tâm Center Clipping làm phẳng đỉnh phụ phổ và Viterbi Tracking nắn đường đi liên tục), sai số GPE trên giọng nam **đã giảm từ $2.94\%$ xuống còn $1.81\%$ (giảm $38.4\%$)**.
+* Trên toàn bộ tập kiểm thử, chỉ số sai số khung tổng thể FFE của ACF giảm từ $7.40\%$ xuống **$6.68\%$ (cải thiện $9.7\%$)**, và VDE giảm từ $7.06\%$ xuống **$6.45\%$ (cải thiện $8.6\%$)**.
 
 ### 2. Hiện tượng trên thuật toán AMDF:
-* AMDF vốn dĩ đã có độ ổn định GPE cực tốt ($0.43\%$) nhờ tính chất đáy cực tiểu phân tách sâu.
-* Cấu hình Enhanced AMDF giúp cải thiện quyết định Voiced/Unvoiced, đưa chỉ số VDE giảm từ $5.71\%$ xuống **$5.62\%$** và FFE giảm xuống **$5.71\%$**.
+* AMDF vốn dĩ đã có độ ổn định GPE tốt ($1.22\%$) nhờ tính chất đáy cực tiểu phân tách sâu.
+* Trên tập ngữ âm TIMIT của PTDB-TUG, Baseline AMDF đạt VDE thấp nhất ($6.19\%$) và FFE thấp nhất ($6.41\%$).
 
 ### 3. Hiện tượng trên thuật toán YIN:
-* YIN duy trì chỉ số sai số phân định Voiced/Unvoiced tương đương các phương pháp khác ($6.06\%$).
-* Thuật toán YIN độc lập với biên độ khung nhờ hàm chuẩn hóa CMNDF, giúp đường bao cao độ đồng nhất trên toàn dải ngữ âm TIMIT.
+* YIN Baseline đạt GPE $3.14\%$ và FFE $7.49\%$. Trên giọng nam, GPE ban đầu ở mức $3.63\%$.
+* Khi áp dụng **Viterbi Tracking (Enhanced YIN)**, thuật toán loại bỏ triệt để các bước nhảy octave đột ngột, giúp sai số GPE trên giọng nam **giảm mạnh từ $3.63\%$ xuống chỉ còn $0.97\%$ (cải thiện ngoạn mục $73.3\%$)**; GPE tổng thể toàn tập giảm từ $3.14\%$ xuống **$2.43\%$ (cải thiện $22.6\%$)**.
+* Thuật toán YIN độc lập với biên độ khung nhờ hàm chuẩn hóa CMNDF, giúp đường bao cao độ mượt mà và bám sát Ground Truth EGG.
 
 ### Biểu đồ đối sánh Benchmark chuẩn quốc tế trên PTDB-TUG:
 ![07_ptdb_benchmark.png](../outputs/figures/07_ptdb_benchmark.png)

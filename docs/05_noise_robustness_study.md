@@ -120,6 +120,7 @@ $$
 * **Trên dạng sóng (Waveform):** Nhiễu trắng $0\text{ dB}$ làm biến dạng hoàn toàn đỉnh sóng tiếng nói.
 * **Trên đồ thị ACF:** Đỉnh tương quan tại $T_0 \approx 5.0\text{ ms}$ vẫn nhô cao vượt trội vì nhiễu trắng tự triệt tiêu lẫn nhau qua tích vô hướng giữa các mẫu độc lập.
 * **Trên đồ thị AMDF:** Sàn nhiễu nâng toàn bộ đường cong lên sát mức $1.0$, làm đáy cực tiểu tại $5.0\text{ ms}$ bị nông hóa nghiêm trọng, khiến thuật toán dễ chọn nhầm đáy giả hoặc đánh giá sai thành vô thanh (Unvoiced).
+* **Trên đồ thị YIN (CMNDF):** Nhờ cơ chế chuẩn hóa tích lũy trung bình $d'(\tau)$, thành phần năng lượng nhiễu ở tử và mẫu triệt tiêu lẫn nhau qua tỉ lệ, giúp cực tiểu tại $T_0 \approx 5.0\text{ ms}$ vẫn chìm sâu rõ rệt dưới ngưỡng tuyệt đối $0.25$, bảo toàn khả năng dò chu kỳ chính xác.
 
 ---
 

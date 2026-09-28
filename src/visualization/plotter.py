@@ -646,7 +646,7 @@ def plot_combinations_ranking(
 def plot_noise_robustness_curves(
     results_list: list,
     save_path: Optional[str] = None,
-    title: str = "Khảo sát Độ Bền Vững Kháng Nhiễu (Noise Robustness): ACF vs. AMDF",
+    title: str = "Khảo sát Độ Bền Vững Kháng Nhiễu (Noise Robustness): ACF vs. AMDF vs. YIN",
 ):
     """Plot dual-panel degradation curves (MAE and F1-Score) across various SNR levels."""
     labels = [r["snr_label"] for r in results_list]
@@ -662,14 +662,25 @@ def plot_noise_robustness_curves(
     f1_acf_e = [r["acf_enh"]["average_voiced_f1_pct"] for r in results_list]
     f1_amdf_e = [r["amdf_enh"]["average_voiced_f1_pct"] for r in results_list]
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
+    has_yin = "yin_base" in results_list[0]
+    if has_yin:
+        err_yin_b = [r["yin_base"]["average_error_hz"] for r in results_list]
+        err_yin_e = [r["yin_enh"]["average_error_hz"] for r in results_list]
+        f1_yin_b = [r["yin_base"]["average_voiced_f1_pct"] for r in results_list]
+        f1_yin_e = [r["yin_enh"]["average_voiced_f1_pct"] for r in results_list]
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
     fig.suptitle(title, fontsize=14, fontweight="bold")
 
     # Panel 1: Error vs SNR (Lower is better)
-    ax1.plot(x, err_acf_b, "o--", color="#1f77b4", linewidth=2.0, markersize=7, label="ACF (Baseline)")
-    ax1.plot(x, err_amdf_b, "s--", color="#d62728", linewidth=2.0, markersize=7, label="AMDF (Baseline)")
-    ax1.plot(x, err_acf_e, "^-", color="#08519c", linewidth=2.5, markersize=8, label="ACF (Tổ hợp Nâng cao Tối ưu)")
-    ax1.plot(x, err_amdf_e, "v-", color="#a50f15", linewidth=2.5, markersize=8, label="AMDF (Tổ hợp Nâng cao Tối ưu)")
+    ax1.plot(x, err_acf_b, "o--", color="#1f77b4", linewidth=1.8, markersize=6, label="ACF (Baseline)")
+    ax1.plot(x, err_amdf_b, "s--", color="#d62728", linewidth=1.8, markersize=6, label="AMDF (Baseline)")
+    if has_yin:
+        ax1.plot(x, err_yin_b, "d--", color="#2ca02c", linewidth=1.8, markersize=6, label="YIN (Baseline)")
+    ax1.plot(x, err_acf_e, "^-", color="#08519c", linewidth=2.2, markersize=7, label="ACF (Tổ hợp Nâng cao)")
+    ax1.plot(x, err_amdf_e, "v-", color="#a50f15", linewidth=2.2, markersize=7, label="AMDF (Tổ hợp Nâng cao)")
+    if has_yin:
+        ax1.plot(x, err_yin_e, "D-", color="#006837", linewidth=2.4, markersize=7, label="YIN (Tổ hợp Nâng cao)")
 
     ax1.set_xticks(x)
     ax1.set_xticklabels(labels, fontsize=10, fontweight="bold")
@@ -677,13 +688,17 @@ def plot_noise_robustness_curves(
     ax1.set_ylabel("Sai số tuyệt đối trung bình |ΔF0| (Hz)", fontsize=11, fontweight="bold")
     ax1.set_title("1. Sai số F0 (Hz) theo mức nhiễu [Thấp hơn là tốt hơn]", fontsize=12, fontweight="bold")
     ax1.grid(True, linestyle="--", alpha=0.6)
-    ax1.legend(loc="upper left", frameon=True, fontsize=9.5)
+    ax1.legend(loc="upper left", frameon=True, fontsize=9.0)
 
     # Panel 2: F1-Score vs SNR (Higher is better)
-    ax2.plot(x, f1_acf_b, "o--", color="#1f77b4", linewidth=2.0, markersize=7, label="ACF (Baseline)")
-    ax2.plot(x, f1_amdf_b, "s--", color="#d62728", linewidth=2.0, markersize=7, label="AMDF (Baseline)")
-    ax2.plot(x, f1_acf_e, "^-", color="#08519c", linewidth=2.5, markersize=8, label="ACF (Tổ hợp Nâng cao Tối ưu)")
-    ax2.plot(x, f1_amdf_e, "v-", color="#a50f15", linewidth=2.5, markersize=8, label="AMDF (Tổ hợp Nâng cao Tối ưu)")
+    ax2.plot(x, f1_acf_b, "o--", color="#1f77b4", linewidth=1.8, markersize=6, label="ACF (Baseline)")
+    ax2.plot(x, f1_amdf_b, "s--", color="#d62728", linewidth=1.8, markersize=6, label="AMDF (Baseline)")
+    if has_yin:
+        ax2.plot(x, f1_yin_b, "d--", color="#2ca02c", linewidth=1.8, markersize=6, label="YIN (Baseline)")
+    ax2.plot(x, f1_acf_e, "^-", color="#08519c", linewidth=2.2, markersize=7, label="ACF (Tổ hợp Nâng cao)")
+    ax2.plot(x, f1_amdf_e, "v-", color="#a50f15", linewidth=2.2, markersize=7, label="AMDF (Tổ hợp Nâng cao)")
+    if has_yin:
+        ax2.plot(x, f1_yin_e, "D-", color="#006837", linewidth=2.4, markersize=7, label="YIN (Tổ hợp Nâng cao)")
 
     ax2.set_xticks(x)
     ax2.set_xticklabels(labels, fontsize=10, fontweight="bold")
@@ -691,7 +706,7 @@ def plot_noise_robustness_curves(
     ax2.set_ylabel("Voiced F1-Score (%)", fontsize=11, fontweight="bold")
     ax2.set_title("2. Độ chính xác phân loại V/UV theo mức nhiễu [Cao hơn là tốt hơn]", fontsize=12, fontweight="bold")
     ax2.grid(True, linestyle="--", alpha=0.6)
-    ax2.legend(loc="lower left", frameon=True, fontsize=9.5)
+    ax2.legend(loc="lower left", frameon=True, fontsize=9.0)
 
     plt.tight_layout(rect=[0, 0, 1, 0.95])
     if save_path:
@@ -709,9 +724,10 @@ def plot_noise_mechanism_demo(
     snr_db: float = 0.0,
     save_path: Optional[str] = None,
 ):
-    """Plot mechanism demonstration comparing ACF and AMDF response under 0dB SNR."""
+    """Plot mechanism demonstration comparing ACF, AMDF, and YIN CMNDF response under 0dB SNR."""
     from src.core.acf import compute_acf
     from src.core.amdf import compute_amdf
+    from src.core.yin import compute_difference_function, cumulative_mean_normalized_difference
 
     acf_clean = compute_acf(clean_frame, mode="normalized")
     acf_noisy = compute_acf(noisy_frame, mode="normalized")
@@ -719,21 +735,29 @@ def plot_noise_mechanism_demo(
     amdf_clean = compute_amdf(clean_frame, mode="normalized")
     amdf_noisy = compute_amdf(noisy_frame, mode="normalized")
 
+    max_lag = len(clean_frame) // 2
+    d_clean = compute_difference_function(clean_frame, max_lag)
+    cmndf_clean = cumulative_mean_normalized_difference(d_clean)
+
+    d_noisy = compute_difference_function(noisy_frame, max_lag)
+    cmndf_noisy = cumulative_mean_normalized_difference(d_noisy)
+
     t_frame = np.arange(len(clean_frame)) / sample_rate * 1000.0  # ms
     tau_ms = np.arange(len(acf_clean)) / sample_rate * 1000.0  # ms
+    tau_yin_ms = np.arange(len(cmndf_clean)) / sample_rate * 1000.0  # ms
     t0_ref_ms = (1.0 / f0_ref) * 1000.0
 
-    fig = plt.figure(figsize=(15, 9))
-    gs = fig.add_gridspec(2, 2, height_ratios=[1, 1.2], hspace=0.35, wspace=0.22)
-    fig.suptitle(f"Minh họa Cơ chế Kháng Nhiễu tại Khung Hữu Thanh (SNR = {snr_db:.0f} dB)", fontsize=14, fontweight="bold")
+    fig = plt.figure(figsize=(18, 9))
+    gs = fig.add_gridspec(2, 3, height_ratios=[1, 1.2], hspace=0.35, wspace=0.22)
+    fig.suptitle(f"Minh họa Cơ chế Kháng Nhiễu tại Khung Hữu Thanh: ACF vs. AMDF vs. YIN (SNR = {snr_db:.0f} dB)", fontsize=14, fontweight="bold")
 
-    # Subplot 1: Waveforms (Span both columns)
+    # Subplot 1: Waveforms (Span all 3 columns)
     ax0 = fig.add_subplot(gs[0, :])
     ax0.plot(t_frame, noisy_frame, color="#ff7f0e", alpha=0.65, label=f"Tín hiệu lẫn nhiễu ({snr_db:.0f} dB AWGN)")
     ax0.plot(t_frame, clean_frame, color="#1f77b4", linewidth=1.8, label="Tín hiệu gốc sạch (Voiced Frame)")
     ax0.set_xlabel("Thời gian (ms)", fontsize=10, fontweight="bold")
     ax0.set_ylabel("Biên độ", fontsize=10, fontweight="bold")
-    ax0.set_title("Dạng sóng miền thời gian: Khung sạch vs Khung nhiễu cực nặng (0 dB)", fontsize=11, fontweight="bold")
+    ax0.set_title("Dạng sóng miền thời gian: Khung sạch vs Khung nhiễu cực nặng (0 dB AWGN)", fontsize=11, fontweight="bold")
     ax0.grid(True, linestyle="--", alpha=0.5)
     ax0.legend(loc="upper right", frameon=True)
 
@@ -741,25 +765,39 @@ def plot_noise_mechanism_demo(
     ax1 = fig.add_subplot(gs[1, 0])
     ax1.plot(tau_ms, acf_clean, color="#1f77b4", linewidth=2.0, label="ACF Khung sạch")
     ax1.plot(tau_ms, acf_noisy, color="#08519c", linewidth=2.0, linestyle="--", label=f"ACF Khung nhiễu ({snr_db:.0f} dB)")
-    ax1.axvline(t0_ref_ms, color="red", linestyle=":", linewidth=2, label=f"Chu kỳ thật T0 = {t0_ref_ms:.2f} ms ({f0_ref:.1f} Hz)")
+    ax1.axvline(t0_ref_ms, color="red", linestyle=":", linewidth=2, label=f"T0 = {t0_ref_ms:.2f} ms ({f0_ref:.1f} Hz)")
     ax1.set_xlim(0, max(tau_ms))
     ax1.set_xlabel("Độ trễ lag τ (ms)", fontsize=10, fontweight="bold")
-    ax1.set_ylabel("Hàm tương quan chuẩn hóa R(τ)", fontsize=10, fontweight="bold")
-    ax1.set_title("ACF: Đỉnh chu kỳ T0 vẫn nhô cao rõ rệt nhờ nhiễu tự triệt tiêu", fontsize=11, fontweight="bold")
+    ax1.set_ylabel("Hàm tương quan R(τ)", fontsize=10, fontweight="bold")
+    ax1.set_title("ACF: Đỉnh chu kỳ T0 vẫn nhô cao nhờ nhiễu tự triệt tiêu", fontsize=10.5, fontweight="bold")
     ax1.grid(True, linestyle="--", alpha=0.5)
-    ax1.legend(loc="upper right", frameon=True, fontsize=9)
+    ax1.legend(loc="upper right", frameon=True, fontsize=8.5)
 
     # Subplot 3: AMDF comparison
     ax2 = fig.add_subplot(gs[1, 1])
     ax2.plot(tau_ms, amdf_clean, color="#d62728", linewidth=2.0, label="AMDF Khung sạch")
     ax2.plot(tau_ms, amdf_noisy, color="#800026", linewidth=2.0, linestyle="--", label=f"AMDF Khung nhiễu ({snr_db:.0f} dB)")
-    ax2.axvline(t0_ref_ms, color="blue", linestyle=":", linewidth=2, label=f"Chu kỳ thật T0 = {t0_ref_ms:.2f} ms ({f0_ref:.1f} Hz)")
+    ax2.axvline(t0_ref_ms, color="blue", linestyle=":", linewidth=2, label=f"T0 = {t0_ref_ms:.2f} ms ({f0_ref:.1f} Hz)")
     ax2.set_xlim(0, max(tau_ms))
     ax2.set_xlabel("Độ trễ lag τ (ms)", fontsize=10, fontweight="bold")
-    ax2.set_ylabel("Hàm hiệu chuẩn hóa D(τ)", fontsize=10, fontweight="bold")
-    ax2.set_title("AMDF: Đáy cực tiểu T0 bị sàn nhiễu nâng cao, lấp phẳng", fontsize=11, fontweight="bold")
+    ax2.set_ylabel("Hàm hiệu D(τ)", fontsize=10, fontweight="bold")
+    ax2.set_title("AMDF: Đáy cực tiểu T0 bị sàn nhiễu nâng cao, lấp phẳng", fontsize=10.5, fontweight="bold")
     ax2.grid(True, linestyle="--", alpha=0.5)
-    ax2.legend(loc="lower right", frameon=True, fontsize=9)
+    ax2.legend(loc="lower right", frameon=True, fontsize=8.5)
+
+    # Subplot 4: YIN CMNDF comparison
+    ax3 = fig.add_subplot(gs[1, 2])
+    ax3.plot(tau_yin_ms, cmndf_clean, color="#2ca02c", linewidth=2.0, label="YIN CMNDF Khung sạch")
+    ax3.plot(tau_yin_ms, cmndf_noisy, color="#006837", linewidth=2.0, linestyle="--", label=f"YIN CMNDF Nhiễu ({snr_db:.0f} dB)")
+    ax3.axvline(t0_ref_ms, color="darkviolet", linestyle=":", linewidth=2, label=f"T0 = {t0_ref_ms:.2f} ms ({f0_ref:.1f} Hz)")
+    ax3.axhline(0.25, color="gray", linestyle="-.", linewidth=1.5, label="Ngưỡng Thresh = 0.25")
+    ax3.set_xlim(0, max(tau_yin_ms))
+    ax3.set_ylim(0, 2.0)
+    ax3.set_xlabel("Độ trễ lag τ (ms)", fontsize=10, fontweight="bold")
+    ax3.set_ylabel("Hàm CMNDF d'(τ)", fontsize=10, fontweight="bold")
+    ax3.set_title("YIN (CMNDF): Cực tiểu T0 vẫn chìm sâu dưới ngưỡng 0.25", fontsize=10.5, fontweight="bold")
+    ax3.grid(True, linestyle="--", alpha=0.5)
+    ax3.legend(loc="upper right", frameon=True, fontsize=8.5)
 
     if save_path:
         os.makedirs(os.path.dirname(os.path.abspath(save_path)), exist_ok=True)
@@ -784,20 +822,26 @@ def plot_ptdb_benchmark_summary(
     gpe_vals = [summary_metrics[s]["gpe"] for s in systems]
     ffe_vals = [summary_metrics[s]["ffe"] for s in systems]
 
-    colors = ["#9ecae1", "#2171b5", "#fc9272", "#cb181d"]
-    if len(colors) < len(systems):
-        colors = plt.cm.tab10(np.linspace(0, 1, len(systems)))
+    color_map = {
+        "Baseline ACF": "#9ecae1",
+        "Enhanced ACF": "#2171b5",
+        "Baseline AMDF": "#fc9272",
+        "Enhanced AMDF": "#cb181d",
+        "Baseline YIN": "#a1d99b",
+        "Enhanced YIN": "#238b45",
+    }
+    colors = [color_map.get(s, "#7f7f7f") for s in systems]
 
     # Ax0: VDE
     ax0 = fig.add_subplot(gs[0, 0])
     bars0 = ax0.bar(systems, vde_vals, color=colors, width=0.55, edgecolor="black", linewidth=0.8)
     ax0.set_title("1. Voicing Decision Error (VDE %)\n(Càng thấp càng tốt)", fontsize=11, fontweight="bold")
     ax0.set_ylabel("VDE (%)", fontsize=10, fontweight="bold")
-    ax0.tick_params(axis="x", rotation=20)
+    ax0.tick_params(axis="x", rotation=25)
     for b in bars0:
         h = b.get_height()
         ax0.annotate(f"{h:.2f}%", (b.get_x() + b.get_width() / 2.0, h),
-                     ha="center", va="bottom", fontsize=9, fontweight="bold")
+                     ha="center", va="bottom", fontsize=8.5, fontweight="bold")
     ax0.grid(True, linestyle="--", alpha=0.5)
 
     # Ax1: GPE
@@ -805,11 +849,11 @@ def plot_ptdb_benchmark_summary(
     bars1 = ax1.bar(systems, gpe_vals, color=colors, width=0.55, edgecolor="black", linewidth=0.8)
     ax1.set_title("2. Gross Pitch Error (GPE %)\n(Sai số pitch > 20%, càng thấp càng tốt)", fontsize=11, fontweight="bold")
     ax1.set_ylabel("GPE (%)", fontsize=10, fontweight="bold")
-    ax1.tick_params(axis="x", rotation=20)
+    ax1.tick_params(axis="x", rotation=25)
     for b in bars1:
         h = b.get_height()
         ax1.annotate(f"{h:.2f}%", (b.get_x() + b.get_width() / 2.0, h),
-                     ha="center", va="bottom", fontsize=9, fontweight="bold")
+                     ha="center", va="bottom", fontsize=8.5, fontweight="bold")
     ax1.grid(True, linestyle="--", alpha=0.5)
 
     # Ax2: FFE
@@ -817,11 +861,11 @@ def plot_ptdb_benchmark_summary(
     bars2 = ax2.bar(systems, ffe_vals, color=colors, width=0.55, edgecolor="black", linewidth=0.8)
     ax2.set_title("3. F0 Frame Error (FFE %)\n(Tổng hợp lỗi VDE + GPE)", fontsize=11, fontweight="bold")
     ax2.set_ylabel("FFE (%)", fontsize=10, fontweight="bold")
-    ax2.tick_params(axis="x", rotation=20)
+    ax2.tick_params(axis="x", rotation=25)
     for b in bars2:
         h = b.get_height()
         ax2.annotate(f"{h:.2f}%", (b.get_x() + b.get_width() / 2.0, h),
-                     ha="center", va="bottom", fontsize=9, fontweight="bold")
+                     ha="center", va="bottom", fontsize=8.5, fontweight="bold")
     ax2.grid(True, linestyle="--", alpha=0.5)
 
     # Row 1: Pitch contour overlay
@@ -829,24 +873,31 @@ def plot_ptdb_benchmark_summary(
         ax_cont = fig.add_subplot(gs[1, :])
         t = sample_contour["times"]
         gt_f0 = sample_contour["gt_f0"]
-        base_f0 = sample_contour["base_f0"]
-        enh_f0 = sample_contour["enh_f0"]
+        base_f0 = sample_contour.get("base_f0")
+        enh_f0 = sample_contour.get("enh_f0")
         title_cont = sample_contour.get("title", "Đối sánh Quỹ đạo Pitch trên câu mẫu PTDB-TUG")
 
         gt_mask = gt_f0 > 0
-        ax_cont.scatter(t[gt_mask], gt_f0[gt_mask], color="#2ca02c", s=18, label="Ground Truth (Laryngograph EGG)", zorder=3)
+        ax_cont.scatter(t[gt_mask], gt_f0[gt_mask], color="#333333", s=14, label="Ground Truth (Laryngograph EGG)", zorder=3)
 
-        base_mask = base_f0 > 0
-        ax_cont.plot(t[base_mask], base_f0[base_mask], color="#d62728", linestyle="--", linewidth=1.5, alpha=0.8, label="Baseline (No plugins)", zorder=2)
+        if base_f0 is not None:
+            base_mask = base_f0 > 0
+            ax_cont.plot(t[base_mask], base_f0[base_mask], color="#fc9272", linestyle="--", linewidth=1.5, alpha=0.75, label="Baseline ACF", zorder=2)
 
-        enh_mask = enh_f0 > 0
-        ax_cont.plot(t[enh_mask], enh_f0[enh_mask], color="#1f77b4", linewidth=2.0, alpha=0.9, label="Enhanced (With plugins)", zorder=4)
+        if enh_f0 is not None:
+            enh_mask = enh_f0 > 0
+            ax_cont.plot(t[enh_mask], enh_f0[enh_mask], color="#2171b5", linewidth=2.0, alpha=0.85, label="Enhanced ACF", zorder=4)
+
+        if "yin_f0" in sample_contour and sample_contour["yin_f0"] is not None:
+            yin_f0 = sample_contour["yin_f0"]
+            yin_mask = yin_f0 > 0
+            ax_cont.plot(t[yin_mask], yin_f0[yin_mask], color="#238b45", linestyle="-.", linewidth=2.0, alpha=0.9, label="Enhanced YIN", zorder=5)
 
         ax_cont.set_title(title_cont, fontsize=12, fontweight="bold")
         ax_cont.set_xlabel("Thời gian (s)", fontsize=10, fontweight="bold")
         ax_cont.set_ylabel("Tần số F0 (Hz)", fontsize=10, fontweight="bold")
         ax_cont.set_ylim(50, 420)
-        ax_cont.legend(loc="upper right", frameon=True, fontsize=10)
+        ax_cont.legend(loc="upper right", frameon=True, fontsize=9.5)
         ax_cont.grid(True, linestyle="--", alpha=0.5)
 
     plt.suptitle("ĐÁNH GIÁ CHUẨN QUỐC TẾ TRÊN CƠ SỞ DỮ LIỆU PTDB-TUG (LARYNGOGRAPH GROUND TRUTH)", fontsize=14, fontweight="bold", y=0.98)

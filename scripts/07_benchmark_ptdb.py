@@ -186,6 +186,8 @@ def run_ptdb_benchmark(
                     sample_contour_for_plot["base_f0"] = aligned_f0
                 elif sys_name == "Enhanced ACF":
                     sample_contour_for_plot["enh_f0"] = aligned_f0
+                elif sys_name == "Enhanced YIN":
+                    sample_contour_for_plot["yin_f0"] = aligned_f0
 
         results_by_utt.append(utt_record)
 
@@ -242,7 +244,7 @@ def run_ptdb_benchmark(
     print("\n" + "=" * 80)
     print("  MỨC ĐỘ CẢI THIỆN NHỜ CÁC PLUGINS (ENHANCED VS BASELINE)")
     print("=" * 80)
-    for meth in ["ACF", "AMDF"]:
+    for meth in ["ACF", "AMDF", "YIN"]:
         base_s = summary[f"Baseline {meth}"]
         enh_s = summary[f"Enhanced {meth}"]
 

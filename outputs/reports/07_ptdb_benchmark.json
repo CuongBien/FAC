@@ -1,82 +1,122 @@
 {
   "Baseline ACF": {
-    "vde": 5.92,
-    "vde_std": 2.51,
-    "gpe": 3.11,
-    "gpe_std": 3.62,
-    "ffe": 6.47,
-    "ffe_std": 2.68,
-    "fpe_mae": 4.8,
-    "fpe_std": 0.96,
+    "vde": 7.06,
+    "vde_std": 3.21,
+    "gpe": 1.95,
+    "gpe_std": 2.92,
+    "ffe": 7.4,
+    "ffe_std": 3.22,
+    "fpe_mae": 4.34,
+    "fpe_std": 0.99,
     "female": {
-      "vde": 5.35,
-      "gpe": 0.13,
-      "ffe": 5.38
+      "vde": 5.46,
+      "gpe": 0.96,
+      "ffe": 5.66
     },
     "male": {
-      "vde": 6.49,
-      "gpe": 6.09,
-      "ffe": 7.56
+      "vde": 8.67,
+      "gpe": 2.94,
+      "ffe": 9.13
     }
   },
   "Enhanced ACF": {
-    "vde": 5.98,
-    "vde_std": 2.39,
-    "gpe": 0.43,
-    "gpe_std": 0.48,
-    "ffe": 6.05,
-    "ffe_std": 2.38,
-    "fpe_mae": 4.85,
-    "fpe_std": 0.75,
+    "vde": 6.45,
+    "vde_std": 2.81,
+    "gpe": 1.36,
+    "gpe_std": 2.22,
+    "ffe": 6.68,
+    "ffe_std": 2.81,
+    "fpe_mae": 4.39,
+    "fpe_std": 0.92,
     "female": {
-      "vde": 5.31,
-      "gpe": 0.25,
-      "ffe": 5.35
+      "vde": 5.38,
+      "gpe": 0.91,
+      "ffe": 5.57
     },
     "male": {
-      "vde": 6.65,
-      "gpe": 0.6,
-      "ffe": 6.75
+      "vde": 7.53,
+      "gpe": 1.81,
+      "ffe": 7.8
     }
   },
   "Baseline AMDF": {
-    "vde": 5.71,
-    "vde_std": 2.31,
-    "gpe": 0.43,
-    "gpe_std": 0.63,
-    "ffe": 5.79,
-    "ffe_std": 2.25,
-    "fpe_mae": 4.82,
-    "fpe_std": 0.82,
+    "vde": 6.19,
+    "vde_std": 2.68,
+    "gpe": 1.22,
+    "gpe_std": 2.1,
+    "ffe": 6.41,
+    "ffe_std": 2.65,
+    "fpe_mae": 4.33,
+    "fpe_std": 0.92,
     "female": {
-      "vde": 5.41,
-      "gpe": 0.68,
-      "ffe": 5.54
+      "vde": 5.38,
+      "gpe": 1.67,
+      "ffe": 5.7
     },
     "male": {
-      "vde": 6.0,
-      "gpe": 0.17,
-      "ffe": 6.03
+      "vde": 7.0,
+      "gpe": 0.78,
+      "ffe": 7.12
     }
   },
   "Enhanced AMDF": {
-    "vde": 5.62,
-    "vde_std": 2.35,
-    "gpe": 0.48,
-    "gpe_std": 0.44,
-    "ffe": 5.71,
-    "ffe_std": 2.36,
-    "fpe_mae": 4.87,
-    "fpe_std": 0.72,
+    "vde": 6.3,
+    "vde_std": 2.75,
+    "gpe": 1.73,
+    "gpe_std": 3.41,
+    "ffe": 6.61,
+    "ffe_std": 2.74,
+    "fpe_mae": 4.35,
+    "fpe_std": 0.97,
     "female": {
-      "vde": 5.19,
-      "gpe": 0.38,
-      "ffe": 5.27
+      "vde": 5.47,
+      "gpe": 2.3,
+      "ffe": 5.93
     },
     "male": {
-      "vde": 6.04,
-      "gpe": 0.58,
-      "ffe": 6.15
+      "vde": 7.13,
+      "gpe": 1.17,
+      "ffe": 7.29
+    }
+  },
+  "Baseline YIN": {
+    "vde": 6.93,
+    "vde_std": 2.74,
+    "gpe": 3.14,
+    "gpe_std": 3.56,
+    "ffe": 7.49,
+    "ffe_std": 2.73,
+    "fpe_mae": 5.14,
+    "fpe_std": 1.35,
+    "female": {
+      "vde": 6.46,
+      "gpe": 2.64,
+      "ffe": 6.96
+    },
+    "male": {
+      "vde": 7.41,
+      "gpe": 3.63,
+      "ffe": 8.01
+    }
+  },
+  "Enhanced YIN": {
+    "vde": 6.93,
+    "vde_std": 2.74,
+    "gpe": 2.43,
+    "gpe_std": 4.78,
+    "ffe": 7.39,
+    "ffe_std": 2.76,
+    "fpe_mae": 5.15,
+    "fpe_std": 1.3,
+    "female": {
+      "vde": 6.46,
+      "gpe": 3.89,
+      "ffe": 7.22
+    },
+    "male": {
+      "vde": 7.41,
+      "gpe": 0.97,
+      "ffe": 7.56
     }
   }
 }
