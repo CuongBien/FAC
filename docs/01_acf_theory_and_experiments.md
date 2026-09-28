@@ -265,42 +265,42 @@ Nếu bước nhảy rơi vào vùng nhảy quãng tám ($[0.8, 1.2]\text{ octav
 
 ### Bảng kết quả đối sánh toàn diện 32 cấu hình trên tập kiểm thử (ACF):
 
-| STT | Cấu hình Plugin | Ngưỡng $T$ | `phone_F2` (145Hz) | `phone_M2` (129Hz) | `studio_F2` (200Hz) | `studio_M2` (155Hz) | Sai số TB $\lvert\Delta F_0\rvert$ | F1-Score TB | V/UV Acc TB |
-| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **01** | **Baseline (Gốc)** | $0.4408$ | 7.77 Hz | 2.92 Hz | 1.02 Hz | 0.97 Hz | 3.17 Hz | 91.03% | 83.58% |
-| **02** | `[Bandpass Filter]` | $0.4892$ | 8.58 Hz | 4.20 Hz | 1.07 Hz | 0.24 Hz | 3.52 Hz | 89.51% | 82.28% |
-| **03** | `[Center Clip]` | $0.3352$ | 6.59 Hz | 2.15 Hz | 1.03 Hz | 0.72 Hz | 2.62 Hz | 89.23% | 82.14% |
-| **04** | `[Hysteresis]` | $0.4408$ | 7.52 Hz | 2.40 Hz | 0.06 Hz | 1.27 Hz | 2.81 Hz | 91.82% | 84.24% |
-| **05** | `[Energy Ext]` | $0.4408$ | 6.80 Hz | 2.88 Hz | 0.65 Hz | 0.97 Hz | 2.83 Hz | 92.89% | 85.09% |
-| **06** | `[Viterbi Tracking]` | $0.4408$ | 7.89 Hz | 3.05 Hz | 0.96 Hz | 1.84 Hz | 3.43 Hz | 91.03% | 83.58% |
-| **07** | `[BP + Clip]` | $0.3953$ | 5.19 Hz | 2.69 Hz | 0.59 Hz | 0.52 Hz | 2.25 Hz | 89.42% | 82.20% |
-| **08** | `[BP + Hyst]` | $0.4892$ | 7.28 Hz | 4.27 Hz | 1.07 Hz | 0.17 Hz | 3.20 Hz | 90.38% | 82.97% |
-| **09** | `[BP + Energy]` | $0.4892$ | 7.58 Hz | 4.60 Hz | 0.19 Hz | 0.17 Hz | 3.13 Hz | 91.53% | 83.89% |
-| **10** | `[BP + Viterbi]` | $0.4892$ | 8.67 Hz | 4.31 Hz | 1.05 Hz | 0.18 Hz | 3.55 Hz | 89.51% | 82.28% |
-| **11** | `[Clip + Hyst]` | $0.3352$ | 6.64 Hz | 1.58 Hz | 0.49 Hz | 0.48 Hz | 2.30 Hz | 89.84% | 82.63% |
-| **12** | `[Clip + Energy]` | $0.3352$ | 6.30 Hz | 2.06 Hz | 0.21 Hz | 0.90 Hz | 2.37 Hz | 90.82% | 83.40% |
-| **13** | `[Clip + Viterbi]` | $0.3352$ | 5.24 Hz | 3.42 Hz | 0.58 Hz | 0.75 Hz | 2.50 Hz | 89.23% | 82.14% |
-| **14** | `[Hyst + Energy]` | $0.4408$ | 6.75 Hz | 2.73 Hz | 0.65 Hz | 1.27 Hz | 2.85 Hz | **93.07%** | **85.25%** |
-| **15** | `[Hyst + Viterbi]` | $0.4408$ | 7.65 Hz | 2.60 Hz | 0.12 Hz | 2.17 Hz | 3.13 Hz | 91.82% | 84.24% |
-| **16** | `[Energy + Viterbi]` | $0.4408$ | 4.88 Hz | 3.00 Hz | 0.76 Hz | 1.84 Hz | 2.62 Hz | 92.89% | 85.09% |
-| **17** | `[BP + Clip + Hyst]` | $0.3953$ | 4.90 Hz | 2.65 Hz | 0.43 Hz | 0.37 Hz | 2.09 Hz | 89.98% | 82.65% |
-| **18** | `[BP + Clip + Energy]` | $0.3953$ | 4.73 Hz | 2.31 Hz | 0.08 Hz | 0.55 Hz | 1.92 Hz | 91.06% | 83.54% |
-| **19** | `[BP + Clip + Viterbi]` | $0.3953$ | 4.65 Hz | 2.69 Hz | 0.42 Hz | 0.60 Hz | 2.09 Hz | 89.42% | 82.20% |
-| **20** | `[BP + Hyst + Energy]` | $0.4892$ | 6.27 Hz | 4.59 Hz | 0.19 Hz | 0.17 Hz | 2.80 Hz | 91.64% | 83.95% |
-| **21** | `[BP + Hyst + Viterbi]` | $0.4892$ | 7.36 Hz | 4.39 Hz | 1.05 Hz | 0.13 Hz | 3.23 Hz | 90.38% | 82.97% |
-| **22** | `[BP + Energy + Viterbi]` | $0.4892$ | 7.69 Hz | 4.63 Hz | 0.12 Hz | 0.13 Hz | 3.14 Hz | 91.53% | 83.89% |
-| **23** | `[Clip + Hyst + Energy]` | $0.3352$ | 6.37 Hz | **1.44 Hz** | 0.19 Hz | 0.91 Hz | 2.23 Hz | 90.93% | 83.49% |
-| **24** | `[Clip + Hyst + Viterbi]` | $0.3352$ | 6.40 Hz | 2.92 Hz | 0.29 Hz | 0.46 Hz | 2.52 Hz | 89.84% | 82.63% |
-| **25** | `[Clip + Energy + Viterbi]` | $0.3352$ | 4.94 Hz | 3.34 Hz | 0.19 Hz | 1.08 Hz | 2.39 Hz | 90.82% | 83.40% |
-| **26** | `[Hyst + Energy + Viterbi]` | $0.4408$ | 4.84 Hz | 3.00 Hz | 0.76 Hz | 2.17 Hz | 2.69 Hz | **93.07%** | **85.25%** |
-| **27** | `[BP + Clip + Hyst + Energy]` | $0.3953$ | 4.91 Hz | 2.20 Hz | **0.05 Hz** | 0.55 Hz | 1.93 Hz | 91.00% | 83.48% |
-| **28** | `[BP + Clip + Hyst + Viterbi]` | $0.3953$ | 4.74 Hz | 2.68 Hz | 0.28 Hz | 0.45 Hz | 2.04 Hz | 89.98% | 82.65% |
-| **29** | `[BP + Clip + Energy + Viterbi]` | $0.3953$ | **4.35 Hz** | 2.38 Hz | 0.22 Hz | 0.64 Hz | **1.90 Hz** | 91.06% | 83.54% |
-| **30** | `[BP + Hyst + Energy + Viterbi]` | $0.4892$ | 4.40 Hz | 4.74 Hz | 0.12 Hz | **0.13 Hz** | 2.35 Hz | 91.64% | 83.95% |
-| **31** | `[Clip + Hyst + Energy + Viterbi]` | $0.3352$ | 7.16 Hz | 2.74 Hz | 0.34 Hz | 1.08 Hz | 2.83 Hz | 90.93% | 83.49% |
-| **32** | `[Cả 5 Plugins]` | $0.3953$ | 4.96 Hz | 2.39 Hz | 0.22 Hz | 0.64 Hz | 2.05 Hz | 91.00% | 83.48% |
+| STT | Cấu hình Plugin | Ngưỡng $T$ | `phone_F2` (145Hz) | `phone_M2` (129Hz) | `studio_F2` (200Hz) | `studio_M2` (155Hz) | Sai số TB $\lvert\Delta F_0\rvert$ | Sai số TB $\lvert\Delta\text{std}\rvert$ | F1-Score TB | V/UV Acc TB |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **01** | **Baseline (Gốc)** | $0.4408$ | 7.77 Hz | 2.92 Hz | 1.02 Hz | 0.97 Hz | 3.17 Hz | 2.52 | 91.03% | 83.58% |
+| **02** | `[Bandpass Filter]` | $0.4892$ | 8.58 Hz | 4.20 Hz | 1.07 Hz | 0.24 Hz | 3.52 Hz | 3.00 | 89.51% | 82.28% |
+| **03** | `[Center Clip]` | $0.3352$ | 6.59 Hz | 2.15 Hz | 1.03 Hz | 0.72 Hz | 2.62 Hz | 2.03 | 89.23% | 82.14% |
+| **04** | `[Hysteresis]` | $0.4408$ | 7.52 Hz | 2.40 Hz | 0.06 Hz | 1.27 Hz | 2.81 Hz | 2.13 | 91.82% | 84.24% |
+| **05** | `[Energy Ext]` | $0.4408$ | 6.75 Hz | 2.88 Hz | 0.65 Hz | 0.94 Hz | 2.80 Hz | 2.02 | 92.96% | 85.14% |
+| **06** | `[Viterbi Tracking]` | $0.4408$ | 7.72 Hz | 2.90 Hz | 0.94 Hz | 0.98 Hz | 3.13 Hz | 2.53 | 91.03% | 83.58% |
+| **07** | `[BP + Clip]` | $0.3953$ | 5.19 Hz | 2.69 Hz | 0.59 Hz | 0.52 Hz | 2.25 Hz | 2.01 | 89.42% | 82.20% |
+| **08** | `[BP + Hyst]` | $0.4892$ | 7.28 Hz | 4.27 Hz | 1.07 Hz | **0.17 Hz** | 3.20 Hz | 2.85 | 90.38% | 82.97% |
+| **09** | `[BP + Energy]` | $0.4892$ | 7.52 Hz | 4.60 Hz | 0.17 Hz | **0.17 Hz** | 3.11 Hz | 2.81 | 91.51% | 83.86% |
+| **10** | `[BP + Viterbi]` | $0.4892$ | 8.57 Hz | 4.19 Hz | 1.06 Hz | 0.26 Hz | 3.52 Hz | 2.99 | 89.51% | 82.28% |
+| **11** | `[Clip + Hyst]` | $0.3352$ | 6.64 Hz | 1.58 Hz | 0.49 Hz | 0.48 Hz | 2.30 Hz | **1.94** | 89.84% | 82.63% |
+| **12** | `[Clip + Energy]` | $0.3352$ | 6.16 Hz | 2.06 Hz | 0.03 Hz | 0.90 Hz | 2.29 Hz | 2.31 | 90.98% | 83.53% |
+| **13** | `[Clip + Viterbi]` | $0.3352$ | 5.96 Hz | 2.14 Hz | 1.13 Hz | 0.78 Hz | 2.50 Hz | 2.07 | 89.23% | 82.14% |
+| **14** | `[Hyst + Energy]` | $0.4408$ | 6.75 Hz | 2.73 Hz | 0.65 Hz | 1.27 Hz | 2.85 Hz | 1.95 | **93.07%** | **85.25%** |
+| **15** | `[Hyst + Viterbi]` | $0.4408$ | 7.48 Hz | 2.38 Hz | 0.15 Hz | 1.28 Hz | 2.82 Hz | 2.13 | 91.82% | 84.24% |
+| **16** | `[Energy + Viterbi]` | $0.4408$ | 8.60 Hz | 2.85 Hz | 0.73 Hz | 0.96 Hz | 3.29 Hz | 2.46 | 92.96% | 85.14% |
+| **17** | `[BP + Clip + Hyst]` | $0.3953$ | 4.90 Hz | 2.65 Hz | 0.43 Hz | 0.37 Hz | 2.09 Hz | 1.95 | 89.98% | 82.65% |
+| **18** | `[BP + Clip + Energy]` | $0.3953$ | 4.73 Hz | 2.25 Hz | 0.10 Hz | 0.55 Hz | 1.91 Hz | 2.03 | 91.39% | 83.80% |
+| **19** | `[BP + Clip + Viterbi]` | $0.3953$ | 5.20 Hz | 2.67 Hz | 0.67 Hz | 0.60 Hz | 2.29 Hz | 2.03 | 89.42% | 82.20% |
+| **20** | `[BP + Hyst + Energy]` | $0.4892$ | 6.21 Hz | 4.59 Hz | 0.17 Hz | **0.17 Hz** | 2.79 Hz | 2.55 | 91.61% | 83.93% |
+| **21** | `[BP + Hyst + Viterbi]` | $0.4892$ | 7.26 Hz | 4.27 Hz | 1.06 Hz | 0.18 Hz | 3.19 Hz | 2.84 | 90.38% | 82.97% |
+| **22** | `[BP + Energy + Viterbi]` | $0.4892$ | 7.51 Hz | 4.58 Hz | 0.16 Hz | 0.19 Hz | 3.11 Hz | 2.80 | 91.51% | 83.86% |
+| **23** | `[Clip + Hyst + Energy]` | $0.3352$ | 6.23 Hz | 1.44 Hz | 0.19 Hz | 0.91 Hz | 2.19 Hz | 2.13 | 91.00% | 83.54% |
+| **24** | `[Clip + Hyst + Viterbi]` | $0.3352$ | 6.65 Hz | 1.56 Hz | 0.58 Hz | 0.53 Hz | 2.33 Hz | 1.96 | 89.84% | 82.63% |
+| **25** | `[Clip + Energy + Viterbi]` | $0.3352$ | 5.55 Hz | 2.05 Hz | 0.11 Hz | 0.97 Hz | 2.17 Hz | 2.35 | 90.98% | 83.53% |
+| **26** | `[Hyst + Energy + Viterbi]` | $0.4408$ | 8.60 Hz | 2.71 Hz | 0.73 Hz | 1.29 Hz | 3.33 Hz | 2.40 | **93.07%** | **85.25%** |
+| **27** | `[BP + Clip + Hyst + Energy]` | $0.3953$ | 4.91 Hz | 2.14 Hz | 0.13 Hz | 0.55 Hz | 1.93 Hz | 2.01 | 91.32% | 83.74% |
+| **28** | `[BP + Clip + Hyst + Viterbi]` | $0.3953$ | 4.90 Hz | 2.62 Hz | 0.51 Hz | 0.45 Hz | 2.12 Hz | 1.96 | 89.98% | 82.65% |
+| **29** | `[BP + Clip + Energy + Viterbi]` | $0.3953$ | **4.53 Hz** | 2.24 Hz | **0.01 Hz** | 0.65 Hz | **1.86 Hz** | 2.02 | 91.39% | 83.80% |
+| **30** | `[BP + Hyst + Energy + Viterbi]` | $0.4892$ | 8.04 Hz | 4.56 Hz | 0.16 Hz | 0.19 Hz | 3.24 Hz | 2.96 | 91.61% | 83.93% |
+| **31** | `[Clip + Hyst + Energy + Viterbi]` | $0.3352$ | 7.20 Hz | **1.43 Hz** | 0.11 Hz | 0.97 Hz | 2.43 Hz | 2.45 | 91.00% | 83.54% |
+| **32** | `[Cả 5 Plugins]` | $0.3953$ | 4.70 Hz | 2.12 Hz | 0.04 Hz | 0.65 Hz | 1.88 Hz | 2.00 | 91.32% | 83.74% |
 
-* **Cấu hình có sai số thấp nhất:** **Cấu hình 29 `[BP + Clip + Energy + Viterbi]`** đạt sai số tuyệt đối trung bình thấp nhất là **$1.90\text{ Hz}$** (giảm 40.1% so với Baseline 3.17 Hz). Trên file kênh thoại khó nhất `phone_F2`, sai số giảm từ $7.77\text{ Hz}$ xuống **$4.35\text{ Hz}$**.
+* **Cấu hình có sai số thấp nhất:** **Cấu hình 29 `[BP + Clip + Energy + Viterbi]`** đạt sai số tuyệt đối trung bình thấp nhất là **$1.86\text{ Hz}$** (giảm 41.3% so với Baseline 3.17 Hz), sai số độ lệch chuẩn TB là **$2.02$**. Trên file kênh thoại khó nhất `phone_F2`, sai số giảm từ $7.77\text{ Hz}$ xuống **$4.53\text{ Hz}$**, và trên file `studio_F2` chỉ còn đúng **$0.01\text{ Hz}$**.
 * **Cấu hình có F1-Score phân loại V/UV cao nhất:** **Cấu hình 14 `[Hyst + Energy]`** và **Cấu hình 26 `[Hyst + Energy + Viterbi]`** đạt **F1 = 93.07%** và **Acc = 85.25%**.
 * **Nhận xét kỹ thuật:**
   * Việc kết hợp tiền xử lý `Bandpass Filter` và `Center Clipping` giúp loại bỏ can nhiễu dải dừng và triệt tiêu ảnh hưởng của formant, giúp sai số giảm đáng kể (Cấu hình 07 đạt $2.25\text{ Hz}$).
@@ -308,7 +308,7 @@ Nếu bước nhảy rơi vào vùng nhảy quãng tám ($[0.8, 1.2]\text{ octav
 
 ### Bảng đối sánh chi tiết 4 file kiểm thử: Baseline vs Enhanced (All Plugins):
 
-| File kiểm thử | Cấu hình | Ref {0\text{-mean}}$ | Pred {0\text{-mean}}$ | $\lvert\Delta F_0\rvert$ (Hz) | Sai số % | Ref {0\text{-std}}$ | Pred {0\text{-std}}$ | $\lvert\Delta\text{std}\rvert$ | V/UV Acc | F1-Score |
+| File kiểm thử | Cấu hình | Ref $F_{0\text{-mean}}$ | Pred $F_{0\text{-mean}}$ | $\lvert\Delta F_0\rvert$ (Hz) | Sai số % | Ref $F_{0\text{-std}}$ | Pred $F_{0\text{-std}}$ | $\lvert\Delta\text{std}\rvert$ | V/UV Acc | F1-Score |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | phone_F2.wav | Baseline | 145.00 Hz | 152.77 Hz | 7.77 Hz | 5.36% | 33.70 | 31.44 | 2.26 | 78.24% | 87.29% |
 | | **Enhanced** | 145.00 Hz | 151.11 Hz | **6.11 Hz** | **4.21%** | 33.70 | 31.52 | **2.18** | **77.82%** | **87.24%** |

@@ -165,17 +165,18 @@ def run_all_combinations(
             configs[name] = (detector, t)
             combo_idx += 1
 
-    print("=" * 137)
+    print("=" * 148)
     print(f"       BẢNG ĐỐI SÁNH TOÀN BỘ 32 TỔ HỢP PLUGINS TRÊN TẬP KIỂM THỬ (METHOD = {method.upper()})")
-    print("=" * 137)
-    header = f"{'Cấu hình':<44} | {'phone_F2 (|Δ|)':<16} | {'phone_M2 (|Δ|)':<16} | {'studio_F2 (|Δ|)':<16} | {'studio_M2 (|Δ|)':<16} | {'Sai số TB':<10} | {'F1 TB':<8} | {'Acc TB':<8}"
+    print("=" * 148)
+    header = f"{'Cấu hình':<44} | {'phone_F2 (|Δ|)':<16} | {'phone_M2 (|Δ|)':<16} | {'studio_F2 (|Δ|)':<16} | {'studio_M2 (|Δ|)':<16} | {'Sai số TB':<10} | {'Std TB':<8} | {'F1 TB':<8} | {'Acc TB':<8}"
     print(header)
-    print("-" * 137)
+    print("-" * 148)
 
     summary_records = []
 
     for name, (detector, t_val) in configs.items():
         errs = []
+        std_errs = []
         f1s = []
         accs = []
         file_metrics = {}
@@ -191,14 +192,19 @@ def run_all_combinations(
                 "pred_f0_mean": ev["pred_f0_mean"],
                 "abs_error_mean": ev["abs_error_mean"],
                 "rel_error_mean_pct": ev["rel_error_mean_pct"],
+                "pred_f0_std": ev["pred_f0_std"],
+                "abs_error_std": ev["abs_error_std"],
+                "rel_error_std_pct": ev["rel_error_std_pct"],
                 "accuracy": ev["classification_accuracy"],
                 "voiced_f1": ev["voiced_f1"],
             }
             errs.append(ev["abs_error_mean"])
+            std_errs.append(ev["abs_error_std"])
             f1s.append(ev["voiced_f1"])
             accs.append(ev["classification_accuracy"])
 
         avg_err = float(np.mean(errs))
+        avg_std_err = float(np.mean(std_errs))
         avg_f1 = float(np.mean(f1s))
         avg_acc = float(np.mean(accs))
 
@@ -209,6 +215,7 @@ def run_all_combinations(
             f"{file_metrics['studio_F2']['abs_error_mean']:5.2f}Hz ({file_metrics['studio_F2']['rel_error_mean_pct']:4.1f}%) | "
             f"{file_metrics['studio_M2']['abs_error_mean']:5.2f}Hz ({file_metrics['studio_M2']['rel_error_mean_pct']:4.1f}%) | "
             f"{avg_err:5.2f} Hz    | "
+            f"{avg_std_err:5.2f}   | "
             f"{avg_f1:5.2f}% | "
             f"{avg_acc:5.2f}%"
         )
@@ -218,12 +225,13 @@ def run_all_combinations(
             "config_name": name,
             "threshold": round(float(t_val), 4),
             "average_error_hz": round(avg_err, 2),
+            "average_std_error": round(avg_std_err, 2),
             "average_accuracy_pct": round(avg_acc, 2),
             "average_voiced_f1_pct": round(avg_f1, 2),
             "files": file_metrics,
         })
 
-    print("=" * 137)
+    print("=" * 148)
 
     # Tìm tổ hợp tốt nhất
     best_err_cfg = min(summary_records, key=lambda x: x["average_error_hz"])
@@ -280,10 +288,10 @@ def run_all_combinations(
 
     # Lưu CSV
     with open(output_csv, "w", encoding="utf-8") as f:
-        f.write("Config,Threshold,phone_F2_Err,phone_M2_Err,studio_F2_Err,studio_M2_Err,Avg_Err_Hz,Avg_Accuracy_Pct,Avg_F1_Pct\n")
+        f.write("Config,Threshold,phone_F2_Err,phone_M2_Err,studio_F2_Err,studio_M2_Err,Avg_Err_Hz,Avg_Std_Err,Avg_Accuracy_Pct,Avg_F1_Pct\n")
         for rec in summary_records:
             t_str = f"{rec.get('threshold', 0.0):.4f}"
-            f.write(f"{rec['config_name']},{t_str},{rec['files']['phone_F2']['abs_error_mean']},{rec['files']['phone_M2']['abs_error_mean']},{rec['files']['studio_F2']['abs_error_mean']},{rec['files']['studio_M2']['abs_error_mean']},{rec['average_error_hz']},{rec['average_accuracy_pct']},{rec['average_voiced_f1_pct']}\n")
+            f.write(f"{rec['config_name']},{t_str},{rec['files']['phone_F2']['abs_error_mean']},{rec['files']['phone_M2']['abs_error_mean']},{rec['files']['studio_F2']['abs_error_mean']},{rec['files']['studio_M2']['abs_error_mean']},{rec['average_error_hz']},{rec.get('average_std_error', 0.0)},{rec['average_accuracy_pct']},{rec['average_voiced_f1_pct']}\n")
     print(f"Saved report: {output_csv}")
 
 

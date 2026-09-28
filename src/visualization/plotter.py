@@ -541,14 +541,16 @@ def plot_combinations_ranking(
     save_path: Optional[str] = None,
     title: str = "Đánh giá toàn bộ 8 tổ hợp Plugins trên tập Kiểm thử",
 ):
-    """Plot horizontal bar charts comparing Mean Absolute Error and F1-Score across all plugin combinations."""
+    """Plot horizontal bar charts comparing Mean Absolute Error, Std Error, F1-Score, and Accuracy across all plugin combinations."""
     names = [rec["config_name"] for rec in summary_records]
     errs = [rec["average_error_hz"] for rec in summary_records]
+    std_errs = [rec.get("average_std_error", 0.0) for rec in summary_records]
     f1s = [rec["average_voiced_f1_pct"] for rec in summary_records]
+    accs = [rec["average_accuracy_pct"] for rec in summary_records]
 
     fig_height = max(8, len(names) * 0.42)
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, fig_height))
-    fig.suptitle(title, fontsize=14, fontweight="bold")
+    fig, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(28, fig_height))
+    fig.suptitle(title, fontsize=15, fontweight="bold")
 
     y_pos = np.arange(len(names))
     label_fontsize = 8.5 if len(names) > 20 else 10
@@ -562,34 +564,77 @@ def plot_combinations_ranking(
     ax1.set_yticklabels(names, fontsize=label_fontsize)
     ax1.invert_yaxis()  # top-down
     ax1.set_xlabel("Sai số tuyệt đối trung bình |ΔF0| (Hz) - [Thấp hơn là tốt hơn]", fontsize=10, fontweight="bold")
-    ax1.set_title("1. So sánh Sai số tuyệt đối trung bình (|ΔF0|)", fontsize=11, fontweight="bold")
+    ax1.set_title("1. Sai số F0 TB (|ΔF0|)", fontsize=11, fontweight="bold")
     ax1.grid(True, axis="x", linestyle="--", alpha=0.5)
 
     for bar in bars1:
         w = bar.get_width()
         ax1.annotate(f"{w:.2f} Hz", xy=(w, bar.get_y() + bar.get_height() / 2),
-                     xytext=(5, 0), textcoords="offset points", va="center", fontsize=annot_fontsize, fontweight="bold")
+                     xytext=(4, 0), textcoords="offset points", va="center", fontsize=annot_fontsize, fontweight="bold")
 
-    # Panel 2: F1-Score (Higher is better)
-    max_f1 = max(f1s)
-    colors_f1 = ["#2ca02c" if f == max_f1 else "#ff7f0e" for f in f1s]
-    bars2 = ax2.barh(y_pos, f1s, color=colors_f1, alpha=0.85, edgecolor="gray")
+    # Panel 2: Std Error (Lower is better)
+    min_std = min(std_errs)
+    colors_std = ["#2ca02c" if s == min_std else "#9467bd" for s in std_errs]
+    bars2 = ax2.barh(y_pos, std_errs, color=colors_std, alpha=0.85, edgecolor="gray")
     ax2.set_yticks(y_pos)
     ax2.set_yticklabels([])  # hide duplicate labels
     ax2.invert_yaxis()
-    f1_min = max(0.0, float(np.floor(min(f1s) - 2.0)))
-    f1_max = min(100.0, float(np.ceil(max(f1s) + 2.0)))
-    ax2.set_xlim(f1_min, f1_max)
-    ax2.set_xlabel("Voiced F1-Score (%) - [Cao hơn là tốt hơn]", fontsize=11, fontweight="bold")
-    ax2.set_title("2. So sánh Voiced F1-Score (%)", fontsize=12, fontweight="bold")
+    ax2.set_xlabel("Sai số độ lệch chuẩn TB |Δstd| - [Thấp hơn là tốt hơn]", fontsize=10, fontweight="bold")
+    ax2.set_title("2. Sai số Độ lệch chuẩn TB (|Δstd|)", fontsize=11, fontweight="bold")
     ax2.grid(True, axis="x", linestyle="--", alpha=0.5)
 
     for bar in bars2:
         w = bar.get_width()
-        ax2.annotate(f"{w:.2f}%", xy=(w, bar.get_y() + bar.get_height() / 2),
-                     xytext=(5, 0), textcoords="offset points", va="center", fontsize=annot_fontsize, fontweight="bold")
+        ax2.annotate(f"{w:.2f}", xy=(w, bar.get_y() + bar.get_height() / 2),
+                     xytext=(4, 0), textcoords="offset points", va="center", fontsize=annot_fontsize, fontweight="bold")
 
-    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    # Panel 3: F1-Score (Higher is better)
+    max_f1 = max(f1s)
+    colors_f1 = ["#2ca02c" if f == max_f1 else "#ff7f0e" for f in f1s]
+    bars3 = ax3.barh(y_pos, f1s, color=colors_f1, alpha=0.85, edgecolor="gray")
+    ax3.set_yticks(y_pos)
+    ax3.set_yticklabels([])  # hide duplicate labels
+    ax3.invert_yaxis()
+    f1_min = max(0.0, float(np.floor(min(f1s) - 2.0)))
+    f1_max = min(100.0, float(np.ceil(max(f1s) + 2.0)))
+    ax3.set_xlim(f1_min, f1_max)
+    ax3.set_xlabel("Voiced F1-Score (%) - [Cao hơn là tốt hơn]", fontsize=10, fontweight="bold")
+    ax3.set_title("3. Voiced F1-Score (%)", fontsize=11, fontweight="bold")
+    ax3.grid(True, axis="x", linestyle="--", alpha=0.5)
+
+    for bar in bars3:
+        w = bar.get_width()
+        ax3.annotate(f"{w:.2f}%", xy=(w, bar.get_y() + bar.get_height() / 2),
+                     xytext=(4, 0), textcoords="offset points", va="center", fontsize=annot_fontsize, fontweight="bold")
+
+    # Panel 4: Accuracy (Higher is better)
+    max_acc = max(accs)
+    colors_acc = ["#2ca02c" if a == max_acc else "#17becf" for a in accs]
+    bars4 = ax4.barh(y_pos, accs, color=colors_acc, alpha=0.85, edgecolor="gray")
+    ax4.set_yticks(y_pos)
+    ax4.set_yticklabels([])  # hide duplicate labels
+    ax4.invert_yaxis()
+    acc_min = max(0.0, float(np.floor(min(accs) - 2.0)))
+    acc_max = min(100.0, float(np.ceil(max(accs) + 2.0)))
+    ax4.set_xlim(acc_min, acc_max)
+    ax4.set_xlabel("V/UV Accuracy (%) - [Cao hơn là tốt hơn]", fontsize=10, fontweight="bold")
+    ax4.set_title("4. V/UV Accuracy (%)", fontsize=11, fontweight="bold")
+    ax4.grid(True, axis="x", linestyle="--", alpha=0.5)
+
+    for bar in bars4:
+        w = bar.get_width()
+        ax4.annotate(f"{w:.2f}%", xy=(w, bar.get_y() + bar.get_height() / 2),
+                     xytext=(4, 0), textcoords="offset points", va="center", fontsize=annot_fontsize, fontweight="bold")
+
+    # Ensure margin for annotations on all panels
+    for ax in [ax1, ax2]:
+        x_min, x_max = ax.get_xlim()
+        ax.set_xlim(x_min, x_max + (x_max - x_min) * 0.15)
+    for ax in [ax3, ax4]:
+        x_min, x_max = ax.get_xlim()
+        ax.set_xlim(x_min, x_max + (x_max - x_min) * 0.18)
+
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
     if save_path:
         os.makedirs(os.path.dirname(os.path.abspath(save_path)), exist_ok=True)
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
