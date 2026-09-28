@@ -10,6 +10,7 @@ from scipy.ndimage import median_filter
 from src.core.audio import load_wav, frame_signal, compute_ste
 from src.core.acf import find_f0_acf
 from src.core.amdf import find_f0_amdf
+from src.core.yin import find_f0_yin
 from src.core.pitch_detector import PitchDetector
 from .base import (
     BasePlugin,
@@ -167,6 +168,19 @@ class PluginPitchDetector:
                 lags[i] = lag
                 candidate_f0[i] = f0_val
                 is_voiced = dip_val <= self.base_detector.threshold
+                current_metric = dip_val
+            elif method == "yin":
+                f0_val, dip_val, lag = find_f0_yin(
+                    pitch_frame,
+                    sample_rate,
+                    f0_min=self.base_detector.f0_min,
+                    f0_max=self.base_detector.f0_max,
+                    harmonic_threshold=self.base_detector.threshold,
+                )
+                peak_values[i] = dip_val
+                lags[i] = int(round(lag))
+                candidate_f0[i] = f0_val
+                is_voiced = f0_val > 0.0
                 current_metric = dip_val
             else:
                 f0_val, peak_val, lag = find_f0_acf(

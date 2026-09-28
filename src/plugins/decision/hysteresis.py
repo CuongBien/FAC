@@ -45,8 +45,8 @@ class HysteresisPlugin(DecisionPlugin):
 
         method = context.get("method", "acf").lower()
 
-        if method == "amdf":
-            # For AMDF: smaller dip means stronger periodicity
+        if method in ("amdf", "yin"):
+            # For AMDF and YIN: smaller dip means stronger periodicity
             # Enter threshold (strict): lower value (e.g. 0.38 - 0.40)
             # Exit threshold (relaxed): higher value (e.g. 0.44 - 0.48)
             t_enter = min(self.t_high, self.t_low)

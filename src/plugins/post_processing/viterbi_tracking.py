@@ -14,6 +14,11 @@ from src.plugins.base import PostProcessingPlugin
 from src.core.audio import frame_signal
 from src.core.acf import compute_acf
 from src.core.amdf import compute_amdf
+from src.core.yin import (
+    compute_difference_function,
+    cumulative_mean_normalized_difference,
+    parabolic_interpolation,
+)
 
 
 class ViterbiTrackingPlugin(PostProcessingPlugin):
@@ -106,6 +111,46 @@ class ViterbiTrackingPlugin(PostProcessingPlugin):
             cost = max(0.0, min(1.0, val))
             candidates.append({"f0": f0, "cost": cost})
 
+        return candidates
+
+    def _extract_yin_candidates(
+        self, frame: np.ndarray, sample_rate: int
+    ) -> List[Dict[str, float]]:
+        lag_min = max(1, int(round(sample_rate / self.f0_max)))
+        lag_max = min(len(frame) - 1, int(round(sample_rate / self.f0_min)))
+        if lag_min >= lag_max:
+            return [{"f0": 0.0, "cost": 1.0}]
+
+        d = compute_difference_function(frame, max_lag=lag_max)
+        d_prime = cumulative_mean_normalized_difference(d)
+
+        dips = []
+        for lag in range(lag_min, min(lag_max, len(d_prime) - 1)):
+            if d_prime[lag] < d_prime[lag - 1] and d_prime[lag] <= d_prime[lag + 1]:
+                tau_fine, val_fine = parabolic_interpolation(d_prime, lag)
+                f0 = float(sample_rate / tau_fine) if tau_fine > 0 else 0.0
+                if self.f0_min * 0.9 <= f0 <= self.f0_max * 1.1:
+                    dips.append((val_fine, f0))
+
+        if not dips:
+            search_slice = d_prime[lag_min : lag_max + 1]
+            if len(search_slice) > 0:
+                rel_idx = int(np.argmin(search_slice))
+                best_lag = lag_min + rel_idx
+                tau_fine, val_fine = parabolic_interpolation(d_prime, best_lag)
+                f0 = float(sample_rate / tau_fine) if tau_fine > 0 else 0.0
+                dips.append((val_fine, f0))
+
+        dips.sort(key=lambda x: x[0])
+        dips = dips[: self.max_candidates]
+
+        candidates = []
+        for val, f0 in dips:
+            cost = max(0.0, min(1.0, val))
+            candidates.append({"f0": f0, "cost": cost})
+
+        if not candidates:
+            return [{"f0": 0.0, "cost": 1.0}]
         return candidates
 
     def _transition_cost(self, f0_prev: float, f0_curr: float) -> float:
@@ -223,6 +268,8 @@ class ViterbiTrackingPlugin(PostProcessingPlugin):
                     frame_data = frames[idx]
                     if method == "amdf":
                         cands = self._extract_amdf_candidates(frame_data, sample_rate)
+                    elif method == "yin":
+                        cands = self._extract_yin_candidates(frame_data, sample_rate)
                     else:
                         cands = self._extract_acf_candidates(frame_data, sample_rate)
                 else:

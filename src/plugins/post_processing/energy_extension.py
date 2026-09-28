@@ -42,8 +42,8 @@ class EnergyExtensionPlugin(PostProcessingPlugin):
 
         num_frames = len(labels)
         method = result.get("method", "acf").lower()
-        if method == "amdf":
-            # For AMDF: smaller dip is better, discount increases tolerable threshold
+        if method in ("amdf", "yin"):
+            # For AMDF and YIN: smaller dip is better, discount increases tolerable threshold
             effective_thresh = base_thresh * (1.0 + self.threshold_discount)
             def check_periodicity(val):
                 return val <= effective_thresh
