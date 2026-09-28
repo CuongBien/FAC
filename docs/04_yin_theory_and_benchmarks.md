@@ -58,7 +58,7 @@ $$
 Để chống lỗi nhân đôi chu kỳ $2T_0$ (hạ quãng tám), YIN không lấy cực tiểu toàn cục mà chọn **cực tiểu địa phương đầu tiên tụt xuống dưới ngưỡng tuyệt đối**:
 
 $$
-\tau^* = \min \left\{ \tau \in [\tau_{\min}, \tau_{\max}] \mid d'_t(\tau) < \text{Thresh}, \; d'_t(\tau) \le d'_t(\tau \pm 1) \right\}
+\tau^* = \min \left\lbrace \tau \in [\tau_{\min}, \tau_{\max}] \mid d'_t(\tau) < \text{Thresh}, \; d'_t(\tau) \le d'_t(\tau \pm 1) \right\rbrace
 $$
 
 Nếu không có thung lũng nào thỏa mãn, thuật toán chọn đáy nhỏ nhất toàn dải hoặc kết luận khung là **Unvoiced ($F_0 = 0\text{ Hz}$)**.

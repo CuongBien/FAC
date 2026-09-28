@@ -133,7 +133,7 @@ $\implies$ **Luận điểm khoa học cho việc chốt chuẩn 25 ms:**
 Hiện tượng rung lật trạng thái (*decision chattering*) khi đỉnh tự tương quan dao động quanh ngưỡng tĩnh $T$.
 
 **Mô hình máy trạng thái:**  
-Ký hiệu $S_i \in \{0, 1\}$ là nhãn khung thứ $i$ (0: Unvoiced, 1: Voiced) và $R_i^* = \max_{\tau \in [\tau_{\min}, \tau_{\max}]} R_i(\tau)$ là đỉnh cực đại tự tương quan.
+Ký hiệu $S_i \in \lbrace 0, 1 \rbrace$ là nhãn khung thứ $i$ (0: Unvoiced, 1: Voiced) và $R_i^* = \max_{\tau \in [\tau_{\min}, \tau_{\max}]} R_i(\tau)$ là đỉnh cực đại tự tương quan.
 
 Phương trình chuyển trạng thái:
 
