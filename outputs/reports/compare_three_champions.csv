@@ -1,5 +1,5 @@
-name,phone_F2_mae,phone_M2_mae,studio_F2_mae,studio_M2_mae,average_error_hz,average_std_error,average_voiced_f1_pct,average_accuracy_pct
-"ACF Champion (Config 29)",4.53,2.24,0.01,0.65,1.86,2.02,91.39,83.8
-"AMDF Champion (Config 13)",5.15,0.27,0.14,0.46,1.5,1.65,91.42,83.88
-"YIN Champion (Viterbi)",1.97,0.06,1.86,1.2,1.27,1.7,92.22,84.54
-"YIN Ultra-Low MAE (BP)",0.17,0.57,2.21,1.38,1.08,1.85,91.54,83.75
+name,dataset,average_error_hz,mape_f0_pct,average_std_error,mape_std_pct,average_num_error,mape_num_pct,final_composite_score_pct,average_voiced_f1_pct,average_accuracy_pct
+"ACF Champion (Config 29)","TinHieuKiemThu",1.86,1.32,2.02,6.75,23.75,14.3,7.46,91.39,83.8
+"AMDF Champion (Config 13)","TinHieuKiemThu",1.5,1.03,1.65,5.4,24.75,14.72,7.05,91.42,83.88
+"YIN Champion (Viterbi)","TinHieuKiemThu",1.27,0.78,1.7,6.04,22.0,13.14,6.65,92.22,84.54
+"YIN Ultra-Low MAE (BP)","TinHieuKiemThu",1.08,0.64,1.85,6.28,16.25,9.79,5.57,91.54,83.75

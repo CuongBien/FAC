@@ -167,9 +167,9 @@ def run_testing(
     print(f"KIỂM THỬ THUẬT TOÁN {method.upper()} TRÊN TẬP TÍN HIỆU KIỂM THỬ ({test_dir})")
     print(f"Tham số: Method={method.upper()}, FrameLen={frame_duration_ms}ms, HopLen={hop_duration_ms}ms, Range=[{f0_min:.0f}, {f0_max:.0f}]Hz, Threshold T={threshold:.4f}{plugin_desc}")
     print("=" * 105)
-    header = f"{'Tên file':<16} | {'Ref F0mean':<10} | {'Pred F0mean':<11} | {'|ΔF0| (Hz)':<10} | {'Lệch %':<7} | {'Ref std':<8} | {'Pred std':<8} | {'|Δstd|':<7} | {'V/UV Acc':<8} | {'F1-Score':<8}"
+    header = f"{'Tên file':<16} | {'Ref F0mean':<10} | {'Pred F0mean':<11} | {'|ΔF0| (Hz)':<10} | {'MAPE F0':<8} | {'Ref std':<8} | {'Pred std':<8} | {'|Δstd|':<7} | {'MAPE std':<8} | {'V/UV Acc':<8} | {'F1-Score':<8}"
     print(header)
-    print("-" * 105)
+    print("-" * 120)
 
     for wav_path in wav_files:
         base_name = os.path.basename(wav_path)
@@ -187,10 +187,11 @@ def run_testing(
             f"{eval_res['ref_f0_mean']:<10.2f} | "
             f"{eval_res['pred_f0_mean']:<11.2f} | "
             f"{eval_res['abs_error_mean']:<10.2f} | "
-            f"{eval_res['rel_error_mean_pct']:<5.2f}% | "
+            f"{eval_res['mape_f0']:<7.2f}% | "
             f"{eval_res['ref_f0_std']:<8.2f} | "
             f"{eval_res['pred_f0_std']:<8.2f} | "
             f"{eval_res['abs_error_std']:<7.2f} | "
+            f"{eval_res['mape_std']:<7.2f}% | "
             f"{eval_res['classification_accuracy']:<7.2f}% | "
             f"{eval_res['voiced_f1']:<7.2f}%"
         )
@@ -227,10 +228,12 @@ def run_testing(
             "pred_f0_mean": eval_res["pred_f0_mean"],
             "abs_error_mean": eval_res["abs_error_mean"],
             "rel_error_mean_pct": eval_res["rel_error_mean_pct"],
+            "mape_f0": eval_res["mape_f0"],
             "ref_f0_std": eval_res["ref_f0_std"],
             "pred_f0_std": eval_res["pred_f0_std"],
             "abs_error_std": eval_res["abs_error_std"],
             "rel_error_std_pct": eval_res["rel_error_std_pct"],
+            "mape_std": eval_res["mape_std"],
             "accuracy": eval_res["classification_accuracy"],
             "voiced_f1": eval_res["voiced_f1"],
             "figure_path": fig_path,
@@ -238,13 +241,15 @@ def run_testing(
 
     # 6. Tính trung bình sai số toàn tập kiểm thử
     avg_abs_err_mean = np.mean([r["abs_error_mean"] for r in results_all])
-    avg_rel_err_mean = np.mean([r["rel_error_mean_pct"] for r in results_all])
+    avg_mape_f0 = np.mean([r["mape_f0"] for r in results_all])
+    avg_abs_err_std = np.mean([r["abs_error_std"] for r in results_all])
+    avg_mape_std = np.mean([r["mape_std"] for r in results_all])
     avg_acc = np.mean([r["accuracy"] for r in results_all])
     avg_f1 = np.mean([r["voiced_f1"] for r in results_all])
 
-    print("-" * 105)
-    print(f"{'TRUNG BÌNH TOÀN TẬP':<16} | {'-':<10} | {'-':<11} | {avg_abs_err_mean:<10.2f} | {avg_rel_err_mean:<6.2f}% | {'-':<8} | {'-':<8} | {'-':<7} | {avg_acc:<7.2f}% | {avg_f1:<7.2f}%")
-    print("=" * 105)
+    print("-" * 120)
+    print(f"{'TRUNG BÌNH TOÀN TẬP':<16} | {'-':<10} | {'-':<11} | {avg_abs_err_mean:<10.2f} | {avg_mape_f0:<7.2f}% | {'-':<8} | {'-':<8} | {avg_abs_err_std:<7.2f} | {avg_mape_std:<7.2f}% | {avg_acc:<7.2f}% | {avg_f1:<7.2f}%")
+    print("=" * 120)
 
     # 7. Lưu kết quả ra file JSON
     summary_data = {

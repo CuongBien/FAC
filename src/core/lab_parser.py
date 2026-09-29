@@ -20,6 +20,7 @@ def parse_lab_file(filepath: str) -> Dict:
     segments: List[Tuple[float, float, str]] = []
     f0_mean = None
     f0_std = None
+    f0_num = None
 
     with open(filepath, "r", encoding="utf-8") as f:
         for raw_line in f:
@@ -39,6 +40,12 @@ def parse_lab_file(filepath: str) -> Dict:
                 f0_std = float(match_std.group(1))
                 continue
 
+            # Check for F0num
+            match_num = re.match(r"^F0num\s+([0-9.]+)", line, re.IGNORECASE)
+            if match_num:
+                f0_num = float(match_num.group(1))
+                continue
+
             # Check for segment line: start_sec end_sec label
             parts = line.split()
             if len(parts) >= 3:
@@ -54,6 +61,7 @@ def parse_lab_file(filepath: str) -> Dict:
         "segments": segments,
         "f0_mean": f0_mean,
         "f0_std": f0_std,
+        "f0_num": f0_num,
     }
 
 

@@ -1,0 +1,5 @@
+name,dataset,average_error_hz,mape_f0_pct,average_std_error,mape_std_pct,average_num_error,mape_num_pct,final_composite_score_pct,average_voiced_f1_pct,average_accuracy_pct
+"ACF Champion (Config 29)","TinHieuHuanLuyen",1.92,1.04,1.52,5.74,18.0,10.93,5.91,None,None
+"AMDF Champion (Config 13)","TinHieuHuanLuyen",1.69,0.99,1.25,4.58,19.25,12.23,5.93,None,None
+"YIN Champion (Viterbi)","TinHieuHuanLuyen",1.26,0.97,1.18,4.38,14.5,9.12,4.82,None,None
+"YIN Ultra-Low MAE (BP)","TinHieuHuanLuyen",2.66,2.15,5.61,30.2,8.0,5.59,12.65,None,None

@@ -1,8 +1,8 @@
-name,phone_F2_mae,phone_M2_mae,studio_F2_mae,studio_M2_mae,average_error_hz,average_std_error,average_voiced_f1_pct,average_accuracy_pct
-"YIN Baseline",2.91,0.04,1.67,0.97,1.4,1.77,92.22,84.54
-"YIN + Viterbi",1.97,0.06,1.86,1.2,1.27,1.7,92.22,84.54
-"YIN + Bandpass",0.17,0.57,2.21,1.38,1.08,1.85,91.54,83.75
-"YIN + EnergyExt",3.01,0.05,1.66,0.91,1.41,1.74,92.22,84.54
-"YIN + BP + Viterbi",0.5,0.58,2.2,1.58,1.22,1.86,91.54,83.75
-"YIN + Energy + Viterbi",2.26,0.06,1.84,1.2,1.34,1.64,92.22,84.54
-"YIN + BP + Energy + Viterbi",0.61,0.58,2.2,1.51,1.23,1.84,91.54,83.75
+name,phone_F2_mae,phone_M2_mae,studio_F2_mae,studio_M2_mae,average_error_hz,average_std_error,mape_f0_pct,mape_std_pct,average_voiced_f1_pct,average_accuracy_pct
+"YIN Baseline",2.91,0.04,1.67,0.97,1.4,1.77,0.87,6.2,92.22,84.54
+"YIN + Viterbi",1.97,0.06,1.86,1.2,1.27,1.7,0.78,6.04,92.22,84.54
+"YIN + Bandpass",0.17,0.57,2.21,1.38,1.08,1.85,0.64,6.28,91.54,83.75
+"YIN + EnergyExt",3.01,0.05,1.66,0.91,1.41,1.74,0.89,6.13,92.22,84.54
+"YIN + BP + Viterbi",0.5,0.58,2.2,1.58,1.22,1.86,0.73,6.34,91.54,83.75
+"YIN + Energy + Viterbi",2.26,0.06,1.84,1.2,1.34,1.64,0.83,5.86,92.22,84.54
+"YIN + BP + Energy + Viterbi",0.61,0.58,2.2,1.51,1.23,1.84,0.74,6.29,91.54,83.75

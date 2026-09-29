@@ -23,6 +23,7 @@ Nhiệm vụ:
    - outputs/reports/compare_yin_enhanced.json & .csv
 """
 import argparse
+import glob
 import json
 import os
 import sys
@@ -127,12 +128,16 @@ def build_detectors():
 
 def evaluate_suite(configs_dict, test_dir="TinHieuKiemThu"):
     """Evaluate a dictionary of detector factory functions across test files."""
-    files = ["phone_F2", "phone_M2", "studio_F2", "studio_M2"]
+    wav_paths = sorted(glob.glob(os.path.join(test_dir, "*.wav")))
+    files = [os.path.splitext(os.path.basename(p))[0] for p in wav_paths]
+    if not files:
+        files = ["phone_F2", "phone_M2", "studio_F2", "studio_M2"]
     suite_results = []
 
     for name, factory in configs_dict.items():
         det = factory()
         errs, std_errs, f1s, accs = [], [], [], []
+        mapes_f0, mapes_std, mapes_num, num_errs = [], [], [], []
         file_metrics = {}
 
         for f_id in files:
@@ -145,23 +150,53 @@ def evaluate_suite(configs_dict, test_dir="TinHieuKiemThu"):
             file_metrics[f_id] = ev
             errs.append(ev["abs_error_mean"])
             std_errs.append(ev["abs_error_std"])
-            f1s.append(ev["voiced_f1"])
-            accs.append(ev["classification_accuracy"])
+            mapes_f0.append(ev["mape_f0"])
+            mapes_std.append(ev["mape_std"])
+            if ev.get("mape_num") is not None:
+                mapes_num.append(ev["mape_num"])
+                num_errs.append(ev["abs_error_num"])
+            if ev.get("voiced_f1") is not None:
+                f1s.append(ev["voiced_f1"])
+            if ev.get("classification_accuracy") is not None:
+                accs.append(ev["classification_accuracy"])
+
+        mean_mape_f0 = float(np.mean(mapes_f0))
+        mean_mape_std = float(np.mean(mapes_std))
+        mean_mape_num = float(np.mean(mapes_num)) if mapes_num else None
+        if mean_mape_num is not None:
+            final_composite = (mean_mape_f0 + mean_mape_std + mean_mape_num) / 3.0
+        else:
+            final_composite = (mean_mape_f0 + mean_mape_std) / 2.0
 
         rec = {
             "name": name,
+            "dataset": test_dir,
             "average_error_hz": round(float(np.mean(errs)), 2),
             "average_std_error": round(float(np.mean(std_errs)), 2),
-            "average_voiced_f1_pct": round(float(np.mean(f1s)), 2),
-            "average_accuracy_pct": round(float(np.mean(accs)), 2),
+            "average_num_error": round(float(np.mean(num_errs)), 2) if num_errs else None,
+            "mape_f0_pct": round(mean_mape_f0, 2),
+            "mape_std_pct": round(mean_mape_std, 2),
+            "mape_num_pct": round(mean_mape_num, 2) if mean_mape_num is not None else None,
+            "final_composite_score_pct": round(final_composite, 2),
+            "average_voiced_f1_pct": round(float(np.mean(f1s)), 2) if f1s else None,
+            "average_accuracy_pct": round(float(np.mean(accs)), 2) if accs else None,
             "files": {
                 f: {
                     "abs_error_mean": round(file_metrics[f]["abs_error_mean"], 2),
+                    "mape_f0": round(file_metrics[f]["mape_f0"], 2),
                     "abs_error_std": round(file_metrics[f]["abs_error_std"], 2),
-                    "voiced_f1": round(file_metrics[f]["voiced_f1"], 2),
-                    "accuracy": round(file_metrics[f]["classification_accuracy"], 2),
+                    "mape_std": round(file_metrics[f]["mape_std"], 2),
+                    "pred_f0_num": file_metrics[f].get("pred_f0_num"),
+                    "ref_f0_num": file_metrics[f].get("ref_f0_num"),
+                    "abs_error_num": file_metrics[f].get("abs_error_num"),
+                    "mape_num": file_metrics[f].get("mape_num"),
+                    "composite_score": file_metrics[f].get("composite_score"),
+                    "voiced_f1": file_metrics[f].get("voiced_f1"),
+                    "accuracy": file_metrics[f].get("classification_accuracy"),
                     "pred_f0_mean": round(file_metrics[f]["pred_f0_mean"], 2),
                     "ref_f0_mean": round(file_metrics[f]["ref_f0_mean"], 2),
+                    "pred_f0_std": round(file_metrics[f]["pred_f0_std"], 2),
+                    "ref_f0_std": round(file_metrics[f]["ref_f0_std"], 2),
                 }
                 for f in files
             }
@@ -294,74 +329,98 @@ def plot_champions_comparison(records, output_fig_path):
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Đối sánh các hệ thống SOTA Champions.")
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        default="both",
+        help="Chọn tập dữ liệu: kiemthu, huanluyen, both, hoặc đường dẫn tới thư mục chứa file .wav/.lab",
+    )
+    args = parser.parse_args()
+
     yin_configs, champions = build_detectors()
 
-    print("=" * 115)
-    print("PHẦN 1: KHẢO SÁT & ĐÁNH GIÁ CÁC CẤU HÌNH ENHANCED TRÊN NỀN TẢNG YIN")
-    print("=" * 115)
-    yin_results = evaluate_suite(yin_configs)
+    datasets = []
+    if args.dataset == "huanluyen":
+        datasets.append(("TinHieuHuanLuyen", "TẬP HUẤN LUYỆN (TinHieuHuanLuyen)"))
+    elif args.dataset == "kiemthu":
+        datasets.append(("TinHieuKiemThu", "TẬP KIỂM THỬ (TinHieuKiemThu)"))
+    elif args.dataset == "both":
+        datasets.append(("TinHieuHuanLuyen", "TẬP HUẤN LUYỆN (TinHieuHuanLuyen)"))
+        datasets.append(("TinHieuKiemThu", "TẬP KIỂM THỬ (TinHieuKiemThu)"))
+    elif os.path.isdir(args.dataset):
+        datasets.append((args.dataset, f"TẬP DỮ LIỆU TÙY CHỌN ({args.dataset})"))
+    else:
+        print(f"[!] Thư mục hoặc tùy chọn không hợp lệ: {args.dataset}")
+        sys.exit(1)
 
-    print(f"{'Cấu hình YIN':<30} | {'phone_F2':<10} | {'phone_M2':<10} | {'studio_F2':<10} | {'studio_M2':<10} | {'MAE TB':<8} | {'Std TB':<8} | {'F1 TB':<8} | {'Acc TB':<8}")
-    print("-" * 125)
-    for r in yin_results:
-        f = r["files"]
-        print(
-            f"{r['name']:<30} | "
-            f"{f['phone_F2']['abs_error_mean']:5.2f} Hz  | "
-            f"{f['phone_M2']['abs_error_mean']:5.2f} Hz  | "
-            f"{f['studio_F2']['abs_error_mean']:5.2f} Hz  | "
-            f"{f['studio_M2']['abs_error_mean']:5.2f} Hz  | "
-            f"{r['average_error_hz']:5.2f} Hz | "
-            f"{r['average_std_error']:5.2f} Hz | "
-            f"{r['average_voiced_f1_pct']:5.2f}% | "
-            f"{r['average_accuracy_pct']:5.2f}%"
-        )
+    for d_dir, d_title in datasets:
+        print("\n" + "=" * 160)
+        print(f"  {d_title} - ĐỐI SÁNH CÁC HỆ THỐNG SOTA CHAMPIONS (F0, STD & F0NUM - KÈM MAPE & FINAL SCORE)")
+        print("=" * 160)
 
-    # Save YIN Enhanced report
-    os.makedirs("outputs/reports", exist_ok=True)
-    with open("outputs/reports/compare_yin_enhanced.json", "w", encoding="utf-8") as f:
-        json.dump(yin_results, f, ensure_ascii=False, indent=2)
+        champ_results = evaluate_suite(champions, test_dir=d_dir)
 
-    with open("outputs/reports/compare_yin_enhanced.csv", "w", encoding="utf-8") as f:
-        f.write("name,phone_F2_mae,phone_M2_mae,studio_F2_mae,studio_M2_mae,average_error_hz,average_std_error,average_voiced_f1_pct,average_accuracy_pct\n")
-        for r in yin_results:
-            f_m = r["files"]
-            f.write(f'"{r["name"]}",{f_m["phone_F2"]["abs_error_mean"]},{f_m["phone_M2"]["abs_error_mean"]},{f_m["studio_F2"]["abs_error_mean"]},{f_m["studio_M2"]["abs_error_mean"]},{r["average_error_hz"]},{r["average_std_error"]},{r["average_voiced_f1_pct"]},{r["average_accuracy_pct"]}\n')
-
-    print("\n" + "=" * 115)
-    print("PHẦN 2: ĐỐI SÁNH TRỰC DIỆN 3 QUÁN QUÂN (ACF vs. AMDF vs. YIN)")
-    print("=" * 115)
-    champ_results = evaluate_suite(champions)
-
-    print(f"{'Quán quân':<30} | {'phone_F2':<10} | {'phone_M2':<10} | {'studio_F2':<10} | {'studio_M2':<10} | {'MAE TB':<8} | {'Std TB':<8} | {'F1 TB':<8} | {'Acc TB':<8}")
-    print("-" * 125)
-    for r in champ_results:
-        f = r["files"]
-        print(
-            f"{r['name']:<30} | "
-            f"{f['phone_F2']['abs_error_mean']:5.2f} Hz  | "
-            f"{f['phone_M2']['abs_error_mean']:5.2f} Hz  | "
-            f"{f['studio_F2']['abs_error_mean']:5.2f} Hz  | "
-            f"{f['studio_M2']['abs_error_mean']:5.2f} Hz  | "
-            f"{r['average_error_hz']:5.2f} Hz | "
-            f"{r['average_std_error']:5.2f} Hz | "
-            f"{r['average_voiced_f1_pct']:5.2f}% | "
-            f"{r['average_accuracy_pct']:5.2f}%"
-        )
-
-    # Save Champions report
-    with open("outputs/reports/compare_three_champions.json", "w", encoding="utf-8") as f:
-        json.dump(champ_results, f, ensure_ascii=False, indent=2)
-
-    with open("outputs/reports/compare_three_champions.csv", "w", encoding="utf-8") as f:
-        f.write("name,phone_F2_mae,phone_M2_mae,studio_F2_mae,studio_M2_mae,average_error_hz,average_std_error,average_voiced_f1_pct,average_accuracy_pct\n")
+        # Print header
+        print(f"{'Hệ thống Quán quân':<28} | {'MAE F0':<9} | {'MAPE F0':<9} | {'ΔStd':<9} | {'MAPE Std':<9} | {'ΔNum (khung)':<13} | {'MAPE Num':<9} | {'FINAL SCORE':<12} | {'F1-Score':<9} | {'V/UV Acc':<9}")
+        print("-" * 160)
         for r in champ_results:
-            f_m = r["files"]
-            f.write(f'"{r["name"]}",{f_m["phone_F2"]["abs_error_mean"]},{f_m["phone_M2"]["abs_error_mean"]},{f_m["studio_F2"]["abs_error_mean"]},{f_m["studio_M2"]["abs_error_mean"]},{r["average_error_hz"]},{r["average_std_error"]},{r["average_voiced_f1_pct"]},{r["average_accuracy_pct"]}\n')
+            num_err_str = f"{r['average_num_error']:5.1f}" if r['average_num_error'] is not None else "   N/A"
+            mape_num_str = f"{r['mape_num_pct']:5.2f}%" if r['mape_num_pct'] is not None else "   N/A"
+            f1_str = f"{r['average_voiced_f1_pct']:5.2f}%" if r['average_voiced_f1_pct'] is not None else "   N/A"
+            acc_str = f"{r['average_accuracy_pct']:5.2f}%" if r['average_accuracy_pct'] is not None else "   N/A"
+            final_score_str = f"{r['final_composite_score_pct']:5.2f}%"
 
-    # Generate Chart
-    plot_champions_comparison(champ_results, "outputs/figures/12_compare_three_champions.png")
-    print("\n[HOÀN TẤT] Toàn bộ báo cáo và biểu đồ đã được lưu trữ thành công!")
+            print(
+                f"{r['name']:<28} | "
+                f"{r['average_error_hz']:5.2f} Hz | "
+                f"{r['mape_f0_pct']:5.2f}%    | "
+                f"{r['average_std_error']:5.2f} Hz | "
+                f"{r['mape_std_pct']:5.2f}%    | "
+                f"{num_err_str:<13} | "
+                f"{mape_num_str:<9} | "
+                f"{final_score_str:<12} | "
+                f"{f1_str:<9} | "
+                f"{acc_str:<9}"
+            )
+
+        # Print breakdown per file
+        print("\n  Chi tiết từng file:")
+        for r in champ_results:
+            print(f"  * {r['name']}:")
+            for fname, fmetrics in r["files"].items():
+                num_info = ""
+                if fmetrics.get("ref_f0_num") is not None:
+                    num_info = f" | Num: Pred={fmetrics['pred_f0_num']} vs Ref={fmetrics['ref_f0_num']} (Δ={fmetrics['abs_error_num']}, MAPE={fmetrics['mape_num']:.1f}%)"
+                comp_info = ""
+                if fmetrics.get("composite_score") is not None:
+                    comp_info = f" | Score={fmetrics['composite_score']:.2f}%"
+                f1_info = f" | F1: {fmetrics['voiced_f1']:.1f}%" if fmetrics.get("voiced_f1") is not None else ""
+                print(f"    - {fname:<12}: F0 Pred={fmetrics['pred_f0_mean']:.1f} vs Ref={fmetrics['ref_f0_mean']:.1f}Hz (Δ={fmetrics['abs_error_mean']:.2f}Hz, MAPE={fmetrics['mape_f0']:.2f}%) | Std: Pred={fmetrics['pred_f0_std']:.1f} vs Ref={fmetrics['ref_f0_std']:.1f}Hz (Δ={fmetrics['abs_error_std']:.2f}Hz, MAPE={fmetrics['mape_std']:.2f}%){num_info}{comp_info}{f1_info}")
+
+        # Save Champions report for this dataset
+        if d_dir == "TinHieuHuanLuyen":
+            prefix_out = "huanluyen_"
+        elif d_dir == "TinHieuKiemThu":
+            prefix_out = ""
+        else:
+            safe_d = os.path.basename(os.path.normpath(d_dir)).lower()
+            prefix_out = f"{safe_d}_"
+
+        os.makedirs("outputs/reports", exist_ok=True)
+        with open(f"outputs/reports/{prefix_out}compare_three_champions.json", "w", encoding="utf-8") as f:
+            json.dump(champ_results, f, ensure_ascii=False, indent=2)
+
+        with open(f"outputs/reports/{prefix_out}compare_three_champions.csv", "w", encoding="utf-8") as f:
+            f.write("name,dataset,average_error_hz,mape_f0_pct,average_std_error,mape_std_pct,average_num_error,mape_num_pct,final_composite_score_pct,average_voiced_f1_pct,average_accuracy_pct\n")
+            for r in champ_results:
+                f.write(f'"{r["name"]}","{d_dir}",{r["average_error_hz"]},{r["mape_f0_pct"]},{r["average_std_error"]},{r["mape_std_pct"]},{r.get("average_num_error","")},{r.get("mape_num_pct","")},{r["final_composite_score_pct"]},{r.get("average_voiced_f1_pct","")},{r.get("average_accuracy_pct","")}\n')
+
+        # If testing dataset, also update the chart
+        if d_dir == "TinHieuKiemThu":
+            plot_champions_comparison(champ_results, "outputs/figures/12_compare_three_champions.png")
+
+    print("\n[HOÀN TẤT] Toàn bộ báo cáo và biểu đồ Champions đã được lưu trữ thành công!")
 
 
 if __name__ == "__main__":

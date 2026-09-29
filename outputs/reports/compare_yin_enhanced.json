@@ -3,40 +3,58 @@
     "name": "YIN Baseline",
     "average_error_hz": 1.4,
     "average_std_error": 1.77,
+    "mape_f0_pct": 0.87,
+    "mape_std_pct": 6.2,
     "average_voiced_f1_pct": 92.22,
     "average_accuracy_pct": 84.54,
     "files": {
       "phone_F2": {
         "abs_error_mean": 2.91,
+        "mape_f0": 2.01,
         "abs_error_std": 0.63,
+        "mape_std": 1.87,
         "voiced_f1": 89.72,
         "accuracy": 80.13,
         "pred_f0_mean": 147.91,
-        "ref_f0_mean": 145.0
+        "ref_f0_mean": 145.0,
+        "pred_f0_std": 34.33,
+        "ref_f0_std": 33.7
       },
       "phone_M2": {
         "abs_error_mean": 0.04,
+        "mape_f0": 0.03,
         "abs_error_std": 2.57,
+        "mape_std": 13.83,
         "voiced_f1": 90.76,
         "accuracy": 78.42,
         "pred_f0_mean": 129.04,
-        "ref_f0_mean": 129.0
+        "ref_f0_mean": 129.0,
+        "pred_f0_std": 16.03,
+        "ref_f0_std": 18.6
       },
       "studio_F2": {
         "abs_error_mean": 1.67,
+        "mape_f0": 0.84,
         "abs_error_std": 3.22,
+        "mape_std": 6.98,
         "voiced_f1": 95.06,
         "accuracy": 91.05,
         "pred_f0_mean": 198.33,
-        "ref_f0_mean": 200.0
+        "ref_f0_mean": 200.0,
+        "pred_f0_std": 42.88,
+        "ref_f0_std": 46.1
       },
       "studio_M2": {
         "abs_error_mean": 0.97,
+        "mape_f0": 0.62,
         "abs_error_std": 0.66,
+        "mape_std": 2.13,
         "voiced_f1": 93.33,
         "accuracy": 88.56,
         "pred_f0_mean": 154.03,
-        "ref_f0_mean": 155.0
+        "ref_f0_mean": 155.0,
+        "pred_f0_std": 30.14,
+        "ref_f0_std": 30.8
       }
     }
   },
@@ -44,40 +62,58 @@
     "name": "YIN + Viterbi",
     "average_error_hz": 1.27,
     "average_std_error": 1.7,
+    "mape_f0_pct": 0.78,
+    "mape_std_pct": 6.04,
     "average_voiced_f1_pct": 92.22,
     "average_accuracy_pct": 84.54,
     "files": {
       "phone_F2": {
         "abs_error_mean": 1.97,
+        "mape_f0": 1.36,
         "abs_error_std": 0.42,
+        "mape_std": 1.26,
         "voiced_f1": 89.72,
         "accuracy": 80.13,
         "pred_f0_mean": 146.97,
-        "ref_f0_mean": 145.0
+        "ref_f0_mean": 145.0,
+        "pred_f0_std": 34.12,
+        "ref_f0_std": 33.7
       },
       "phone_M2": {
         "abs_error_mean": 0.06,
+        "mape_f0": 0.05,
         "abs_error_std": 2.5,
+        "mape_std": 13.46,
         "voiced_f1": 90.76,
         "accuracy": 78.42,
         "pred_f0_mean": 129.06,
-        "ref_f0_mean": 129.0
+        "ref_f0_mean": 129.0,
+        "pred_f0_std": 16.1,
+        "ref_f0_std": 18.6
       },
       "studio_F2": {
         "abs_error_mean": 1.86,
+        "mape_f0": 0.93,
         "abs_error_std": 2.96,
+        "mape_std": 6.41,
         "voiced_f1": 95.06,
         "accuracy": 91.05,
         "pred_f0_mean": 198.14,
-        "ref_f0_mean": 200.0
+        "ref_f0_mean": 200.0,
+        "pred_f0_std": 43.14,
+        "ref_f0_std": 46.1
       },
       "studio_M2": {
         "abs_error_mean": 1.2,
+        "mape_f0": 0.77,
         "abs_error_std": 0.93,
+        "mape_std": 3.01,
         "voiced_f1": 93.33,
         "accuracy": 88.56,
         "pred_f0_mean": 153.8,
-        "ref_f0_mean": 155.0
+        "ref_f0_mean": 155.0,
+        "pred_f0_std": 29.87,
+        "ref_f0_std": 30.8
       }
     }
   },
@@ -85,40 +121,58 @@
     "name": "YIN + Bandpass",
     "average_error_hz": 1.08,
     "average_std_error": 1.85,
+    "mape_f0_pct": 0.64,
+    "mape_std_pct": 6.28,
     "average_voiced_f1_pct": 91.54,
     "average_accuracy_pct": 83.75,
     "files": {
       "phone_F2": {
         "abs_error_mean": 0.17,
+        "mape_f0": 0.12,
         "abs_error_std": 0.88,
+        "mape_std": 2.6,
         "voiced_f1": 88.64,
         "accuracy": 78.87,
         "pred_f0_mean": 145.17,
-        "ref_f0_mean": 145.0
+        "ref_f0_mean": 145.0,
+        "pred_f0_std": 34.58,
+        "ref_f0_std": 33.7
       },
       "phone_M2": {
         "abs_error_mean": 0.57,
+        "mape_f0": 0.45,
         "abs_error_std": 2.27,
+        "mape_std": 12.2,
         "voiced_f1": 90.2,
         "accuracy": 77.7,
         "pred_f0_mean": 129.57,
-        "ref_f0_mean": 129.0
+        "ref_f0_mean": 129.0,
+        "pred_f0_std": 16.33,
+        "ref_f0_std": 18.6
       },
       "studio_F2": {
         "abs_error_mean": 2.21,
+        "mape_f0": 1.1,
         "abs_error_std": 3.17,
+        "mape_std": 6.87,
         "voiced_f1": 94.7,
         "accuracy": 90.73,
         "pred_f0_mean": 197.79,
-        "ref_f0_mean": 200.0
+        "ref_f0_mean": 200.0,
+        "pred_f0_std": 42.93,
+        "ref_f0_std": 46.1
       },
       "studio_M2": {
         "abs_error_mean": 1.38,
+        "mape_f0": 0.89,
         "abs_error_std": 1.06,
+        "mape_std": 3.44,
         "voiced_f1": 92.62,
         "accuracy": 87.71,
         "pred_f0_mean": 153.62,
-        "ref_f0_mean": 155.0
+        "ref_f0_mean": 155.0,
+        "pred_f0_std": 29.74,
+        "ref_f0_std": 30.8
       }
     }
   },
@@ -126,40 +180,58 @@
     "name": "YIN + EnergyExt",
     "average_error_hz": 1.41,
     "average_std_error": 1.74,
+    "mape_f0_pct": 0.89,
+    "mape_std_pct": 6.13,
     "average_voiced_f1_pct": 92.22,
     "average_accuracy_pct": 84.54,
     "files": {
       "phone_F2": {
         "abs_error_mean": 3.01,
+        "mape_f0": 2.08,
         "abs_error_std": 0.44,
+        "mape_std": 1.31,
         "voiced_f1": 89.72,
         "accuracy": 80.13,
         "pred_f0_mean": 148.01,
-        "ref_f0_mean": 145.0
+        "ref_f0_mean": 145.0,
+        "pred_f0_std": 34.14,
+        "ref_f0_std": 33.7
       },
       "phone_M2": {
         "abs_error_mean": 0.05,
+        "mape_f0": 0.04,
         "abs_error_std": 2.6,
+        "mape_std": 13.97,
         "voiced_f1": 90.76,
         "accuracy": 78.42,
         "pred_f0_mean": 129.05,
-        "ref_f0_mean": 129.0
+        "ref_f0_mean": 129.0,
+        "pred_f0_std": 16.0,
+        "ref_f0_std": 18.6
       },
       "studio_F2": {
         "abs_error_mean": 1.66,
+        "mape_f0": 0.83,
         "abs_error_std": 3.23,
+        "mape_std": 7.0,
         "voiced_f1": 95.06,
         "accuracy": 91.05,
         "pred_f0_mean": 198.34,
-        "ref_f0_mean": 200.0
+        "ref_f0_mean": 200.0,
+        "pred_f0_std": 42.87,
+        "ref_f0_std": 46.1
       },
       "studio_M2": {
         "abs_error_mean": 0.91,
+        "mape_f0": 0.59,
         "abs_error_std": 0.7,
+        "mape_std": 2.26,
         "voiced_f1": 93.33,
         "accuracy": 88.56,
         "pred_f0_mean": 154.09,
-        "ref_f0_mean": 155.0
+        "ref_f0_mean": 155.0,
+        "pred_f0_std": 30.1,
+        "ref_f0_std": 30.8
       }
     }
   },
@@ -167,40 +239,58 @@
     "name": "YIN + BP + Viterbi",
     "average_error_hz": 1.22,
     "average_std_error": 1.86,
+    "mape_f0_pct": 0.73,
+    "mape_std_pct": 6.34,
     "average_voiced_f1_pct": 91.54,
     "average_accuracy_pct": 83.75,
     "files": {
       "phone_F2": {
         "abs_error_mean": 0.5,
+        "mape_f0": 0.34,
         "abs_error_std": 0.76,
+        "mape_std": 2.26,
         "voiced_f1": 88.64,
         "accuracy": 78.87,
         "pred_f0_mean": 145.5,
-        "ref_f0_mean": 145.0
+        "ref_f0_mean": 145.0,
+        "pred_f0_std": 34.46,
+        "ref_f0_std": 33.7
       },
       "phone_M2": {
         "abs_error_mean": 0.58,
+        "mape_f0": 0.45,
         "abs_error_std": 2.26,
+        "mape_std": 12.13,
         "voiced_f1": 90.2,
         "accuracy": 77.7,
         "pred_f0_mean": 129.58,
-        "ref_f0_mean": 129.0
+        "ref_f0_mean": 129.0,
+        "pred_f0_std": 16.34,
+        "ref_f0_std": 18.6
       },
       "studio_F2": {
         "abs_error_mean": 2.2,
+        "mape_f0": 1.1,
         "abs_error_std": 3.12,
+        "mape_std": 6.78,
         "voiced_f1": 94.7,
         "accuracy": 90.73,
         "pred_f0_mean": 197.8,
-        "ref_f0_mean": 200.0
+        "ref_f0_mean": 200.0,
+        "pred_f0_std": 42.98,
+        "ref_f0_std": 46.1
       },
       "studio_M2": {
         "abs_error_mean": 1.58,
+        "mape_f0": 1.02,
         "abs_error_std": 1.29,
+        "mape_std": 4.2,
         "voiced_f1": 92.62,
         "accuracy": 87.71,
         "pred_f0_mean": 153.42,
-        "ref_f0_mean": 155.0
+        "ref_f0_mean": 155.0,
+        "pred_f0_std": 29.51,
+        "ref_f0_std": 30.8
       }
     }
   },
@@ -208,40 +298,58 @@
     "name": "YIN + Energy + Viterbi",
     "average_error_hz": 1.34,
     "average_std_error": 1.64,
+    "mape_f0_pct": 0.83,
+    "mape_std_pct": 5.86,
     "average_voiced_f1_pct": 92.22,
     "average_accuracy_pct": 84.54,
     "files": {
       "phone_F2": {
         "abs_error_mean": 2.26,
+        "mape_f0": 1.56,
         "abs_error_std": 0.08,
+        "mape_std": 0.25,
         "voiced_f1": 89.72,
         "accuracy": 80.13,
         "pred_f0_mean": 147.26,
-        "ref_f0_mean": 145.0
+        "ref_f0_mean": 145.0,
+        "pred_f0_std": 33.62,
+        "ref_f0_std": 33.7
       },
       "phone_M2": {
         "abs_error_mean": 0.06,
+        "mape_f0": 0.05,
         "abs_error_std": 2.5,
+        "mape_std": 13.46,
         "voiced_f1": 90.76,
         "accuracy": 78.42,
         "pred_f0_mean": 129.06,
-        "ref_f0_mean": 129.0
+        "ref_f0_mean": 129.0,
+        "pred_f0_std": 16.1,
+        "ref_f0_std": 18.6
       },
       "studio_F2": {
         "abs_error_mean": 1.84,
+        "mape_f0": 0.92,
         "abs_error_std": 2.96,
+        "mape_std": 6.43,
         "voiced_f1": 95.06,
         "accuracy": 91.05,
         "pred_f0_mean": 198.16,
-        "ref_f0_mean": 200.0
+        "ref_f0_mean": 200.0,
+        "pred_f0_std": 43.14,
+        "ref_f0_std": 46.1
       },
       "studio_M2": {
         "abs_error_mean": 1.2,
+        "mape_f0": 0.77,
         "abs_error_std": 1.01,
+        "mape_std": 3.28,
         "voiced_f1": 93.33,
         "accuracy": 88.56,
         "pred_f0_mean": 153.8,
-        "ref_f0_mean": 155.0
+        "ref_f0_mean": 155.0,
+        "pred_f0_std": 29.79,
+        "ref_f0_std": 30.8
       }
     }
   },
@@ -249,40 +357,58 @@
     "name": "YIN + BP + Energy + Viterbi",
     "average_error_hz": 1.23,
     "average_std_error": 1.84,
+    "mape_f0_pct": 0.74,
+    "mape_std_pct": 6.29,
     "average_voiced_f1_pct": 91.54,
     "average_accuracy_pct": 83.75,
     "files": {
       "phone_F2": {
         "abs_error_mean": 0.61,
+        "mape_f0": 0.42,
         "abs_error_std": 0.59,
+        "mape_std": 1.75,
         "voiced_f1": 88.64,
         "accuracy": 78.87,
         "pred_f0_mean": 145.61,
-        "ref_f0_mean": 145.0
+        "ref_f0_mean": 145.0,
+        "pred_f0_std": 34.29,
+        "ref_f0_std": 33.7
       },
       "phone_M2": {
         "abs_error_mean": 0.58,
+        "mape_f0": 0.45,
         "abs_error_std": 2.26,
+        "mape_std": 12.13,
         "voiced_f1": 90.2,
         "accuracy": 77.7,
         "pred_f0_mean": 129.58,
-        "ref_f0_mean": 129.0
+        "ref_f0_mean": 129.0,
+        "pred_f0_std": 16.34,
+        "ref_f0_std": 18.6
       },
       "studio_F2": {
         "abs_error_mean": 2.2,
+        "mape_f0": 1.1,
         "abs_error_std": 3.12,
+        "mape_std": 6.78,
         "voiced_f1": 94.7,
         "accuracy": 90.73,
         "pred_f0_mean": 197.8,
-        "ref_f0_mean": 200.0
+        "ref_f0_mean": 200.0,
+        "pred_f0_std": 42.98,
+        "ref_f0_std": 46.1
       },
       "studio_M2": {
         "abs_error_mean": 1.51,
+        "mape_f0": 0.97,
         "abs_error_std": 1.38,
+        "mape_std": 4.48,
         "voiced_f1": 92.62,
         "accuracy": 87.71,
         "pred_f0_mean": 153.49,
-        "ref_f0_mean": 155.0
+        "ref_f0_mean": 155.0,
+        "pred_f0_std": 29.42,
+        "ref_f0_std": 30.8
       }
     }
   }
