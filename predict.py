@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """PREDICT & TEST CLI TOOL - DÀNH CHO BUỔI BẢO VỆ / THỰC NGHIỆM TRÊN DỮ LIỆU CỦA THẦY
 Hỗ trợ kiểm thử tức thì trên 1 file .wav bất kỳ hoặc toàn bộ thư mục âm thanh.
-Tự động kích hoạt các cấu hình Quán quân tối ưu nhất (ACF Champion, AMDF Champion, YIN Champion).
+Tự động kích hoạt các cấu hình Quán quân tối ưu nhất (ACF Champion, AMDF Champion, Cepstrum Champion).
 Tự động đối soát nhãn Ground Truth (.lab) nếu có cùng tên trong thư mục.
 
 Ví dụ sử dụng:
@@ -11,8 +11,8 @@ Ví dụ sử dụng:
 2. Chạy trên toàn bộ thư mục âm thanh của thầy:
    uv run python predict.py --input path/to/folder_thay/
 
-3. Chỉ chạy riêng thuật toán tốt nhất (YIN hoặc ACF hoặc AMDF):
-   uv run python predict.py --input audio.wav --method yin
+3. Chỉ chạy riêng thuật toán tốt nhất (Cepstrum hoặc ACF hoặc AMDF):
+   uv run python predict.py --input audio.wav --method cepstrum
 """
 import argparse
 import glob
@@ -46,48 +46,50 @@ from src.analysis.evaluation import evaluate_against_ground_truth
 
 
 def get_champion_detectors() -> Dict[str, PitchDetector]:
-    """Khởi tạo 3 hệ thống Quán quân tối ưu nhất của đề tài."""
-    # 1. ACF Champion: Config 29 (Bandpass + Center Clipping + Energy Extension + Viterbi)
+    """Khởi tạo 3 hệ thống Quán quân tối ưu nhất của đề tài (ACF, AMDF, Cepstrum)."""
+    # 1. ACF Champion: BP + Energy + Viterbi (Tối ưu toàn diện: Score = 2.95%)
     acf_champ = PluginPitchDetector(
-        base_detector=PitchDetector(method="acf", threshold=0.395257),
+        base_detector=PitchDetector(method="acf", threshold=0.4892),
+        plugins=[
+            BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
+            EnergyExtensionPlugin(threshold_discount=0.20),
+            ViterbiTrackingPlugin(w_freq=3.0, w_octave=4.0),
+        ],
+    )
+
+    # 2. AMDF Champion: Energy + Viterbi (Tối ưu toàn diện: Score = 3.29%)
+    amdf_champ = PluginPitchDetector(
+        base_detector=PitchDetector(method="amdf", threshold=0.4380),
+        plugins=[
+            EnergyExtensionPlugin(threshold_discount=0.20),
+            ViterbiTrackingPlugin(w_freq=3.0, w_octave=4.0),
+        ],
+    )
+
+    # 3. Cepstrum Champion: BP + Clip + Energy + Viterbi (Tối ưu toàn diện: Score = 4.44%)
+    cepstrum_champ = PluginPitchDetector(
+        base_detector=PitchDetector(method="cepstrum", threshold=0.0500),
         plugins=[
             BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
             CenterClippingPlugin(clipping_ratio=0.40),
             EnergyExtensionPlugin(threshold_discount=0.20),
-            ViterbiTrackingPlugin(w_freq=3.0, w_octave=2.0),
-        ],
-    )
-
-    # 2. AMDF Champion: Config 13 (Center Clipping + Viterbi)
-    amdf_champ = PluginPitchDetector(
-        base_detector=PitchDetector(method="amdf", threshold=0.648843),
-        plugins=[
-            CenterClippingPlugin(clipping_ratio=0.40),
-            ViterbiTrackingPlugin(w_freq=3.0, w_octave=2.0),
-        ],
-    )
-
-    # 3. YIN Champion: Enhanced YIN (Viterbi Tracking)
-    yin_champ = PluginPitchDetector(
-        base_detector=PitchDetector(method="yin", threshold=0.250000),
-        plugins=[
-            ViterbiTrackingPlugin(w_freq=3.0, w_octave=2.0),
+            ViterbiTrackingPlugin(w_freq=3.0, w_octave=4.0),
         ],
     )
 
     return {
-        "YIN Champion": yin_champ,
         "ACF Champion": acf_champ,
         "AMDF Champion": amdf_champ,
+        "Cepstrum Champion": cepstrum_champ,
     }
 
 
 def get_baseline_detectors() -> Dict[str, PitchDetector]:
-    """Khởi tạo 3 hệ thống Baseline nguyên bản (không plugin)."""
+    """Khởi tạo các hệ thống Baseline nguyên bản (không plugin)."""
     return {
-        "YIN Baseline": PitchDetector(method="yin", threshold=0.250000),
         "ACF Baseline": PitchDetector(method="acf", threshold=0.440788),
         "AMDF Baseline": PitchDetector(method="amdf", threshold=0.437976),
+        "Cepstrum Baseline": PitchDetector(method="cepstrum", threshold=0.060000),
     }
 
 
@@ -215,9 +217,9 @@ def process_single_file(
 
         # Panel 2: Quỹ đạo cao độ F0
         ax1 = fig.add_subplot(gs[1])
-        colors = {"YIN Champion": "#2ca02c", "ACF Champion": "#1f77b4", "AMDF Champion": "#d62728",
-                  "YIN Baseline": "#98df8a", "ACF Baseline": "#aec7e8", "AMDF Baseline": "#ff9896"}
-        styles = {"YIN Champion": "-", "ACF Champion": "--", "AMDF Champion": "-."}
+        colors = {"ACF Champion": "#1f77b4", "AMDF Champion": "#d62728", "Cepstrum Champion": "#2ca02c",
+                  "ACF Baseline": "#aec7e8", "AMDF Baseline": "#ff9896", "Cepstrum Baseline": "#98df8a"}
+        styles = {"ACF Champion": "-", "AMDF Champion": "--", "Cepstrum Champion": "-."}
 
         # Nếu có ground truth, vẽ vùng chuẩn
         if has_ground_truth and eval_res is not None:
@@ -270,7 +272,7 @@ def process_single_file(
 def main():
     parser = argparse.ArgumentParser(description="Pitch Prediction & Testing CLI on Custom Data.")
     parser.add_argument("--input", "-i", type=str, required=True, help="Đường dẫn tới 1 file .wav hoặc thư mục chứa các file .wav")
-    parser.add_argument("--method", "-m", type=str, default="champions", choices=["champions", "all", "yin", "acf", "amdf", "baseline"], help="Chế độ thuật toán (mặc định: 'champions' gồm 3 Quán quân tốt nhất)")
+    parser.add_argument("--method", "-m", type=str, default="champions", choices=["champions", "all", "acf", "amdf", "cepstrum", "baseline"], help="Chế độ thuật toán (mặc định: 'champions' gồm các Quán quân tốt nhất)")
     parser.add_argument("--output-dir", "-o", type=str, default="outputs/predictions", help="Thư mục xuất kết quả (ảnh PNG và bảng CSV)")
     args = parser.parse_args()
 
@@ -284,12 +286,12 @@ def main():
         detectors = bases
     elif args.method == "all":
         detectors = {**champs, **bases}
-    elif args.method == "yin":
-        detectors = {"YIN Champion": champs["YIN Champion"], "YIN Baseline": bases["YIN Baseline"]}
     elif args.method == "acf":
         detectors = {"ACF Champion": champs["ACF Champion"], "ACF Baseline": bases["ACF Baseline"]}
     elif args.method == "amdf":
         detectors = {"AMDF Champion": champs["AMDF Champion"], "AMDF Baseline": bases["AMDF Baseline"]}
+    elif args.method == "cepstrum":
+        detectors = {"Cepstrum Champion": champs["Cepstrum Champion"], "Cepstrum Baseline": bases["Cepstrum Baseline"]}
     else:
         detectors = champs
 

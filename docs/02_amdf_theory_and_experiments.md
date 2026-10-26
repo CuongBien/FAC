@@ -79,17 +79,17 @@ Thực nghiệm trên file âm thanh `TinHieuHuanLuyen/phone_F1.wav` ($f_s = 160
 
 ## II.4. Đánh Giá Kiểm Thử Trên 4 File Kiểm Thử (AMDF Baseline)
 
-Chạy kiểm thử tự động toàn bộ 4 file kiểm thử với thuật toán AMDF ($T = 0.4380$, Frame = 25 ms):
+Chạy kiểm thử tự động toàn bộ 4 file kiểm thử với thuật toán AMDF ($T = 0.4380$, Frame = 25 ms), đánh giá toàn diện cả 3 chỉ số và **Final Score**:
 
-| File kiểm thử | Kênh / Giới tính | Ref $F_{0\text{-mean}}$ | Pred $F_{0\text{-mean}}$ | $\lvert\Delta F_0\rvert$ (Hz) | Sai số % | Ref $F_{0\text{-std}}$ | Pred $F_{0\text{-std}}$ | $\lvert\Delta\text{std}\rvert$ | V/UV Acc | F1-Score |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `phone_F2.wav` | Điện thoại / Nữ | 145.00 Hz | 150.19 Hz | 5.19 Hz | 3.58% | 33.70 | 32.46 | 1.24 | 78.45% | 87.56% |
-| `phone_M2.wav` | Điện thoại / Nam | 129.00 Hz | 129.48 Hz | **0.48 Hz** | **0.37%** | 18.60 | 15.58 | 3.02 | 80.22% | 92.86% |
-| `studio_F2.wav`| Studio / Nữ | 200.00 Hz | 199.80 Hz | **0.20 Hz** | **0.10%** | 46.10 | 44.93 | 1.17 | 91.37% | 95.45% |
-| `studio_M2.wav`| Studio / Nam | 155.00 Hz | 155.52 Hz | **0.52 Hz** | **0.33%** | 30.80 | 30.55 | 0.25 | 88.56% | 93.33% |
-| **TRUNG BÌNH** | — | — | — | **1.60 Hz** | **1.09%** | — | — | **1.42** | **84.65%** | **92.30%** |
+| File kiểm thử | Kênh / Giới tính | Ref $F_0$ | Pred $F_0$ | $\lvert\Delta F_0\rvert$ | MAPE $F_0$ | Ref Std | Pred Std | $\lvert\Delta\text{Std}\rvert$ | MAPE Std | Ref Num | Pred Num | $\lvert\Delta\text{Num}\rvert$ | MAPE Num | **FINAL SCORE** |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| `phone_F2.wav` | Điện thoại / Nữ | 150.20 Hz | 150.19 Hz | 0.01 Hz | 0.00% | 30.70 | 32.46 | 1.76 | 5.74% | 219 | 183 | 36 | 16.44% | **7.39%** |
+| `phone_M2.wav` | Điện thoại / Nam | 130.20 Hz | 129.48 Hz | 0.72 Hz | 0.55% | 15.40 | 15.58 | 0.18 | 1.17% | 123 | 118 | 5 | 4.07% | **1.93%** |
+| `studio_F2.wav`| Studio / Nữ | 198.60 Hz | 199.80 Hz | 1.20 Hz | 0.61% | 47.80 | 44.93 | 2.87 | 6.00% | 139 | 127 | 12 | 8.63% | **5.08%** |
+| `studio_M2.wav`| Studio / Nam | 154.70 Hz | 155.52 Hz | 0.82 Hz | 0.53% | 30.30 | 30.55 | 0.25 | 0.83% | 116 | 112 | 4 | 3.45% | **1.60%** |
+| **TRUNG BÌNH** | — | — | — | **0.69 Hz** | **0.42%** | — | — | **1.27** | **3.44%** | — | — | **14.2** | **8.15%** | **4.00%** |
 
-### Đồ thị Pitch Contour 4 file kiểm thử (AMDF):
+### Đồ thị Pitch Contour### Đồ thị Pitch Contour 4 file kiểm thử (AMDF):
 
 | `phone_F2.wav` | `phone_M2.wav` |
 | :---: | :---: |
@@ -197,66 +197,44 @@ Nếu bước nhảy rơi vào vùng nhảy quãng tám ($[0.8, 1.2]\text{ octav
 
 ---
 
-## II.6. Khảo Sát & Xếp Hạng Toàn Bộ 32 Tổ Hợp Cải Tiến Cho AMDF
+## II.6. Khảo Sát & Phân Nhóm Cấu Hình Tối Ưu Cho AMDF Trên Tập Huấn Luyện (TinHieuHuanLuyen)
 
-### Bảng kết quả đối sánh toàn diện 32 cấu hình trên tập kiểm thử (AMDF):
+Toàn bộ quá trình thực nghiệm, khảo sát 16 tổ hợp plugin và lựa chọn các cấu hình tiêu biểu được tiến hành trên **Tập Huấn Luyện (TinHieuHuanLuyen)** gồm 4 file chuẩn (phone_F1, phone_M1, studio_F1, studio_M1). Dưới đây là bảng phân loại thành 4 nhóm tối ưu đại diện cho 3 chỉ số mục tiêu cốt lõi và điểm tổng hợp toàn diện:
 
-| STT | Cấu hình Plugin | Ngưỡng $T$ | `phone_F2` (145Hz) | `phone_M2` (129Hz) | `studio_F2` (200Hz) | `studio_M2` (155Hz) | Sai số TB $\lvert\Delta F_0\rvert$ | Sai số TB $\lvert\Delta\text{std}\rvert$ | F1-Score TB | V/UV Acc TB |
-| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **01** | **Baseline (Gốc)** | $0.4380$ | 5.19 Hz | 0.48 Hz | 0.20 Hz | 0.52 Hz | 1.60 Hz | **1.42** | 92.30% | 84.65% |
-| **02** | `[Bandpass Filter]` | $0.3734$ | 4.32 Hz | 1.66 Hz | 1.82 Hz | 0.95 Hz | 2.19 Hz | 1.87 | 90.93% | 83.38% |
-| **03** | `[Center Clip]` | $0.6488$ | 5.96 Hz | 1.34 Hz | 0.07 Hz | 0.49 Hz | 1.97 Hz | 1.63 | 91.42% | 83.88% |
-| **04** | `[Hysteresis]` | $0.4380$ | 5.59 Hz | 0.76 Hz | 0.45 Hz | 0.67 Hz | 1.87 Hz | 1.59 | 91.04% | 83.56% |
-| **05** | `[Energy Ext]` | $0.4380$ | 4.51 Hz | 0.80 Hz | 0.40 Hz | 0.42 Hz | 1.53 Hz | 1.50 | **93.83%** | **85.92%** |
-| **06** | `[Viterbi Tracking]` | $0.4380$ | 5.19 Hz | 0.48 Hz | 0.40 Hz | 0.49 Hz | 1.64 Hz | 1.43 | 92.30% | 84.65% |
-| **07** | `[BP + Clip]` | $0.5628$ | 5.05 Hz | 1.76 Hz | 0.99 Hz | 0.35 Hz | 2.04 Hz | 1.80 | 90.73% | 83.22% |
-| **08** | `[BP + Hyst]` | $0.3734$ | 5.36 Hz | 1.85 Hz | 2.61 Hz | 1.73 Hz | 2.89 Hz | 2.35 | 89.99% | 82.64% |
-| **09** | `[BP + Energy]` | $0.3734$ | **3.55 Hz** | 1.07 Hz | 1.90 Hz | 0.52 Hz | 1.76 Hz | 2.01 | 92.42% | 84.62% |
-| **10** | `[BP + Viterbi]` | $0.3734$ | 4.65 Hz | 1.63 Hz | 1.82 Hz | 0.94 Hz | 2.26 Hz | 1.94 | 90.93% | 83.38% |
-| **11** | `[Clip + Hyst]` | $0.6488$ | 5.85 Hz | 0.09 Hz | **0.01 Hz** | 0.48 Hz | 1.61 Hz | 1.55 | 90.33% | 82.98% |
-| **12** | `[Clip + Energy]` | $0.6488$ | 5.86 Hz | 1.47 Hz | 0.17 Hz | **0.04 Hz** | 1.89 Hz | 1.84 | 93.03% | 85.25% |
-| **13** | `[Clip + Viterbi]` | $0.6488$ | 5.15 Hz | 0.27 Hz | 0.14 Hz | 0.46 Hz | **1.50 Hz** | 1.65 | 91.42% | 83.88% |
-| **14** | `[Hyst + Energy]` | $0.4380$ | 5.03 Hz | 1.04 Hz | 0.40 Hz | 0.33 Hz | 1.70 Hz | 1.67 | 93.27% | 85.43% |
-| **15** | `[Hyst + Viterbi]` | $0.4380$ | 5.44 Hz | 0.75 Hz | 0.65 Hz | 0.71 Hz | 1.89 Hz | 1.59 | 91.04% | 83.56% |
-| **16** | `[Energy + Viterbi]` | $0.4380$ | 4.57 Hz | 0.80 Hz | 0.59 Hz | 0.40 Hz | 1.59 Hz | 1.53 | **93.83%** | **85.92%** |
-| **17** | `[BP + Clip + Hyst]` | $0.5628$ | 5.15 Hz | 1.33 Hz | 1.23 Hz | 0.24 Hz | 1.99 Hz | 1.89 | 89.44% | 82.18% |
-| **18** | `[BP + Clip + Energy]` | $0.5628$ | 4.35 Hz | 1.30 Hz | 0.89 Hz | 0.30 Hz | 1.71 Hz | 2.08 | 92.52% | 84.71% |
-| **19** | `[BP + Clip + Viterbi]` | $0.5628$ | 4.47 Hz | 1.69 Hz | 0.99 Hz | 0.40 Hz | 1.89 Hz | 1.77 | 90.73% | 83.22% |
-| **20** | `[BP + Hyst + Energy]` | $0.3734$ | 3.72 Hz | 1.43 Hz | 1.90 Hz | 0.73 Hz | 1.95 Hz | 2.22 | 92.04% | 84.29% |
-| **21** | `[BP + Hyst + Viterbi]` | $0.3734$ | 5.34 Hz | 1.83 Hz | 2.61 Hz | 1.72 Hz | 2.88 Hz | 2.33 | 89.99% | 82.64% |
-| **22** | `[BP + Energy + Viterbi]` | $0.3734$ | 3.86 Hz | 1.04 Hz | 1.90 Hz | 0.52 Hz | 1.83 Hz | 2.08 | 92.42% | 84.62% |
-| **23** | `[Clip + Hyst + Energy]` | $0.6488$ | 5.66 Hz | 0.10 Hz | 0.28 Hz | **0.04 Hz** | 1.52 Hz | 1.72 | 92.28% | 84.62% |
-| **24** | `[Clip + Hyst + Viterbi]` | $0.6488$ | 5.79 Hz | 0.14 Hz | 0.08 Hz | 0.45 Hz | 1.61 Hz | 1.52 | 90.33% | 82.98% |
-| **25** | `[Clip + Energy + Viterbi]` | $0.6488$ | 8.14 Hz | **0.06 Hz** | 0.24 Hz | 0.15 Hz | 2.15 Hz | 2.33 | 93.03% | 85.25% |
-| **26** | `[Hyst + Energy + Viterbi]` | $0.4380$ | 5.23 Hz | 1.03 Hz | 0.59 Hz | 0.30 Hz | 1.79 Hz | 1.77 | 93.27% | 85.43% |
-| **27** | `[BP + Clip + Hyst + Energy]` | $0.5628$ | 4.36 Hz | 1.20 Hz | 0.89 Hz | 0.26 Hz | 1.68 Hz | 2.12 | 92.11% | 84.36% |
-| **28** | `[BP + Clip + Hyst + Viterbi]` | $0.5628$ | 5.15 Hz | 1.26 Hz | 1.23 Hz | 0.18 Hz | 1.96 Hz | 1.82 | 89.44% | 82.18% |
-| **29** | `[BP + Clip + Energy + Viterbi]` | $0.5628$ | 3.79 Hz | 1.24 Hz | 0.90 Hz | 0.33 Hz | 1.57 Hz | 2.06 | 92.52% | 84.71% |
-| **30** | `[BP + Hyst + Energy + Viterbi]` | $0.3734$ | 4.04 Hz | 1.40 Hz | 1.90 Hz | 0.71 Hz | 2.01 Hz | 2.29 | 92.04% | 84.29% |
-| **31** | `[Clip + Hyst + Energy + Viterbi]` | $0.6488$ | 6.08 Hz | 0.07 Hz | 0.20 Hz | 0.25 Hz | 1.65 Hz | 1.84 | 92.28% | 84.62% |
-| **32** | `[Cả 5 Plugins]` | $0.5628$ | 4.51 Hz | 1.14 Hz | 0.90 Hz | 0.22 Hz | 1.69 Hz | 2.14 | 92.11% | 84.36% |
+### Bảng kết quả phân nhóm tối ưu cho thuật toán AMDF (Tập Huấn Luyện):
 
-* **Cấu hình có sai số thấp nhất:** **Cấu hình 13 `[Clip + Viterbi]`** đạt sai số tuyệt đối trung bình thấp nhất là **$1.50\text{ Hz}$** (giảm so với Baseline 1.60 Hz), sai số độ lệch chuẩn TB là **$1.65$**. Ngoài ra, **Cấu hình 05 `[Energy Ext]`** đạt **$1.53\text{ Hz}$** (sai số std TB **$1.50$**, F1 = 93.83%) và **Cấu hình 23 `[Clip + Hyst + Energy]`** đạt **$1.52\text{ Hz}$** (trong đó sai số trên file `phone_M2` và `studio_M2` chỉ còn đúng **$0.10\text{ Hz}$** và **$0.04\text{ Hz}$**).
-* **Cấu hình có F1-Score phân loại V/UV cao nhất:** **Cấu hình 05 `[Energy Ext]`** và **Cấu hình 16 `[Energy + Viterbi]`** đạt **F1 = 93.83%** và **Acc = 85.92%**.
-* **Nhận xét kỹ thuật:**
-  * Việc áp dụng `Center Clipping` trên AMDF giúp loại bỏ các dao động đáy giả do formant $F_1, F_2$, đặc biệt hiệu quả trên các nguyên âm kéo dài.
-  * Bộ đôi `Energy Extension` và `Viterbi Tracking` hỗ trợ giữ trọn vẹn ranh giới nguyên âm và nắn chỉnh đường contour mịn màng, loại bỏ các bước nhảy cực tiểu sai lệch.
+| Phân nhóm chỉ số | Cấu hình Plugin | $\Delta F_0$ (Hz) | MAPE $ (%) | $\Delta\text{Std}$ (Hz) | MAPE Std (%) | $\Delta\text{Num}$ (Khung) | MAPE Num (%) | FINAL SCORE (%) |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Baseline (Gốc)** | Baseline | 1.49 Hz | 0.93% | 2.31 Hz | 11.34% | 14.8 khung | 8.77% | **7.01%** |
+| **Nhóm 1 (Top 1 F0)** | BP + Energy + Viterbi | **0.86 Hz** | **0.48%** | 1.02 Hz | 3.81% | 11.8 khung | 7.64% | 3.98% |
+| **Nhóm 1 (Top 2 F0)** | BP + Viterbi | 1.11 Hz | 0.67% | 1.24 Hz | 4.78% | 17.2 khung | 11.39% | 5.61% |
+| **Nhóm 1 (Top 3 F0)** | BP + Energy | 1.11 Hz | 0.68% | 2.16 Hz | 10.53% | 11.8 khung | 7.64% | 6.29% |
+| **Nhóm 2 (Top 1 Std)** | Energy + Viterbi | 1.30 Hz | 0.80% | **0.96 Hz** | **3.42%** | **9.2 khung** | **5.64%** | **3.29%** 🏆 |
+| **Nhóm 2 (Top 2 Std)** | BP + Energy + Viterbi | **0.86 Hz** | **0.48%** | 1.02 Hz | 3.81% | 11.8 khung | 7.64% | 3.98% |
+| **Nhóm 2 (Top 3 Std)** | Viterbi | 1.46 Hz | 0.92% | 1.16 Hz | 4.37% | 14.8 khung | 8.77% | 4.69% |
+| **Nhóm 3 (Top 1 Num)** | BP + Clip + Energy | 1.90 Hz | 1.16% | 1.79 Hz | 7.29% | **7.8 khung** | **4.93%** | 4.46% |
+| **Nhóm 3 (Top 2 Num)** | BP + Clip + Energy + Viterbi | 1.85 Hz | 1.14% | 1.79 Hz | 7.29% | **7.8 khung** | **4.93%** | 4.45% |
+| **Nhóm 3 (Top 3 Num)** | Energy | 1.27 Hz | 0.76% | 2.04 Hz | 10.00% | 9.2 khung | 5.64% | 5.47% |
+| **Nhóm 4 (Top 1 Toàn diện)** | Energy + Viterbi | **1.30 Hz** | **0.80%** | **0.96 Hz** | **3.42%** | **9.2 khung** | **5.64%** | **3.29%** 🏆 |
+| **Nhóm 4 (Top 2 Toàn diện)** | BP + Energy + Viterbi | 0.86 Hz | 0.48% | 1.02 Hz | 3.81% | 11.8 khung | 7.64% | 3.98% |
+| **Nhóm 4 (Top 3 Toàn diện)** | Clip + Energy + Viterbi | 2.01 Hz | 1.22% | 1.37 Hz | 5.05% | 10.8 khung | 6.75% | 4.34% |
 
-### Bảng đối sánh chi tiết 4 file kiểm thử: Baseline vs Cấu hình tối ưu 13 [Clip + Viterbi]:
+### Bảng đối sánh chi tiết 4 file huấn luyện: AMDF Baseline vs AMDF Top 1 Champion [Energy + Viterbi]:
 
-| File kiểm thử | Cấu hình | Ref $F_{0\text{-mean}}$ | Pred $F_{0\text{-mean}}$ | $\lvert\Delta F_0\rvert$ (Hz) | Sai số % | Ref $F_{0\text{-std}}$ | Pred $F_{0\text{-std}}$ | $\lvert\Delta\text{std}\rvert$ | V/UV Acc | F1-Score |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| phone_F2.wav | Baseline | 145.00 Hz | 150.19 Hz | 5.19 Hz | 3.58% | 33.70 | 32.46 | **1.24** | 78.45% | 87.56% |
-| | **Enhanced (Cfg 13)** | 145.00 Hz | 150.15 Hz | **5.15 Hz** | **3.55%** | 33.70 | 32.38 | 1.32 | **79.29%** | **88.63%** |
-| phone_M2.wav | Baseline | 129.00 Hz | 129.48 Hz | 0.48 Hz | 0.37% | 18.60 | 15.58 | 3.02 | **80.22%** | **92.86%** |
-| | **Enhanced (Cfg 13)** | 129.00 Hz | 128.73 Hz | **0.27 Hz** | **0.21%** | 18.60 | 16.91 | **1.69** | 78.42% | 90.76% |
-| studio_F2.wav| Baseline | 200.00 Hz | 199.80 Hz | 0.20 Hz | 0.10% | 46.10 | 44.93 | **1.17** | **91.37%** | **95.45%** |
-| | **Enhanced (Cfg 13)** | 200.00 Hz | 199.86 Hz | **0.14 Hz** | **0.07%** | 46.10 | 43.31 | 2.79 | 90.10% | 93.85% |
-| studio_M2.wav| Baseline | 155.00 Hz | 155.52 Hz | 0.52 Hz | 0.33% | 30.80 | 30.55 | **0.25** | **88.56%** | **93.33%** |
-| | **Enhanced (Cfg 13)** | 155.00 Hz | 154.54 Hz | **0.46 Hz** | **0.30%** | 30.80 | 30.01 | 0.79 | 87.71% | 92.44% |
-| **TRUNG BÌNH** | Baseline | — | — | 1.60 Hz | 1.09% | — | — | **1.42** | **84.65%** | **92.30%** |
-| | **Enhanced (Cfg 13)** | — | — | **1.50 Hz** | **1.03%** | — | — | 1.65 | 83.88% | 91.42% |
-### Biểu đồ cột xếp hạng toàn bộ 32 cấu hình AMDF:
+| File huấn luyện | Cấu hình | Ref $ | Pred $ | $\lvert\Delta F_0\rvert$ | MAPE $ | Ref Std | Pred Std | $\lvert\Delta\text{Std}\rvert$ | MAPE Std | Ref Num | Pred Num | $\lvert\Delta\text{Num}\rvert$ | MAPE Num | **FINAL SCORE** |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| phone_F1.wav | Baseline | 215.60 Hz | 216.65 Hz | 1.05 Hz | 0.49% | 20.60 | 20.87 | 0.27 | 1.30% | 148 | 134 | 14 | 9.46% | **3.75%** |
+| | **Champion** | 215.60 Hz | 215.88 Hz | **0.28 Hz** | **0.13%** | 20.60 | 20.92 | **0.32** | **1.55%** | 148 | 137 | **11** | **7.43%** | **3.04%** 🏆 |
+| phone_M1.wav | Baseline | 123.70 Hz | 125.07 Hz | 1.37 Hz | 1.11% | 16.80 | 22.27 | 5.47 | 32.55% | 232 | 202 | 30 | 12.93% | **15.53%** |
+| | **Champion** | 123.70 Hz | 122.59 Hz | **1.11 Hz** | **0.90%** | 16.80 | 17.14 | **0.34** | **2.00%** | 232 | 217 | **15** | **6.47%** | **3.12%** 🏆 |
+| studio_F1.wav| Baseline | 229.60 Hz | 231.76 Hz | 2.16 Hz | 0.94% | 36.80 | 35.18 | 1.62 | 4.41% | 127 | 114 | 13 | 10.24% | **5.20%** |
+| | **Champion** | 229.60 Hz | 232.18 Hz | 2.58 Hz | 1.12% | 36.80 | 35.08 | 1.72 | 4.68% | 127 | 116 | **11** | **8.66%** | **4.82%** 🏆 |
+| studio_M1.wav| Baseline | 116.90 Hz | 115.51 Hz | 1.39 Hz | 1.19% | 26.40 | 24.53 | 1.87 | 7.09% | 82 | 80 | 2 | 2.44% | **3.57%** |
+| | **Champion** | 116.90 Hz | 115.67 Hz | **1.23 Hz** | **1.05%** | 26.40 | 24.96 | **1.44** | **5.45%** | 82 | 82 | **0** | **0.00%** | **2.17%** 🏆 |
+| **TRUNG BÌNH** | Baseline | — | — | 1.49 Hz | 0.93% | — | — | 2.31 | 11.34% | — | — | 14.8 | 8.77% | **7.01%** |
+| | **Champion** | — | — | **1.30 Hz** | **0.80%** | — | — | **0.95** | **3.42%** | — | — | **9.2** | **5.64%** | **3.29%** 🏆 |
+
+### Biểu đồ cột xếp hạng### Biểu đồ cột xếp hạng toàn bộ 32 cấu hình AMDF:
 ![05_all_combinations_ranking_amdf.png](../outputs/figures/05_all_combinations_ranking_amdf.png)
 
 ### Biểu đồ trực quan đối sánh Baseline vs Cấu hình tối ưu sai số (Cấu hình 13):
@@ -306,4 +284,4 @@ $\implies$ **Tổng kết đối sánh kỹ thuật:**
 
 ---
 
-**Dẫn hướng:** [← Chương I: Thuật toán ACF](01_acf_theory_and_experiments.md) | [Trang chủ README](../README.md) | [Chương III: Phân tích hiện tượng sai số →](03_error_analysis_and_phenomena.md)
+**Dẫn hướng:** [← Chương I: Thuật toán ACF](01_acf_theory_and_experiments.md) | [Trang chủ README](../README.md) | [Chương III: Thuật toán Cepstrum →](03_cepstrum_theory_and_experiments.md)

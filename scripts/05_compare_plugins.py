@@ -1,19 +1,24 @@
-"""Script 05: Đánh giá và đối sánh TOÀN BỘ 8 TỔ HỢP PLUGINS trên tập kiểm thử TinHieuKiemThu:
-1. Baseline (Không dùng plugin)
-2. Plugin 1 (Hysteresis)
-3. Plugin 2 (Energy Extension)
-4. Plugin 3 (Bandpass Filter)
-5. Tổ hợp [Hysteresis + Energy Extension]
-6. Tổ hợp [Bandpass + Hysteresis]
-7. Tổ hợp [Bandpass + Energy Extension]
-8. Tổ hợp [Cả 3 Plugins: Bandpass + Hysteresis + Energy Extension]
+"""Script 05: Đánh giá toàn diện các tổ hợp Plugins cho từng thuật toán (ACF, AMDF, Cepstrum).
+
+Nhiệm vụ:
+1. Chạy tất cả 16 tổ hợp plugin (Bandpass, Center Clipping, Energy Extension, Viterbi).
+2. Lọc và trích xuất đúng các nhóm tiêu chuẩn:
+   - Baseline (Gốc)
+   - Nhóm 1: Top 3 Tối ưu MAPE F0
+   - Nhóm 2: Top 3 Tối ưu MAPE Std
+   - Nhóm 3: Top 3 Tối ưu MAPE Num
+   - Nhóm 4: Top 3 Toàn diện nhất (Best Final Composite Score)
+3. Xuất bảng dữ liệu 8 cột tiêu chuẩn (hiển thị đầy đủ Δ và MAPE).
+4. Lưu tệp CSV/JSON và vẽ biểu đồ 4 panel trực quan gọn gàng.
 """
 import argparse
+import glob
 import itertools
 import json
 import os
 import sys
-from typing import Optional
+from typing import Dict, List, Optional, Tuple
+import matplotlib.pyplot as plt
 import numpy as np
 
 # Ensure UTF-8 output on Windows console
@@ -30,25 +35,151 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 from src.core.pitch_detector import PitchDetector
 from src.plugins import (
     PluginPitchDetector,
-    HysteresisPlugin,
-    EnergyExtensionPlugin,
     BandpassFilterPlugin,
     CenterClippingPlugin,
+    HysteresisPlugin,
+    EnergyExtensionPlugin,
     ViterbiTrackingPlugin,
 )
 from src.analysis.evaluation import evaluate_against_ground_truth
-from src.visualization.plotter import plot_plugin_contour_comparison, plot_combinations_ranking
 
 
-def run_all_combinations(
-    test_dir: str = "TinHieuKiemThu",
+def get_threshold(method: str, combo: Tuple[str, ...]) -> float:
+    """Trả về ngưỡng tối ưu Gauss/thực nghiệm cho từng thuật toán và tổ hợp plugin."""
+    m = method.lower()
+    has_bp = "BP" in combo
+    has_clip = "Clip" in combo
+
+    if m == "acf":
+        if has_bp and has_clip:
+            return 0.3953
+        elif has_bp:
+            return 0.4892
+        elif has_clip:
+            return 0.3352
+        else:
+            return 0.4408
+    elif m == "amdf":
+        if has_bp and has_clip:
+            return 0.5628
+        elif has_clip:
+            return 0.6488
+        elif has_bp:
+            return 0.3734
+        else:
+            return 0.4380
+    elif m == "cepstrum":
+        if has_bp:
+            return 0.0500
+        else:
+            return 0.0600
+    return 0.40
+
+
+def plot_clean_ranking(summary_records: List[Dict], save_path: str, title: str):
+    """Vẽ biểu đồ đối sánh 4 panel: ΔF0, ΔStd, ΔNum, và Final Score."""
+    # Lấy các cấu hình độc nhất để vẽ biểu đồ không bị trùng lặp
+    seen = set()
+    unique_records = []
+    for r in summary_records:
+        if r["config_name"] not in seen:
+            seen.add(r["config_name"])
+            unique_records.append(r)
+
+    names = [r["config_name"] for r in unique_records]
+    scores = [r["final_composite_score_pct"] for r in unique_records]
+    maes = [r["average_error_hz"] for r in unique_records]
+    stds = [r["average_std_error"] for r in unique_records]
+    nums = [r["average_num_error"] for r in unique_records]
+
+    n_items = len(names)
+    fig, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(22, max(5, n_items * 0.45)))
+    fig.suptitle(title, fontsize=14, fontweight="bold", y=0.98)
+
+    y_pos = np.arange(n_items)
+
+    # Panel 1: ΔF0 (MAE F0)
+    min_mae = min(maes)
+    colors1 = ["#2ca02c" if m == min_mae else "#1f77b4" for m in maes]
+    bars1 = ax1.barh(y_pos, maes, color=colors1, alpha=0.85, edgecolor="gray")
+    ax1.set_yticks(y_pos)
+    ax1.set_yticklabels(names, fontsize=9, fontweight="bold")
+    ax1.invert_yaxis()
+    ax1.set_xlabel("ΔF0 (Hz) [Càng nhỏ càng tốt]", fontsize=10, fontweight="bold")
+    ax1.set_title("1. Sai số F0 (ΔF0 Hz)", fontsize=11, fontweight="bold")
+    ax1.grid(True, axis="x", linestyle="--", alpha=0.5)
+    for b in bars1:
+        w = b.get_width()
+        ax1.annotate(f" {w:.2f} Hz", xy=(w, b.get_y() + b.get_height() / 2),
+                     va="center", fontsize=8, fontweight="bold")
+
+    # Panel 2: ΔStd (MAE Std)
+    min_std = min(stds)
+    colors2 = ["#2ca02c" if s == min_std else "#9467bd" for s in stds]
+    bars2 = ax2.barh(y_pos, stds, color=colors2, alpha=0.85, edgecolor="gray")
+    ax2.set_yticks(y_pos)
+    ax2.set_yticklabels([])
+    ax2.invert_yaxis()
+    ax2.set_xlabel("ΔStd (Hz) [Càng nhỏ càng tốt]", fontsize=10, fontweight="bold")
+    ax2.set_title("2. Sai số Độ lệch chuẩn (ΔStd)", fontsize=11, fontweight="bold")
+    ax2.grid(True, axis="x", linestyle="--", alpha=0.5)
+    for b in bars2:
+        w = b.get_width()
+        ax2.annotate(f" {w:.2f}", xy=(w, b.get_y() + b.get_height() / 2),
+                     va="center", fontsize=8, fontweight="bold")
+
+    # Panel 3: ΔNum (Lệch số khung)
+    min_num = min(nums)
+    colors3 = ["#2ca02c" if n == min_num else "#ff7f0e" for n in nums]
+    bars3 = ax3.barh(y_pos, nums, color=colors3, alpha=0.85, edgecolor="gray")
+    ax3.set_yticks(y_pos)
+    ax3.set_yticklabels([])
+    ax3.invert_yaxis()
+    ax3.set_xlabel("ΔNum (Khung) [Càng nhỏ càng tốt]", fontsize=10, fontweight="bold")
+    ax3.set_title("3. Lệch số khung (ΔNum)", fontsize=11, fontweight="bold")
+    ax3.grid(True, axis="x", linestyle="--", alpha=0.5)
+    for b in bars3:
+        w = b.get_width()
+        ax3.annotate(f" {w:.1f}", xy=(w, b.get_y() + b.get_height() / 2),
+                     va="center", fontsize=8, fontweight="bold")
+
+    # Panel 4: Final Score (%)
+    min_score = min(scores)
+    colors4 = ["#2ca02c" if s == min_score else "#d62728" for s in scores]
+    bars4 = ax4.barh(y_pos, scores, color=colors4, alpha=0.85, edgecolor="gray")
+    ax4.set_yticks(y_pos)
+    ax4.set_yticklabels([])
+    ax4.invert_yaxis()
+    ax4.set_xlabel("Final Score (%) [Càng nhỏ càng tốt]", fontsize=10, fontweight="bold")
+    ax4.set_title("4. Điểm tổng hợp Final Score (%)", fontsize=11, fontweight="bold")
+    ax4.grid(True, axis="x", linestyle="--", alpha=0.5)
+    for b in bars4:
+        w = b.get_width()
+        ax4.annotate(f" {w:.2f}%", xy=(w, b.get_y() + b.get_height() / 2),
+                     va="center", fontsize=8, fontweight="bold")
+
+    plt.tight_layout()
+    if save_path:
+        os.makedirs(os.path.dirname(os.path.abspath(save_path)), exist_ok=True)
+        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+        print(f"[+] Đã lưu biểu đồ: {save_path}")
+    plt.close()
+
+
+def run_evaluation(
+    test_dir: str = "TinHieuHuanLuyen",
     method: str = "acf",
     output_json: Optional[str] = None,
     output_csv: Optional[str] = None,
     output_ranking_fig: Optional[str] = None,
 ):
     method = method.lower()
-    files = ["phone_F2", "phone_M2", "studio_F2", "studio_M2"]
+    wav_paths = sorted(glob.glob(os.path.join(test_dir, "*.wav")) + glob.glob(os.path.join(test_dir, "*.WAV")))
+    files = [os.path.splitext(os.path.basename(p))[0] for p in wav_paths]
+    if not files:
+        files = ["phone_F1", "phone_M1", "studio_F1", "studio_M1"] if "huanluyen" in test_dir.lower() else ["phone_F2", "phone_M2", "studio_F2", "studio_M2"]
+
+    dataset_name = "TẬP HUẤN LUYỆN (TinHieuHuanLuyen)" if "huanluyen" in test_dir.lower() else f"TẬP DỮ LIỆU ({test_dir})"
 
     if output_json is None:
         output_json = f"outputs/reports/compare_plugins_{method}.json" if method != "acf" else "outputs/reports/compare_plugins.json"
@@ -57,129 +188,32 @@ def run_all_combinations(
     if output_ranking_fig is None:
         output_ranking_fig = f"outputs/figures/05_all_combinations_ranking_{method}.png" if method != "acf" else "outputs/figures/05_all_combinations_ranking.png"
 
-    # 1. Tải ngưỡng tối ưu cho 4 nhóm tiền xử lý: Raw, Bandpass, CenterClip, Bandpass+CenterClip
-    if method == "amdf":
-        t_raw = 0.4380
-        t_bp = 0.3734
-        t_clip = 0.6488
-        t_bp_clip = 0.5628
-    else:
-        t_raw = 0.4408
-        t_bp = 0.4892
-        t_clip = 0.3352
-        t_bp_clip = 0.3953
+    plugin_keys = ["BP", "Clip", "Energy", "Viterbi"]
+    plugin_factories = {
+        "BP": lambda: BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
+        "Clip": lambda: CenterClippingPlugin(clipping_ratio=0.40),
+        "Energy": lambda: EnergyExtensionPlugin(threshold_discount=0.20),
+        "Viterbi": lambda: ViterbiTrackingPlugin(),
+    }
 
-    thresh_file = "outputs/reports/threshold_all_preprocessors.json"
-    if os.path.exists(thresh_file):
-        try:
-            with open(thresh_file, "r", encoding="utf-8") as f:
-                t_all = json.load(f)
-                if method in t_all:
-                    t_raw = float(t_all[method]["raw"]["t_opt"])
-                    t_bp = float(t_all[method]["bp"]["t_opt"])
-                    t_clip = float(t_all[method]["clip"]["t_opt"])
-                    t_bp_clip = float(t_all[method]["bp_clip"]["t_opt"])
-        except Exception:
-            pass
+    all_combos = []
+    for r in range(len(plugin_keys) + 1):
+        for combo in itertools.combinations(plugin_keys, r):
+            all_combos.append(combo)
 
-    # Helper tạo plugin cho các nhóm
-    def make_bp():
-        return BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0)
+    print(f"\n[+] Đang chạy toàn bộ {len(all_combos)} tổ hợp cho thuật toán: {method.upper()}...")
+    all_results = []
 
-    def make_clip():
-        return CenterClippingPlugin(clipping_ratio=0.40, mode="standard")
+    for combo in all_combos:
+        thresh = get_threshold(method, combo)
+        base_det = PitchDetector(method=method, threshold=thresh)
+        plugins = [plugin_factories[k]() for k in combo]
 
-    def make_hyst(t):
-        return HysteresisPlugin(t_high=t, t_low=t * 0.90)
+        detector = PluginPitchDetector(base_detector=base_det, plugins=plugins) if plugins else base_det
 
-    def make_energy():
-        return EnergyExtensionPlugin(threshold_discount=0.20)
-
-    def make_viterbi():
-        return ViterbiTrackingPlugin(w_freq=3.0, w_octave=2.0)
-
-    plugin_defs = [
-        ("BP", "Bandpass Filter"),
-        ("Clip", "Center Clip"),
-        ("Hyst", "Hysteresis"),
-        ("Energy", "Energy Ext"),
-        ("Viterbi", "Viterbi Tracking"),
-    ]
-
-    # Sinh tự động toàn bộ 32 tổ hợp (2^5) theo bậc k = 0..5
-    configs = {}
-    combo_idx = 1
-    for k in range(6):
-        for combo in itertools.combinations(plugin_defs, k):
-            short_names = [p[0] for p in combo]
-            has_bp = "BP" in short_names
-            has_clip = "Clip" in short_names
-            has_hyst = "Hyst" in short_names
-            has_energy = "Energy" in short_names
-            has_viterbi = "Viterbi" in short_names
-
-            # Chọn ngưỡng tối ưu theo phân phối tiền xử lý
-            if has_bp and has_clip:
-                t = t_bp_clip
-            elif has_bp:
-                t = t_bp
-            elif has_clip:
-                t = t_clip
-            else:
-                t = t_raw
-
-            plugins = []
-            if has_bp:
-                plugins.append(make_bp())
-            if has_clip:
-                plugins.append(make_clip())
-            if has_hyst:
-                plugins.append(make_hyst(t))
-            if has_energy:
-                plugins.append(make_energy())
-            if has_viterbi:
-                plugins.append(make_viterbi())
-
-            if k == 0:
-                name = f"{combo_idx:02d}. Baseline (Gốc)"
-                detector = PitchDetector(method=method, threshold=t)
-            elif k == 5:
-                name = f"{combo_idx:02d}. [Cả 5 Plugins]"
-                detector = PluginPitchDetector(
-                    base_detector=PitchDetector(method=method, threshold=t),
-                    plugins=plugins,
-                )
-            elif k == 1:
-                name = f"{combo_idx:02d}. [{combo[0][1]}]"
-                detector = PluginPitchDetector(
-                    base_detector=PitchDetector(method=method, threshold=t),
-                    plugins=plugins,
-                )
-            else:
-                name = f"{combo_idx:02d}. [{' + '.join(short_names)}]"
-                detector = PluginPitchDetector(
-                    base_detector=PitchDetector(method=method, threshold=t),
-                    plugins=plugins,
-                )
-
-            configs[name] = (detector, t)
-            combo_idx += 1
-
-    print("=" * 148)
-    print(f"       BẢNG ĐỐI SÁNH TOÀN BỘ 32 TỔ HỢP PLUGINS TRÊN TẬP KIỂM THỬ (METHOD = {method.upper()})")
-    print("=" * 148)
-    header = f"{'Cấu hình':<44} | {'phone_F2 (|Δ|)':<16} | {'phone_M2 (|Δ|)':<16} | {'studio_F2 (|Δ|)':<16} | {'studio_M2 (|Δ|)':<16} | {'Sai số TB':<10} | {'Std TB':<8} | {'F1 TB':<8} | {'Acc TB':<8}"
-    print(header)
-    print("-" * 148)
-
-    summary_records = []
-
-    for name, (detector, t_val) in configs.items():
-        errs = []
-        std_errs = []
-        f1s = []
-        accs = []
-        file_metrics = {}
+        errs, mape_f0s = [], []
+        std_errs, mape_stds = [], []
+        num_errs, mape_nums, scores = [], [], []
 
         for f_id in files:
             wav_path = os.path.join(test_dir, f"{f_id}.wav")
@@ -188,123 +222,127 @@ def run_all_combinations(
             res = detector.process_file(wav_path)
             ev = evaluate_against_ground_truth(res, lab_path)
 
-            file_metrics[f_id] = {
-                "pred_f0_mean": ev["pred_f0_mean"],
-                "abs_error_mean": ev["abs_error_mean"],
-                "rel_error_mean_pct": ev["rel_error_mean_pct"],
-                "pred_f0_std": ev["pred_f0_std"],
-                "abs_error_std": ev["abs_error_std"],
-                "rel_error_std_pct": ev["rel_error_std_pct"],
-                "accuracy": ev["classification_accuracy"],
-                "voiced_f1": ev["voiced_f1"],
-            }
             errs.append(ev["abs_error_mean"])
-            std_errs.append(ev["abs_error_std"])
-            f1s.append(ev["voiced_f1"])
-            accs.append(ev["classification_accuracy"])
+            mape_f0s.append(ev["mape_f0"])
+            std_errs.append(ev.get("abs_error_std", 0.0))
+            mape_stds.append(ev.get("mape_std", 0.0))
+            num_errs.append(ev.get("abs_error_num", 0))
+            mape_nums.append(ev.get("mape_num", 0.0))
+            scores.append(ev.get("final_score", ev.get("composite_score", 0.0)))
 
-        avg_err = float(np.mean(errs))
-        avg_std_err = float(np.mean(std_errs))
-        avg_f1 = float(np.mean(f1s))
-        avg_acc = float(np.mean(accs))
-
-        row = (
-            f"{name:<44} | "
-            f"{file_metrics['phone_F2']['abs_error_mean']:5.2f}Hz ({file_metrics['phone_F2']['rel_error_mean_pct']:4.1f}%) | "
-            f"{file_metrics['phone_M2']['abs_error_mean']:5.2f}Hz ({file_metrics['phone_M2']['rel_error_mean_pct']:4.1f}%) | "
-            f"{file_metrics['studio_F2']['abs_error_mean']:5.2f}Hz ({file_metrics['studio_F2']['rel_error_mean_pct']:4.1f}%) | "
-            f"{file_metrics['studio_M2']['abs_error_mean']:5.2f}Hz ({file_metrics['studio_M2']['rel_error_mean_pct']:4.1f}%) | "
-            f"{avg_err:5.2f} Hz    | "
-            f"{avg_std_err:5.2f}   | "
-            f"{avg_f1:5.2f}% | "
-            f"{avg_acc:5.2f}%"
-        )
-        print(row)
-
-        summary_records.append({
+        name = "Baseline" if not combo else " + ".join(combo)
+        all_results.append({
             "config_name": name,
-            "threshold": round(float(t_val), 4),
-            "average_error_hz": round(avg_err, 2),
-            "average_std_error": round(avg_std_err, 2),
-            "average_accuracy_pct": round(avg_acc, 2),
-            "average_voiced_f1_pct": round(avg_f1, 2),
-            "files": file_metrics,
+            "combo": list(combo),
+            "threshold": round(float(thresh), 4),
+            "average_error_hz": round(float(np.mean(errs)), 2),
+            "average_mape_f0_pct": round(float(np.mean(mape_f0s)), 2),
+            "average_std_error": round(float(np.mean(std_errs)), 2),
+            "average_mape_std_pct": round(float(np.mean(mape_stds)), 2),
+            "average_num_error": round(float(np.mean(num_errs)), 2),
+            "average_mape_num_pct": round(float(np.mean(mape_nums)), 2),
+            "final_composite_score_pct": round(float(np.mean(scores)), 2),
         })
 
-    print("=" * 148)
+    # 1. Baseline
+    baseline = next(r for r in all_results if len(r["combo"]) == 0)
 
-    # Tìm tổ hợp tốt nhất
-    best_err_cfg = min(summary_records, key=lambda x: x["average_error_hz"])
-    best_f1_cfg = max(summary_records, key=lambda x: x["average_voiced_f1_pct"])
+    # 2. Nhóm 1: Top 3 Tối ưu MAPE F0
+    top3_f0 = sorted(all_results, key=lambda x: (x["average_mape_f0_pct"], x["average_error_hz"]))[:3]
 
-    print(f"[*] Cấu hình có SAI SỐ THẤP NHẤT: {best_err_cfg['config_name']} (Sai số TB: {best_err_cfg['average_error_hz']} Hz)")
-    print(f"[*] Cấu hình có F1-SCORE CAO NHẤT : {best_f1_cfg['config_name']} (F1 TB: {best_f1_cfg['average_voiced_f1_pct']}%, Acc: {best_f1_cfg['average_accuracy_pct']}%)")
-    print("-" * 137)
+    # 3. Nhóm 2: Top 3 Tối ưu MAPE Std
+    top3_std = sorted(all_results, key=lambda x: (x["average_mape_std_pct"], x["average_std_error"]))[:3]
 
-    # 1. Vẽ biểu đồ xếp hạng toàn bộ các cấu hình
-    plot_combinations_ranking(summary_records, save_path=output_ranking_fig, title=f"Đánh giá toàn bộ 32 tổ hợp Plugins ({method.upper()}) trên tập Kiểm thử")
-    print(f"Saved ranking figure: {output_ranking_fig}")
+    # 4. Nhóm 3: Top 3 Tối ưu MAPE Num
+    top3_num = sorted(all_results, key=lambda x: (x["average_mape_num_pct"], x["average_num_error"]))[:3]
 
-    # 2. Xuất biểu đồ trực quan đối sánh Baseline vs Tổ hợp tốt nhất
-    fig_dir = "outputs/figures"
-    detector_base = configs["01. Baseline (Gốc)"][0]
-    best_name = best_err_cfg["config_name"]
-    detector_best = configs[best_name][0]
+    # 5. Nhóm 4: Top 3 Toàn diện nhất (Best Final Composite Score)
+    top3_overall = sorted(all_results, key=lambda x: x["final_composite_score_pct"])[:3]
 
-    print(f"\nĐang xuất 4 biểu đồ đối sánh trực quan (Baseline vs. {best_name})...")
-    for f_id in files:
-        wav_path = os.path.join(test_dir, f"{f_id}.wav")
-        lab_path = os.path.join(test_dir, f"{f_id}.lab")
+    # Tập hợp các dòng báo cáo chuẩn
+    reported_records = []
+    
+    # Thêm Baseline
+    b_copy = dict(baseline)
+    b_copy["group_label"] = "Baseline (Gốc)"
+    reported_records.append(b_copy)
 
-        res_base = detector_base.process_file(wav_path)
-        res_best = detector_best.process_file(wav_path)
+    # Thêm Nhóm 1
+    for rank, item in enumerate(top3_f0, 1):
+        c = dict(item)
+        c["group_label"] = f"Nhóm 1 (Top {rank} F0)"
+        reported_records.append(c)
 
-        ev_base = evaluate_against_ground_truth(res_base, lab_path)
-        ev_best = evaluate_against_ground_truth(res_best, lab_path)
+    # Thêm Nhóm 2
+    for rank, item in enumerate(top3_std, 1):
+        c = dict(item)
+        c["group_label"] = f"Nhóm 2 (Top {rank} Std)"
+        reported_records.append(c)
 
-        fig_prefix = f"05_compare_plugin_{method}_{f_id}.png" if method != "acf" else f"05_compare_plugin_{f_id}.png"
-        fig_path = os.path.join(fig_dir, fig_prefix)
-        time_sig = np.arange(len(res_base["signal"])) / res_base["sample_rate"]
+    # Thêm Nhóm 3
+    for rank, item in enumerate(top3_num, 1):
+        c = dict(item)
+        c["group_label"] = f"Nhóm 3 (Top {rank} Num)"
+        reported_records.append(c)
 
-        plot_plugin_contour_comparison(
-            time_sig=time_sig,
-            signal=res_base["signal"],
-            time_f0=res_base["frame_times"],
-            f0_baseline=res_base["f0_contour"],
-            f0_enhanced=res_best["f0_contour"],
-            eval_baseline=ev_base,
-            eval_enhanced=ev_best,
-            ground_truth_segments=ev_base["gt_segments"],
-            file_name=f"{f_id}.wav",
-            plugin_names_str=f"{method.upper()}: {best_name}",
-            save_path=fig_path,
+    # Thêm Nhóm 4
+    for rank, item in enumerate(top3_overall, 1):
+        c = dict(item)
+        c["group_label"] = f"Nhóm 4 (Top {rank} Toàn diện)"
+        reported_records.append(c)
+
+    # In bảng ra console
+    print("\n" + "=" * 135)
+    print(f"       BÁO CÁO PHÂN NHÓM TỐI ƯU ({dataset_name}) - THUẬT TOÁN: {method.upper()}")
+    print("=" * 135)
+    print(f"{'Phân nhóm':<24} | {'Cấu hình Plugin':<30} | {'ΔF0 (Hz)':<10} | {'MAPE F0':<9} | {'ΔStd (Hz)':<10} | {'MAPE Std':<9} | {'ΔNum (Khung)':<13} | {'MAPE Num':<9} | {'FINAL SCORE':<11}")
+    print("-" * 135)
+
+    last_group_prefix = ""
+    for r in reported_records:
+        g_prefix = r["group_label"].split()[0]
+        if last_group_prefix and g_prefix != last_group_prefix:
+            print("-" * 135)
+        last_group_prefix = g_prefix
+
+        print(
+            f"{r['group_label']:<24} | "
+            f"{r['config_name']:<30} | "
+            f"{r['average_error_hz']:5.2f} Hz  | "
+            f"{r['average_mape_f0_pct']:5.2f}%   | "
+            f"{r['average_std_error']:5.2f} Hz  | "
+            f"{r['average_mape_std_pct']:5.2f}%   | "
+            f"{r['average_num_error']:5.1f} khung  | "
+            f"{r['average_mape_num_pct']:5.2f}%   | "
+            f"{r['final_composite_score_pct']:5.2f}%"
         )
 
-    # Lưu JSON
+    print("=" * 135)
+
+    # Lưu JSON & CSV
     os.makedirs(os.path.dirname(os.path.abspath(output_json)), exist_ok=True)
     with open(output_json, "w", encoding="utf-8") as f:
-        json.dump(summary_records, f, indent=2, ensure_ascii=False)
-    print(f"Saved report: {output_json}")
+        json.dump(reported_records, f, indent=2, ensure_ascii=False)
 
-    # Lưu CSV
     with open(output_csv, "w", encoding="utf-8") as f:
-        f.write("Config,Threshold,phone_F2_Err,phone_M2_Err,studio_F2_Err,studio_M2_Err,Avg_Err_Hz,Avg_Std_Err,Avg_Accuracy_Pct,Avg_F1_Pct\n")
-        for rec in summary_records:
-            t_str = f"{rec.get('threshold', 0.0):.4f}"
-            f.write(f"{rec['config_name']},{t_str},{rec['files']['phone_F2']['abs_error_mean']},{rec['files']['phone_M2']['abs_error_mean']},{rec['files']['studio_F2']['abs_error_mean']},{rec['files']['studio_M2']['abs_error_mean']},{rec['average_error_hz']},{rec.get('average_std_error', 0.0)},{rec['average_accuracy_pct']},{rec['average_voiced_f1_pct']}\n")
-    print(f"Saved report: {output_csv}")
+        f.write("Group,Config,Threshold,MAE_F0_Hz,MAPE_F0_Pct,MAE_Std_Hz,MAPE_Std_Pct,Delta_Num_Frames,MAPE_Num_Pct,Final_Score_Pct\n")
+        for r in reported_records:
+            f.write(f"\"{r['group_label']}\",\"{r['config_name']}\",{r['threshold']},{r['average_error_hz']},{r['average_mape_f0_pct']},{r['average_std_error']},{r['average_mape_std_pct']},{r['average_num_error']},{r['average_mape_num_pct']},{r['final_composite_score_pct']}\n")
+
+    plot_clean_ranking(reported_records, save_path=output_ranking_fig, title=f"Đối sánh cấu hình {method.upper()} trên {dataset_name} (Baseline & Top Groups)")
+    print(f"[+] Báo cáo CSV: {output_csv}")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Evaluate all 32 plugin combinations.")
-    parser.add_argument("--test_dir", type=str, default="TinHieuKiemThu", help="Test directory")
-    parser.add_argument("--method", type=str, default="acf", choices=["acf", "amdf"], help="Pitch detection method (acf or amdf)")
+    parser = argparse.ArgumentParser(description="Evaluate plugin configurations across top groups.")
+    parser.add_argument("--test_dir", type=str, default="TinHieuHuanLuyen", help="Thư mục dữ liệu (mặc định: TinHieuHuanLuyen)")
+    parser.add_argument("--method", type=str, default="acf", choices=["acf", "amdf", "cepstrum"], help="Method (acf, amdf, or cepstrum)")
     parser.add_argument("--out_json", type=str, default=None, help="JSON output")
     parser.add_argument("--out_csv", type=str, default=None, help="CSV output")
     parser.add_argument("--out_fig", type=str, default=None, help="Ranking plot")
 
     args = parser.parse_args()
-    run_all_combinations(
+    run_evaluation(
         test_dir=args.test_dir,
         method=args.method,
         output_json=args.out_json,

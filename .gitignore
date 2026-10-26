@@ -33,3 +33,7 @@ data/ptdb_tug/
 Thumbs.db
 Desktop.ini
 .DS_Store
+
+# Archives
+*.zip
+

@@ -102,5 +102,17 @@ def find_f0_amdf(
         best_lag = lag_min + rel_idx
         dip_value = float(d[best_lag])
 
-    f0_hz = float(sample_rate / best_lag) if best_lag > 0 else 0.0
+    # Parabolic (quadratic) refinement for continuous sub-sample precision
+    if 0 < best_lag < len(d) - 1:
+        alpha = float(d[best_lag - 1])
+        beta = float(d[best_lag])
+        gamma = float(d[best_lag + 1])
+        denom = alpha - 2.0 * beta + gamma
+        delta = 0.5 * (alpha - gamma) / denom if abs(denom) > 1e-12 else 0.0
+        delta = float(np.clip(delta, -1.0, 1.0))
+    else:
+        delta = 0.0
+
+    refined_lag = float(best_lag + delta)
+    f0_hz = float(sample_rate / refined_lag) if refined_lag > 0 else 0.0
     return f0_hz, dip_value, best_lag

@@ -163,13 +163,13 @@ def run_testing(
 
     results_all = []
 
-    print("=" * 105)
+    print("=" * 160)
     print(f"KIỂM THỬ THUẬT TOÁN {method.upper()} TRÊN TẬP TÍN HIỆU KIỂM THỬ ({test_dir})")
     print(f"Tham số: Method={method.upper()}, FrameLen={frame_duration_ms}ms, HopLen={hop_duration_ms}ms, Range=[{f0_min:.0f}, {f0_max:.0f}]Hz, Threshold T={threshold:.4f}{plugin_desc}")
-    print("=" * 105)
-    header = f"{'Tên file':<16} | {'Ref F0mean':<10} | {'Pred F0mean':<11} | {'|ΔF0| (Hz)':<10} | {'MAPE F0':<8} | {'Ref std':<8} | {'Pred std':<8} | {'|Δstd|':<7} | {'MAPE std':<8} | {'V/UV Acc':<8} | {'F1-Score':<8}"
+    print("=" * 160)
+    header = f"{'Tên file':<14} | {'Ref F0':<8} | {'Pred F0':<8} | {'ΔF0':<6} | {'MAPE F0':<8} | {'Ref Std':<8} | {'Pred Std':<8} | {'ΔStd':<6} | {'MAPE Std':<9} | {'Ref Num':<8} | {'Pred Num':<8} | {'ΔNum':<5} | {'MAPE Num':<9} | {'SCORE':<7} | {'V/UV Acc':<8} | {'F1':<6}"
     print(header)
-    print("-" * 120)
+    print("-" * 160)
 
     for wav_path in wav_files:
         base_name = os.path.basename(wav_path)
@@ -182,18 +182,31 @@ def run_testing(
         # Đánh giá sai số so với ground truth *.lab
         eval_res = evaluate_against_ground_truth(res, lab_path)
 
+        ref_num = eval_res.get("ref_f0_num", 0)
+        pred_num = eval_res.get("pred_f0_num", 0)
+        abs_err_num = eval_res.get("abs_error_num", 0)
+        mape_num = eval_res.get("mape_num", 0.0)
+        score = eval_res.get("final_score", eval_res.get("composite_score", 0.0))
+        acc_str = f"{eval_res['classification_accuracy']:5.2f}%" if eval_res['classification_accuracy'] is not None else " N/A"
+        f1_str = f"{eval_res['voiced_f1']:5.2f}%" if eval_res['voiced_f1'] is not None else " N/A"
+
         row = (
-            f"{base_name:<16} | "
-            f"{eval_res['ref_f0_mean']:<10.2f} | "
-            f"{eval_res['pred_f0_mean']:<11.2f} | "
-            f"{eval_res['abs_error_mean']:<10.2f} | "
+            f"{base_name:<14} | "
+            f"{eval_res['ref_f0_mean']:<8.2f} | "
+            f"{eval_res['pred_f0_mean']:<8.2f} | "
+            f"{eval_res['abs_error_mean']:<6.2f} | "
             f"{eval_res['mape_f0']:<7.2f}% | "
             f"{eval_res['ref_f0_std']:<8.2f} | "
             f"{eval_res['pred_f0_std']:<8.2f} | "
-            f"{eval_res['abs_error_std']:<7.2f} | "
-            f"{eval_res['mape_std']:<7.2f}% | "
-            f"{eval_res['classification_accuracy']:<7.2f}% | "
-            f"{eval_res['voiced_f1']:<7.2f}%"
+            f"{eval_res['abs_error_std']:<6.2f} | "
+            f"{eval_res['mape_std']:<8.2f}% | "
+            f"{ref_num:<8} | "
+            f"{pred_num:<8} | "
+            f"{abs_err_num:<5} | "
+            f"{mape_num:<8.2f}% | "
+            f"{score:<6.2f}% | "
+            f"{acc_str:<8} | "
+            f"{f1_str:<6}"
         )
         print(row)
 
@@ -234,6 +247,12 @@ def run_testing(
             "abs_error_std": eval_res["abs_error_std"],
             "rel_error_std_pct": eval_res["rel_error_std_pct"],
             "mape_std": eval_res["mape_std"],
+            "ref_f0_num": ref_num,
+            "pred_f0_num": pred_num,
+            "abs_error_num": abs_err_num,
+            "mape_num": mape_num,
+            "composite_score": score,
+            "final_score": score,
             "accuracy": eval_res["classification_accuracy"],
             "voiced_f1": eval_res["voiced_f1"],
             "figure_path": fig_path,
@@ -244,12 +263,23 @@ def run_testing(
     avg_mape_f0 = np.mean([r["mape_f0"] for r in results_all])
     avg_abs_err_std = np.mean([r["abs_error_std"] for r in results_all])
     avg_mape_std = np.mean([r["mape_std"] for r in results_all])
-    avg_acc = np.mean([r["accuracy"] for r in results_all])
-    avg_f1 = np.mean([r["voiced_f1"] for r in results_all])
+    avg_abs_err_num = np.mean([r["abs_error_num"] for r in results_all])
+    avg_mape_num = np.mean([r["mape_num"] for r in results_all])
+    avg_score = np.mean([r["final_score"] for r in results_all])
 
-    print("-" * 120)
-    print(f"{'TRUNG BÌNH TOÀN TẬP':<16} | {'-':<10} | {'-':<11} | {avg_abs_err_mean:<10.2f} | {avg_mape_f0:<7.2f}% | {'-':<8} | {'-':<8} | {avg_abs_err_std:<7.2f} | {avg_mape_std:<7.2f}% | {avg_acc:<7.2f}% | {avg_f1:<7.2f}%")
-    print("=" * 120)
+    acc_valid = [r["accuracy"] for r in results_all if r["accuracy"] is not None]
+    f1_valid = [r["voiced_f1"] for r in results_all if r["voiced_f1"] is not None]
+    avg_acc = np.mean(acc_valid) if acc_valid else 0.0
+    avg_f1 = np.mean(f1_valid) if f1_valid else 0.0
+
+    print("-" * 160)
+    print(
+        f"{'TRUNG BÌNH TOÀN TẬP':<14} | {'-':<8} | {'-':<8} | {avg_abs_err_mean:<6.2f} | {avg_mape_f0:<7.2f}% | "
+        f"{'-':<8} | {'-':<8} | {avg_abs_err_std:<6.2f} | {avg_mape_std:<8.2f}% | "
+        f"{'-':<8} | {'-':<8} | {avg_abs_err_num:<5.1f} | {avg_mape_num:<8.2f}% | "
+        f"{avg_score:<6.2f}% | {avg_acc:<7.2f}% | {avg_f1:<6.2f}%"
+    )
+    print("=" * 160)
 
     # 7. Lưu kết quả ra file JSON
     summary_data = {
@@ -263,9 +293,14 @@ def run_testing(
         },
         "average_metrics": {
             "mean_abs_error_f0": round(float(avg_abs_err_mean), 2),
-            "mean_rel_error_pct": round(float(avg_rel_err_mean), 2),
-            "mean_v_uv_accuracy": round(float(avg_acc), 2),
-            "mean_voiced_f1": round(float(avg_f1), 2),
+            "mean_mape_f0_pct": round(float(avg_mape_f0), 2),
+            "mean_abs_error_std": round(float(avg_abs_err_std), 2),
+            "mean_mape_std_pct": round(float(avg_mape_std), 2),
+            "mean_abs_error_num": round(float(avg_abs_err_num), 2),
+            "mean_mape_num_pct": round(float(avg_mape_num), 2),
+            "final_composite_score_pct": round(float(avg_score), 2),
+            "mean_v_uv_accuracy": round(float(avg_acc), 2) if acc_valid else None,
+            "mean_voiced_f1": round(float(avg_f1), 2) if f1_valid else None,
         },
         "files": results_all,
     }
@@ -276,9 +311,9 @@ def run_testing(
 
     # 8. Lưu kết quả ra file CSV
     with open(output_csv, "w", encoding="utf-8") as f:
-        f.write("File,Fs_Hz,Ref_F0mean,Pred_F0mean,AbsErr_F0mean,RelErr_Pct,Ref_F0std,Pred_F0std,AbsErr_F0std,Accuracy_Pct,F1_Pct\n")
+        f.write("File,Fs_Hz,Ref_F0mean,Pred_F0mean,AbsErr_F0mean,MAPE_F0_Pct,Ref_F0std,Pred_F0std,AbsErr_F0std,MAPE_Std_Pct,Ref_F0num,Pred_F0num,AbsErr_F0num,MAPE_Num_Pct,Final_Score_Pct,Accuracy_Pct,F1_Pct\n")
         for r in results_all:
-            f.write(f"{r['file']},{r['sample_rate']},{r['ref_f0_mean']},{r['pred_f0_mean']},{r['abs_error_mean']},{r['rel_error_mean_pct']},{r['ref_f0_std']},{r['pred_f0_std']},{r['abs_error_std']},{r['accuracy']},{r['voiced_f1']}\n")
+            f.write(f"{r['file']},{r['sample_rate']},{r['ref_f0_mean']},{r['pred_f0_mean']},{r['abs_error_mean']},{r['mape_f0']},{r['ref_f0_std']},{r['pred_f0_std']},{r['abs_error_std']},{r['mape_std']},{r['ref_f0_num']},{r['pred_f0_num']},{r['abs_error_num']},{r['mape_num']},{r['final_score']},{r['accuracy']},{r['voiced_f1']}\n")
     print(f"Saved summary CSV: {output_csv}")
     print(f"Generated 4 figures in: {output_dir_fig}/")
 

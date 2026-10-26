@@ -14,11 +14,7 @@ from src.plugins.base import PostProcessingPlugin
 from src.core.audio import frame_signal
 from src.core.acf import compute_acf
 from src.core.amdf import compute_amdf
-from src.core.yin import (
-    compute_difference_function,
-    cumulative_mean_normalized_difference,
-    parabolic_interpolation,
-)
+from src.core.cepstrum import compute_real_cepstrum
 
 
 class ViterbiTrackingPlugin(PostProcessingPlugin):
@@ -31,7 +27,7 @@ class ViterbiTrackingPlugin(PostProcessingPlugin):
     def __init__(
         self,
         w_freq: float = 3.0,
-        w_octave: float = 2.0,
+        w_octave: float = 4.0,
         max_candidates: int = 5,
         f0_min: float = 70.0,
         f0_max: float = 400.0,
@@ -59,7 +55,14 @@ class ViterbiTrackingPlugin(PostProcessingPlugin):
             if search_slice[i] > search_slice[i - 1] and search_slice[i] >= search_slice[i + 1]:
                 lag = lag_min + i
                 val = float(search_slice[i])
-                f0 = float(sample_rate / lag)
+                # 3-point parabolic refinement
+                alpha = float(r[lag - 1])
+                beta = float(r[lag])
+                gamma = float(r[lag + 1])
+                denom = alpha - 2.0 * beta + gamma
+                delta = 0.5 * (alpha - gamma) / denom if abs(denom) > 1e-12 else 0.0
+                refined_lag = lag + float(np.clip(delta, -1.0, 1.0))
+                f0 = float(sample_rate / refined_lag) if refined_lag > 0 else 0.0
                 peaks.append((val, f0))
 
         if not peaks:
@@ -94,7 +97,14 @@ class ViterbiTrackingPlugin(PostProcessingPlugin):
             if search_slice[i] < search_slice[i - 1] and search_slice[i] <= search_slice[i + 1]:
                 lag = lag_min + i
                 val = float(search_slice[i])
-                f0 = float(sample_rate / lag)
+                # 3-point parabolic refinement
+                alpha = float(d[lag - 1])
+                beta = float(d[lag])
+                gamma = float(d[lag + 1])
+                denom = alpha - 2.0 * beta + gamma
+                delta = 0.5 * (alpha - gamma) / denom if abs(denom) > 1e-12 else 0.0
+                refined_lag = lag + float(np.clip(delta, -1.0, 1.0))
+                f0 = float(sample_rate / refined_lag) if refined_lag > 0 else 0.0
                 dips.append((val, f0))
 
         if not dips:
@@ -113,40 +123,44 @@ class ViterbiTrackingPlugin(PostProcessingPlugin):
 
         return candidates
 
-    def _extract_yin_candidates(
+    def _extract_cepstrum_candidates(
         self, frame: np.ndarray, sample_rate: int
     ) -> List[Dict[str, float]]:
+        cep, _ = compute_real_cepstrum(frame, sample_rate, window="hamming", n_fft=2048)
         lag_min = max(1, int(round(sample_rate / self.f0_max)))
-        lag_max = min(len(frame) - 1, int(round(sample_rate / self.f0_min)))
-        if lag_min >= lag_max:
+        lag_max = min(len(cep) // 2, int(round(sample_rate / self.f0_min)))
+
+        if lag_min >= lag_max or lag_max >= len(cep):
             return [{"f0": 0.0, "cost": 1.0}]
 
-        d = compute_difference_function(frame, max_lag=lag_max)
-        d_prime = cumulative_mean_normalized_difference(d)
+        search_slice = cep[lag_min : lag_max + 1]
+        peaks = []
+        for i in range(1, len(search_slice) - 1):
+            if search_slice[i] > search_slice[i - 1] and search_slice[i] >= search_slice[i + 1]:
+                lag = lag_min + i
+                val = float(search_slice[i])
+                # 3-point parabolic refinement
+                alpha = float(cep[lag - 1])
+                beta = float(cep[lag])
+                gamma = float(cep[lag + 1])
+                denom = alpha - 2.0 * beta + gamma
+                delta = 0.5 * (alpha - gamma) / denom if abs(denom) > 1e-12 else 0.0
+                refined_lag = lag + float(np.clip(delta, -1.0, 1.0))
+                f0 = float(sample_rate / refined_lag) if refined_lag > 0 else 0.0
+                peaks.append((val, f0))
 
-        dips = []
-        for lag in range(lag_min, min(lag_max, len(d_prime) - 1)):
-            if d_prime[lag] < d_prime[lag - 1] and d_prime[lag] <= d_prime[lag + 1]:
-                tau_fine, val_fine = parabolic_interpolation(d_prime, lag)
-                f0 = float(sample_rate / tau_fine) if tau_fine > 0 else 0.0
-                if self.f0_min * 0.9 <= f0 <= self.f0_max * 1.1:
-                    dips.append((val_fine, f0))
+        if not peaks:
+            best_idx = int(np.argmax(search_slice))
+            best_lag = lag_min + best_idx
+            peaks.append((float(search_slice[best_idx]), float(sample_rate / best_lag)))
 
-        if not dips:
-            search_slice = d_prime[lag_min : lag_max + 1]
-            if len(search_slice) > 0:
-                rel_idx = int(np.argmin(search_slice))
-                best_lag = lag_min + rel_idx
-                tau_fine, val_fine = parabolic_interpolation(d_prime, best_lag)
-                f0 = float(sample_rate / tau_fine) if tau_fine > 0 else 0.0
-                dips.append((val_fine, f0))
+        peaks.sort(key=lambda x: x[0], reverse=True)
+        peaks = peaks[: self.max_candidates]
 
-        dips.sort(key=lambda x: x[0])
-        dips = dips[: self.max_candidates]
-
+        max_val = max([p[0] for p in peaks]) if peaks and max([p[0] for p in peaks]) > 0 else 1.0
         candidates = []
-        for val, f0 in dips:
-            cost = max(0.0, min(1.0, val))
+        for val, f0 in peaks:
+            cost = max(0.0, 1.0 - (val / max_val))
             candidates.append({"f0": f0, "cost": cost})
 
         if not candidates:
@@ -268,8 +282,8 @@ class ViterbiTrackingPlugin(PostProcessingPlugin):
                     frame_data = frames[idx]
                     if method == "amdf":
                         cands = self._extract_amdf_candidates(frame_data, sample_rate)
-                    elif method == "yin":
-                        cands = self._extract_yin_candidates(frame_data, sample_rate)
+                    elif method == "cepstrum":
+                        cands = self._extract_cepstrum_candidates(frame_data, sample_rate)
                     else:
                         cands = self._extract_acf_candidates(frame_data, sample_rate)
                 else:

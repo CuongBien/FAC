@@ -1,4 +1,4 @@
-"""Pitch Detector engine: combines framing, ACF/AMDF, silence detection, and V/UV thresholding."""
+"""Pitch Detector engine: combines framing, ACF/AMDF/Cepstrum, silence detection, and V/UV thresholding."""
 from typing import Dict, Literal, Optional
 import numpy as np
 from scipy.ndimage import median_filter
@@ -6,7 +6,7 @@ from scipy.ndimage import median_filter
 from src.core.audio import load_wav, frame_signal, compute_ste
 from src.core.acf import find_f0_acf
 from src.core.amdf import find_f0_amdf
-from src.core.yin import find_f0_yin
+from src.core.cepstrum import find_f0_cepstrum
 
 
 class PitchDetector:
@@ -14,7 +14,7 @@ class PitchDetector:
 
     def __init__(
         self,
-        method: Literal["acf", "amdf", "yin"] = "acf",
+        method: Literal["acf", "amdf", "cepstrum"] = "acf",
         frame_duration_ms: float = 25.0,
         hop_duration_ms: float = 10.0,
         f0_min: float = 70.0,
@@ -32,8 +32,8 @@ class PitchDetector:
         if threshold is None:
             if self.method == "amdf":
                 self.threshold = 0.35
-            elif self.method == "yin":
-                self.threshold = 0.15
+            elif self.method == "cepstrum":
+                self.threshold = 0.18
             else:
                 self.threshold = 0.4408
         else:
@@ -123,18 +123,21 @@ class PitchDetector:
                 else:
                     labels[i] = "uv"
                     f0_raw[i] = 0.0
-            elif self.method == "yin":
-                f0_val, dip_val, lag = find_f0_yin(
+            elif self.method == "cepstrum":
+                f0_val, peak_val, lag = find_f0_cepstrum(
                     frames[i],
                     sample_rate,
                     f0_min=self.f0_min,
                     f0_max=self.f0_max,
-                    harmonic_threshold=self.threshold,
+                    window="hamming",
+                    n_fft=2048,
+                    mode="peak",
                 )
-                peak_values[i] = dip_val
-                lags[i] = int(round(lag))
+                peak_values[i] = peak_val
+                lags[i] = lag
 
-                if f0_val > 0.0:
+                # In Cepstrum: Periodic (Voiced) frames have a prominent peak >= threshold
+                if peak_val >= self.threshold:
                     labels[i] = "v"
                     f0_raw[i] = f0_val
                 else:

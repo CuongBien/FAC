@@ -1,0 +1,216 @@
+[
+  {
+    "config_name": "Baseline",
+    "combo": [],
+    "threshold": 0.06,
+    "average_error_hz": 13.95,
+    "average_mape_f0_pct": 10.99,
+    "average_std_error": 19.54,
+    "average_mape_std_pct": 91.74,
+    "average_num_error": 18.25,
+    "average_mape_num_pct": 16.71,
+    "final_composite_score_pct": 39.81,
+    "group_label": "Baseline (Gốc)"
+  },
+  {
+    "config_name": "BP + Clip + Energy + Viterbi",
+    "combo": [
+      "BP",
+      "Clip",
+      "Energy",
+      "Viterbi"
+    ],
+    "threshold": 0.05,
+    "average_error_hz": 1.42,
+    "average_mape_f0_pct": 0.87,
+    "average_std_error": 1.28,
+    "average_mape_std_pct": 6.24,
+    "average_num_error": 9.25,
+    "average_mape_num_pct": 6.2,
+    "final_composite_score_pct": 4.44,
+    "group_label": "Nhóm 1 (Top 1 F0)"
+  },
+  {
+    "config_name": "BP + Viterbi",
+    "combo": [
+      "BP",
+      "Viterbi"
+    ],
+    "threshold": 0.05,
+    "average_error_hz": 1.53,
+    "average_mape_f0_pct": 0.94,
+    "average_std_error": 1.21,
+    "average_mape_std_pct": 5.85,
+    "average_num_error": 14.25,
+    "average_mape_num_pct": 9.8,
+    "final_composite_score_pct": 5.53,
+    "group_label": "Nhóm 1 (Top 2 F0)"
+  },
+  {
+    "config_name": "BP + Energy + Viterbi",
+    "combo": [
+      "BP",
+      "Energy",
+      "Viterbi"
+    ],
+    "threshold": 0.05,
+    "average_error_hz": 1.59,
+    "average_mape_f0_pct": 0.97,
+    "average_std_error": 1.38,
+    "average_mape_std_pct": 6.32,
+    "average_num_error": 13.75,
+    "average_mape_num_pct": 9.46,
+    "final_composite_score_pct": 5.59,
+    "group_label": "Nhóm 1 (Top 3 F0)"
+  },
+  {
+    "config_name": "BP + Viterbi",
+    "combo": [
+      "BP",
+      "Viterbi"
+    ],
+    "threshold": 0.05,
+    "average_error_hz": 1.53,
+    "average_mape_f0_pct": 0.94,
+    "average_std_error": 1.21,
+    "average_mape_std_pct": 5.85,
+    "average_num_error": 14.25,
+    "average_mape_num_pct": 9.8,
+    "final_composite_score_pct": 5.53,
+    "group_label": "Nhóm 2 (Top 1 Std)"
+  },
+  {
+    "config_name": "BP + Clip + Energy + Viterbi",
+    "combo": [
+      "BP",
+      "Clip",
+      "Energy",
+      "Viterbi"
+    ],
+    "threshold": 0.05,
+    "average_error_hz": 1.42,
+    "average_mape_f0_pct": 0.87,
+    "average_std_error": 1.28,
+    "average_mape_std_pct": 6.24,
+    "average_num_error": 9.25,
+    "average_mape_num_pct": 6.2,
+    "final_composite_score_pct": 4.44,
+    "group_label": "Nhóm 2 (Top 2 Std)"
+  },
+  {
+    "config_name": "BP + Energy + Viterbi",
+    "combo": [
+      "BP",
+      "Energy",
+      "Viterbi"
+    ],
+    "threshold": 0.05,
+    "average_error_hz": 1.59,
+    "average_mape_f0_pct": 0.97,
+    "average_std_error": 1.38,
+    "average_mape_std_pct": 6.32,
+    "average_num_error": 13.75,
+    "average_mape_num_pct": 9.46,
+    "final_composite_score_pct": 5.59,
+    "group_label": "Nhóm 2 (Top 3 Std)"
+  },
+  {
+    "config_name": "BP + Clip",
+    "combo": [
+      "BP",
+      "Clip"
+    ],
+    "threshold": 0.05,
+    "average_error_hz": 2.63,
+    "average_mape_f0_pct": 1.69,
+    "average_std_error": 5.51,
+    "average_mape_std_pct": 27.68,
+    "average_num_error": 8.0,
+    "average_mape_num_pct": 5.16,
+    "final_composite_score_pct": 11.5,
+    "group_label": "Nhóm 3 (Top 1 Num)"
+  },
+  {
+    "config_name": "BP + Clip + Viterbi",
+    "combo": [
+      "BP",
+      "Clip",
+      "Viterbi"
+    ],
+    "threshold": 0.05,
+    "average_error_hz": 2.12,
+    "average_mape_f0_pct": 1.44,
+    "average_std_error": 2.5,
+    "average_mape_std_pct": 11.47,
+    "average_num_error": 8.0,
+    "average_mape_num_pct": 5.16,
+    "final_composite_score_pct": 6.03,
+    "group_label": "Nhóm 3 (Top 2 Num)"
+  },
+  {
+    "config_name": "Clip",
+    "combo": [
+      "Clip"
+    ],
+    "threshold": 0.06,
+    "average_error_hz": 4.22,
+    "average_mape_f0_pct": 3.24,
+    "average_std_error": 9.63,
+    "average_mape_std_pct": 45.77,
+    "average_num_error": 7.75,
+    "average_mape_num_pct": 5.37,
+    "final_composite_score_pct": 18.12,
+    "group_label": "Nhóm 3 (Top 3 Num)"
+  },
+  {
+    "config_name": "BP + Clip + Energy + Viterbi",
+    "combo": [
+      "BP",
+      "Clip",
+      "Energy",
+      "Viterbi"
+    ],
+    "threshold": 0.05,
+    "average_error_hz": 1.42,
+    "average_mape_f0_pct": 0.87,
+    "average_std_error": 1.28,
+    "average_mape_std_pct": 6.24,
+    "average_num_error": 9.25,
+    "average_mape_num_pct": 6.2,
+    "final_composite_score_pct": 4.44,
+    "group_label": "Nhóm 4 (Top 1 Toàn diện)"
+  },
+  {
+    "config_name": "BP + Viterbi",
+    "combo": [
+      "BP",
+      "Viterbi"
+    ],
+    "threshold": 0.05,
+    "average_error_hz": 1.53,
+    "average_mape_f0_pct": 0.94,
+    "average_std_error": 1.21,
+    "average_mape_std_pct": 5.85,
+    "average_num_error": 14.25,
+    "average_mape_num_pct": 9.8,
+    "final_composite_score_pct": 5.53,
+    "group_label": "Nhóm 4 (Top 2 Toàn diện)"
+  },
+  {
+    "config_name": "BP + Energy + Viterbi",
+    "combo": [
+      "BP",
+      "Energy",
+      "Viterbi"
+    ],
+    "threshold": 0.05,
+    "average_error_hz": 1.59,
+    "average_mape_f0_pct": 0.97,
+    "average_std_error": 1.38,
+    "average_mape_std_pct": 6.32,
+    "average_num_error": 13.75,
+    "average_mape_num_pct": 9.46,
+    "final_composite_score_pct": 5.59,
+    "group_label": "Nhóm 4 (Top 3 Toàn diện)"
+  }
+]

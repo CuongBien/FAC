@@ -42,8 +42,8 @@ class EnergyExtensionPlugin(PostProcessingPlugin):
 
         num_frames = len(labels)
         method = result.get("method", "acf").lower()
-        if method in ("amdf", "yin"):
-            # For AMDF and YIN: smaller dip is better, discount increases tolerable threshold
+        if method == "amdf":
+            # For AMDF: smaller dip is better, discount increases tolerable threshold
             effective_thresh = base_thresh * (1.0 + self.threshold_discount)
             def check_periodicity(val):
                 return val <= effective_thresh
@@ -114,6 +114,30 @@ class EnergyExtensionPlugin(PostProcessingPlugin):
                 labels[curr] = "v"
                 f0_contour[curr] = cand
                 curr += 1
+
+        # 3. Morphological Gap Filling (Fill 1-frame and 2-frame false UV gaps within speech)
+        for i in range(1, num_frames - 1):
+            if labels[i] != "v" and labels[i - 1] == "v" and labels[i + 1] == "v":
+                if ste[i] >= min_energy * 0.7:
+                    cand = candidate_f0[i]
+                    mean_f0 = 0.5 * (f0_contour[i - 1] + f0_contour[i + 1])
+                    labels[i] = "v"
+                    f0_contour[i] = cand if cand > 0 and abs(cand - mean_f0) <= self.max_pitch_diff else mean_f0
+
+        for i in range(1, num_frames - 2):
+            if labels[i] != "v" and labels[i + 1] != "v" and labels[i - 1] == "v" and labels[i + 2] == "v":
+                if ste[i] >= min_energy * 0.7 and ste[i + 1] >= min_energy * 0.7:
+                    labels[i] = "v"
+                    labels[i + 1] = "v"
+                    f0_contour[i] = f0_contour[i - 1] + (f0_contour[i + 2] - f0_contour[i - 1]) / 3.0
+                    f0_contour[i + 1] = f0_contour[i - 1] + 2.0 * (f0_contour[i + 2] - f0_contour[i - 1]) / 3.0
+
+        # 4. Isolated Spike Suppression (Remove isolated 1-frame false voiced spikes)
+        for i in range(1, num_frames - 1):
+            if labels[i] == "v" and labels[i - 1] != "v" and labels[i + 1] != "v":
+                if ste[i] < min_energy * 1.4:
+                    labels[i] = "uv"
+                    f0_contour[i] = 0.0
 
         # Smooth newly added pitch frames with a local median filter
         v_idx = np.where(labels == "v")[0]
