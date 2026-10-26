@@ -83,18 +83,17 @@ Dưới đây là chi tiết giá trị dự đoán, nhãn chuẩn và sai số 
 | | **File Score (%)** | - | **1.51%** | **0.84%** 🏆 | **4.28%** |
 
 ### 2. Điểm nhấn đột phá từ bảng chi tiết:
-1. **`studio_M2` - Đỉnh cao độ chính xác của AMDF Champion:**
+1. **Sự thống trị của Cepstrum Champion trên 100% các file giọng nữ:**
+   * **`studio_F2` (Nữ phòng thu):** Cepstrum Champion dự đoán được $138 / 139$ khung hữu thanh, sai số số khung chỉ vỏn vẹn **1 khung duy nhất (0.72%)**, đạt điểm kỷ lục **2.90%** (vượt trội hoàn toàn so với ACF 4.63% và AMDF 4.32%).
+   * **`phone_F2` (Nữ kênh thoại):** Dù qua đường truyền viễn thông, Cepstrum Champion đạt sai số độ lệch chuẩn cực thấp ($\Delta\text{Std} = 0.70\text{ Hz}$, $2.29\%$) và điểm dẫn đầu **3.03%** (vượt trội hơn ACF 5.09% và AMDF 5.06%).
+   * *Nguyên nhân:* Nhờ phép khử tích chập đồng cấu, Cepstrum nén sạch toàn bộ Formant thanh đạo $F_1$ về vùng quefrency thấp ($< 2\text{ ms}$), loại bỏ hoàn toàn hiện tượng gợn sóng Formant (Formant Ripples) vốn làm méo mó các đỉnh tương quan thời gian của ACF và AMDF trên giọng nữ.
+2. **`studio_M2` - Đỉnh cao độ chính xác tuyệt đối của AMDF Champion:**
    * Dự đoán đúng tuyệt đối $116 / 116$ khung hữu thanh ($\Delta\text{Num} = 0\text{ khung}$, sai số $0.00\%$).
    * Sai số độ lệch chuẩn chỉ $0.43\text{ Hz}$ ($1.43\%$) và sai số $F_0$ chỉ $1.69\text{ Hz}$ ($1.10\%$).
    * Điểm lỗi tổng hợp đạt mức kỷ lục: **0.84%**!
-2. **`studio_F2` - Khả năng bám phân loại tuyệt hảo của Cepstrum Champion:**
-   * Trong điều kiện phòng thu băng thông đầy đủ, Cepstrum Champion dự đoán được $138 / 139$ khung hữu thanh, sai số số khung chỉ vỏn vẹn **1 khung duy nhất (0.72%)**.
-   * Đạt điểm lỗi file cực kỳ ấn tượng: **2.90%** (vượt trội hơn cả ACF 4.63% và AMDF 4.32%).
-3. **`phone_F2` - Độ ổn định cao độ của Cepstrum:**
-   * Dù qua kênh thoại, âm vực nữ ($150\text{ Hz}$) có các hài nằm trong dải thông ($> 300\text{ Hz}$), giúp Cepstrum Champion đạt sai số độ lệch chuẩn cực thấp ($\Delta\text{Std} = 0.70\text{ Hz}$, $2.29\%$) và điểm file dẫn đầu **3.03%**.
-4. **`phone_M2` - Thử thách phân hóa thuật toán:**
-   * AMDF chứng minh sự ưu việt trong môi trường suy giảm hài với điểm dẫn đầu **4.88%** (chỉ lệch 5 khung, $4.07\%$).
-   * Cepstrum Champion dự đoán tần số trung bình siêu chuẩn ($130.11\text{ Hz}$ so với chuẩn $130.20\text{ Hz}$, sai số chỉ **0.09 Hz** hay **0.07%**), tuy nhiên do thiếu hài bậc 1 nên một số khung bị kéo dài phân loại sang vùng lân cận dẫn đến $\Delta\text{Num} = 31\text{ khung}$.
+3. **`phone_M2` - Thử thách phân hóa thuật toán & Hiệu quả Viterbi:**
+   * Kênh thoại cắt toàn bộ dải dưới $300\text{ Hz}$, xóa sổ sóng hài cơ bản $130\text{ Hz}$. AMDF ($L_1$) tận dụng hiện tượng đường bao giao thoa (Missing Fundamental) nên duy trì vị trí dẫn đầu với Score **4.88%** (chỉ lệch 5 khung, $4.07\%$).
+   * Với Cepstrum Champion, nhờ quy hoạch động Viterbi Tracking ($w_{\text{octave}} = 4.0$), sai số $F_0$ trung bình được ép về mức gần như hoàn hảo: **$130.11\text{ Hz}$ so với chuẩn $130.20\text{ Hz}$ (sai số chỉ 0.09 Hz hay 0.07%)**! Tuy nhiên, do thiếu các vạch phổ bậc thấp nên năng lượng quefrency bị suy giảm, một số khung biên chuyển tiếp bị kéo dài sang vùng lân cận khiến $\Delta\text{Num} = 31\text{ khung}$ (Score = 20.26%).
 
 ---
 
@@ -103,11 +102,14 @@ Dưới đây là chi tiết giá trị dự đoán, nhãn chuẩn và sai số 
 ### 1. Hiện tượng suy hao sóng hài cơ bản trong kênh thoại viễn thông (Missing Fundamental & Bandwidth Limitation)
 * **Cơ chế âm học:** Đường truyền điện thoại thông thường áp dụng bộ lọc thông dải viễn thông từ $300\text{ Hz}$ đến $3400\text{ Hz}$. Đối với giọng nam trầm như file `phone_M2.wav` ($F_0 \approx 130.2\text{ Hz}$), cả sóng hài cơ bản $f_1 = 130.2\text{ Hz}$ và sóng hài bậc hai $f_2 = 260.4\text{ Hz}$ đều bị suy hao nghiêm trọng (bị cắt gọt bởi sườn suy giảm của bộ lọc viễn thông).
 * **Phản ứng của miền thời gian ($L_1$ của AMDF và $L_2$ của ACF):**
-  * Tín hiệu trong miền thời gian là sự chồng chập của các sóng hài còn lại ($f_3 = 390.6\text{ Hz}$, $f_4 = 520.8\text{ Hz}$, $f_5 = 651.0\text{ Hz}, \dots$). Sự giao thoa của các sóng hài cách đều một khoảng đúng bằng $\Delta f = F_0$ tạo ra đường bao biến điệu biên độ (envelope modulation) với chu kỳ chính xác bằng $T_0 = 1/F_0$.
+  * Tín hiệu trong miền thời gian là sự chồng chập của các sóng hài còn lại ($f_3 = 390.6\text{ Hz}$, $f_4 = 520.8\text{ Hz}$, $f_5 = 651.0\text{ Hz}, \dots$). Sự giao thoa pha của các sóng hài cách đều một khoảng đúng bằng $\Delta f = F_0$ tạo ra đường bao biến điệu biên độ (envelope modulation) với chu kỳ chính xác bằng $T_0 = 1/F_0$.
   * Do đó, cả hàm tự tương quan $R(\tau)$ và hàm hiệu độ lớn trung bình $\gamma(\tau)$ vẫn hình thành các cực đại/cực tiểu rất rõ nét tại $\tau_0 = 123\text{ mẫu}$ ($130\text{ Hz}$ tại $f_s = 16\text{ kHz}$). Điều này lý giải tại sao AMDF và ACF duy trì sai số cực thấp trên `phone_M2` (AMDF Score = 4.88%, ACF Score = 5.65%).
-* **Phản ứng của miền Quefrency (Cepstrum):**
-  * Thuật toán Cepstrum thực hiện phép lấy logarithm của phổ biên độ $|X(k)|$. Khi hai hài thấp đầu tiên bị biến mất, cấu trúc lược hài trong phổ tần số bị thưa ở vùng tần số thấp và chỉ bắt đầu xuất hiện rõ từ $k > 300\text{ Hz}$.
-  * Phép biến đổi Fourier ngược (IFFT) trên phổ logarit bị mất các thành phần tần số thấp sẽ làm giảm biên độ của đỉnh xung thanh môn $c[q_0]$ tại quefrency cao. Đỉnh quefrency bị tù và thấp hơn ngưỡng kích hoạt chuẩn $T_{\text{Cep}}$, dẫn đến việc một số khung có năng lượng yếu bị phân loại nhầm thành Unvoiced nếu không được hỗ trợ bởi tiền xử lý Bandpass.
+* **Bản chất sai số lớn ở Cepstrum Baseline và đối chiếu văn hiến khoa học:**
+  * Thuật toán Cepstrum thực hiện phép lấy logarithm của phổ biên độ $|X(k)|$. Khi hai hài thấp đầu tiên bị biến mất, các sóng hài còn lại ($390, 520, 650\text{ Hz}$) bị Formant $F_1 \approx 500\text{ Hz}$ khuếch đại không đồng đều. Khoảng cách giữa các hài mạnh là $2F_0 = 260\text{ Hz}$.
+  * Khi biến đổi IFFT sang quefrency, đỉnh tại $T_0 / 2$ ($260\text{ Hz}$) có biên độ cao hơn đỉnh chu kỳ thật $T_0$ ($130\text{ Hz}$).
+  * Mô hình Baseline mộc (chỉ dùng `argmax` đơn lẻ từng khung) bắt nhầm vào đỉnh $260\text{ Hz}$ (Pitch Doubling) trên $30\%$ số khung. Điều này khiến phương sai bùng nổ, kéo $\text{MAPE Std}$ của file `phone_M2` lên tới **290.61%** (Score = 112.42%) và đẩy trung bình Baseline của toàn bộ tập kiểm thử lên **42.95%**!
+  * Trên thực tế, Cepstrum Baseline trên file nữ phòng thu `studio_F2` vẫn đạt kết quả rất tốt (**9.16%**), chứng minh chuỗi biến đổi toán học FFT $\to$ Log $\to$ IFFT là chuẩn xác, và hiện tượng lỗi lớn ở Baseline hoàn toàn do Pitch Doubling trên giọng nam thoại.
+  * Hiện tượng kinh điển này đã được **A. Michael Noll (1967)** cảnh báo trong bài báo nền tảng *"Cepstrum Pitch Determination"* và được **L. R. Rabiner (1976)** (*IEEE Trans. ASSP*) chứng minh thực nghiệm rằng Cepstrum mộc không thể tránh khỏi Gross Pitch Error trên kênh thoại nếu thiếu quy hoạch động liên kết thời gian.
 
 ### 2. Hiện tượng rơi rụng khung tại biên chuyển tiếp (Boundary Dropping) & Giải pháp Hình thái học
 * **Cơ chế âm học:** Tại các đoạn chuyển tiếp giữa âm hữu thanh và âm vô thanh hoặc khoảng lặng (V-UV Transition / Speech Onset & Offset), dây thanh bắt đầu rung hoặc ngừng rung. Dạng sóng trong các khung này có biên độ nhỏ dần và tính giả chu kỳ (quasi-periodicity) chưa đạt trạng thái dừng (non-stationary).
