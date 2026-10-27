@@ -42,7 +42,8 @@ FAC/
 │   ├── 01_acf_theory_and_experiments.md       # Chương I: Thuật toán ACF & 16 tổ hợp plugin
 │   ├── 02_amdf_theory_and_experiments.md      # Chương II: Thuật toán AMDF & 16 tổ hợp plugin
 │   ├── 03_cepstrum_theory_and_experiments.md  # Chương III: Thuật toán Cepstrum & Đối sánh BT2
-│   └── 04_test_set_benchmark_and_analysis.md  # Chương IV: Đối sánh trên Tập Kiểm Thử & Phân tích hiện tượng
+│   ├── 04_test_set_benchmark_and_analysis.md  # Chương IV: Đối sánh trên Tập Kiểm Thử & Phân tích hiện tượng
+│   └── 05_unsupervised_thresholding_analysis.md # Chương V: 4 Giải pháp Học không giám sát tìm ngưỡng Voiced/Unvoiced
 │
 ├── src/                         # Mã nguồn module hóa
 │   ├── core/                    # Tầng xử lý tín hiệu cốt lõi
@@ -62,6 +63,7 @@ FAC/
 │   │
 │   ├── analysis/                # Phân tích thống kê & đánh giá sai số
 │   │   ├── threshold.py         # Trích xuất phân bố Gauss (mean, std), giải phương trình tìm T
+│   │   ├── unsupervised_threshold.py # 4 giải pháp phân ngưỡng không giám sát (Otsu, Valley, Median, K-Means)
 │   │   └── evaluation.py        # Đánh giá định lượng F0, V/UV Accuracy, F1, MAPE, Final Score
 │   │
 │   └── visualization/           # Trực quan hóa dữ liệu
@@ -74,6 +76,7 @@ FAC/
 │   ├── 04_run_testing.py        # Chạy kiểm thử tự động trên tập dữ liệu
 │   ├── 05_compare_plugins.py    # Khảo sát 16 tổ hợp plugin cho ACF, AMDF, Cepstrum (chia 4 nhóm)
 │   ├── 14_compare_acf_amdf_cepstrum.py # Đối sánh toàn diện 3 thuật toán BT2
+│   ├── 15_evaluate_unsupervised_thresholds.py # Benchmark 4 giải pháp học không giám sát (yêu cầu mở rộng của GV)
 │   ├── visualize_amdf_effects.py       # Trực quan hóa chi tiết AMDF
 │   └── visualize_preprocessing_effects.py # Trực quan hóa tác dụng của Bandpass & Center Clipping
 │
@@ -249,7 +252,13 @@ uv run python scripts/14_compare_acf_amdf_cepstrum.py --dataset TinHieuHuanLuyen
 uv run python scripts/14_compare_acf_amdf_cepstrum.py --dataset TinHieuKiemThu
 ```
 
-#### 6. Công cụ CLI Dự đoán độc lập & Trực quan hóa (`predict.py`):
+#### 6. Benchmark 4 giải pháp Học Không Giám Sát tìm ngưỡng Voiced / Unvoiced (Yêu cầu mở rộng của GV):
+```powershell
+# Chạy đánh giá 4 giải pháp (Median 50%, Otsu, K-Means 1D, Valley) trên ACF, AMDF, Cepstrum:
+uv run python scripts/15_evaluate_unsupervised_thresholds.py
+```
+
+#### 7. Công cụ CLI Dự đoán độc lập & Trực quan hóa (`predict.py`):
 ```powershell
 # Dự đoán toàn bộ thư mục âm thanh với bộ 3 Quán quân tốt nhất
 uv run python predict.py -i TinHieuHuanLuyen -m champions

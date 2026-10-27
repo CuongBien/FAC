@@ -10,6 +10,7 @@ from scipy.ndimage import median_filter
 from src.core.audio import load_wav, frame_signal, compute_ste
 from src.core.acf import find_f0_acf
 from src.core.amdf import find_f0_amdf
+from src.core.cepstrum import find_f0_cepstrum
 from src.core.pitch_detector import PitchDetector
 from .base import (
     BasePlugin,
@@ -168,6 +169,21 @@ class PluginPitchDetector:
                 candidate_f0[i] = f0_val
                 is_voiced = dip_val <= self.base_detector.threshold
                 current_metric = dip_val
+            elif method == "cepstrum":
+                f0_val, peak_val, lag = find_f0_cepstrum(
+                    pitch_frame,
+                    sample_rate,
+                    f0_min=self.base_detector.f0_min,
+                    f0_max=self.base_detector.f0_max,
+                    window="hamming",
+                    n_fft=2048,
+                    mode="peak",
+                )
+                peak_values[i] = peak_val
+                lags[i] = lag
+                candidate_f0[i] = f0_val
+                is_voiced = peak_val >= self.base_detector.threshold
+                current_metric = peak_val
             else:
                 f0_val, peak_val, lag = find_f0_acf(
                     pitch_frame,

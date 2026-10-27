@@ -1,0 +1,16 @@
+Algorithm,Strategy,Threshold_T,Diff_F0_Hz,MAPE_F0_Pct,Diff_Std_Hz,MAPE_Std_Pct,Diff_Num_Frames,MAPE_Num_Pct,Final_Score_Pct
+ACF,Median (Tiên nghiệm 50/50),0.0,1.52,1.04,1.55,4.55,16.75,10.07,5.22
+ACF,Otsu (Cực đại phương sai),0.0,1.55,1.06,1.63,5.24,19.0,11.45,5.91
+ACF,K-Means (Phân cụm 1D),0.0,1.63,1.11,1.53,4.92,19.5,11.78,5.93
+ACF,Đáy Thung Lũng (Valley),0.0,3.0,2.0,4.42,23.69,6.0,4.68,10.12
+ACF,Chuẩn đối sánh (Có giám sát),0.0,1.46,0.99,1.65,5.17,17.25,10.47,5.55
+AMDF,Median (Tiên nghiệm 50/50),0.0,1.48,0.94,3.57,11.06,13.25,7.49,6.5
+AMDF,Otsu (Cực đại phương sai),0.0,0.34,0.21,1.72,4.92,19.0,11.64,5.59
+AMDF,K-Means (Phân cụm 1D),0.0,0.29,0.19,1.73,4.92,19.25,11.76,5.62
+AMDF,Đáy Thung Lũng (Valley),0.0,1.42,0.88,1.8,5.42,26.0,16.6,7.63
+AMDF,Chuẩn đối sánh (Có giám sát),0.0,0.68,0.41,1.28,3.5,14.25,8.15,4.02
+CEPSTRUM,Median (Tiên nghiệm 50/50),0.0,14.24,9.84,12.74,68.52,46.0,33.7,37.35
+CEPSTRUM,Otsu (Cực đại phương sai),0.0,44.41,25.64,13.84,46.43,128.5,87.9,53.33
+CEPSTRUM,K-Means (Phân cụm 1D),0.0,46.34,26.94,16.17,55.45,130.25,89.07,57.16
+CEPSTRUM,Đáy Thung Lũng (Valley),0.0,85.29,50.66,22.06,68.44,142.0,95.69,71.6
+CEPSTRUM,Chuẩn đối sánh (Có giám sát),0.0,17.23,12.05,19.27,98.55,23.25,18.24,42.95
