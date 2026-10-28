@@ -64,6 +64,7 @@ FAC/
 │   ├── analysis/                # Phân tích thống kê & đánh giá sai số
 │   │   ├── threshold.py         # Trích xuất phân bố Gauss (mean, std), giải phương trình tìm T
 │   │   ├── unsupervised_threshold.py # 4 giải pháp phân ngưỡng không giám sát (Otsu, Valley, Median, K-Means)
+│   │   ├── advanced_unsupervised.py  # 4 giải pháp nâng cao (GMM-EM 1D 50/50, 2D ZCR, 2-State HMM, Dynamic Threshold)
 │   │   └── evaluation.py        # Đánh giá định lượng F0, V/UV Accuracy, F1, MAPE, Final Score
 │   │
 │   └── visualization/           # Trực quan hóa dữ liệu
@@ -77,6 +78,7 @@ FAC/
 │   ├── 05_compare_plugins.py    # Khảo sát 16 tổ hợp plugin cho ACF, AMDF, Cepstrum (chia 4 nhóm)
 │   ├── 14_compare_acf_amdf_cepstrum.py # Đối sánh toàn diện 3 thuật toán BT2
 │   ├── 15_evaluate_unsupervised_thresholds.py # Benchmark 4 giải pháp học không giám sát (yêu cầu mở rộng của GV)
+│   ├── 16_evaluate_advanced_unsupervised.py   # Benchmark 4 giải pháp nâng cao vượt giới hạn Histogram
 │   ├── visualize_amdf_effects.py       # Trực quan hóa chi tiết AMDF
 │   └── visualize_preprocessing_effects.py # Trực quan hóa tác dụng của Bandpass & Center Clipping
 │
@@ -252,10 +254,13 @@ uv run python scripts/14_compare_acf_amdf_cepstrum.py --dataset TinHieuHuanLuyen
 uv run python scripts/14_compare_acf_amdf_cepstrum.py --dataset TinHieuKiemThu
 ```
 
-#### 6. Benchmark 4 giải pháp Học Không Giám Sát tìm ngưỡng Voiced / Unvoiced (Yêu cầu mở rộng của GV):
+#### 6. Benchmark các giải pháp Học Không Giám Sát tìm ngưỡng Voiced / Unvoiced:
 ```powershell
-# Chạy đánh giá 4 giải pháp (Median 50%, Otsu, K-Means 1D, Valley) trên ACF, AMDF, Cepstrum:
+# 6.1. Đánh giá 4 giải pháp Histogram cơ bản (Median 50%, Otsu, K-Means 1D, Valley):
 uv run python scripts/15_evaluate_unsupervised_thresholds.py
+
+# 6.2. Đánh giá 4 giải pháp Nâng cao (GMM-EM 1D 50/50, Đa đặc trưng 2D ZCR, 2-State HMM, Ngưỡng động):
+uv run python scripts/16_evaluate_advanced_unsupervised.py
 ```
 
 #### 7. Công cụ CLI Dự đoán độc lập & Trực quan hóa (`predict.py`):
