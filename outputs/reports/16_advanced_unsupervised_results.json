@@ -1,159 +1,199 @@
 {
   "acf": {
     "thresholds": {
-      "t_median": 0.4333,
-      "t_otsu": 0.456,
-      "t_gmm": 0.4189,
-      "t_supervised": 0.4408
+      "t_median": 0.4293,
+      "t_otsu": 0.4559,
+      "t_gmm": 0.4294,
+      "t_supervised": 0.4408,
+      "supervised_source": "historical_saved_parameters; not refit from current summary-only LAB"
     },
     "gmm_model": {
-      "mu0": 0.2622,
-      "std0": 0.1001,
-      "mu1": 0.635,
-      "std1": 0.1264
+      "threshold": 0.42940389696577674,
+      "mu0": 0.2598033338990578,
+      "std0": 0.09849454515602099,
+      "mu1": 0.6301457996103219,
+      "std1": 0.1288259554224831,
+      "weight0": 0.5,
+      "weight1": 0.5,
+      "log_likelihood": 268.7992176060729,
+      "threshold_status": "between_means",
+      "converged": true,
+      "num_iter": 23
+    },
+    "protocol": {
+      "global_threshold_fit": "train_all_frames_including_silence",
+      "clustering_fit": "each_test_file_active_frames",
+      "hmm_fit": "shared_emissions_per_test_file_active_segments",
+      "hmm_A_pi": "fixed; reset pi at every active segment",
+      "dynamic_window_frames": 50,
+      "dynamic_window_offsets": [
+        -25,
+        24
+      ],
+      "dynamic_alpha": 0.3
     },
     "pipeline_eval": {
       "Supervised (Bayes Lab)": {
-        "diff_f0": 1.46,
-        "mape_f0": 0.99,
-        "diff_std": 1.65,
-        "mape_std": 5.17,
+        "diff_f0": 1.79,
+        "mape_f0": 1.21,
+        "diff_std": 2.1,
+        "mape_std": 5.79,
         "diff_num": 17.2,
         "mape_num": 10.47,
-        "final_score": 5.55
+        "final_score": 5.82
       },
       "Median 50% (Histogram)": {
-        "diff_f0": 1.52,
-        "mape_f0": 1.04,
-        "diff_std": 1.55,
-        "mape_std": 4.55,
-        "diff_num": 16.8,
-        "mape_num": 10.07,
-        "final_score": 5.22
+        "diff_f0": 2.17,
+        "mape_f0": 1.42,
+        "diff_std": 1.68,
+        "mape_std": 4.73,
+        "diff_num": 15.8,
+        "mape_num": 9.36,
+        "final_score": 5.17
       },
       "Otsu (Histogram)": {
-        "diff_f0": 1.55,
-        "mape_f0": 1.06,
-        "diff_std": 1.63,
-        "mape_std": 5.24,
+        "diff_f0": 1.91,
+        "mape_f0": 1.29,
+        "diff_std": 2.15,
+        "mape_std": 6.31,
         "diff_num": 19.0,
         "mape_num": 11.45,
-        "final_score": 5.91
+        "final_score": 6.35
       },
       "1. GMM-EM 1D (50/50 Liên tục)": {
-        "diff_f0": 1.79,
-        "mape_f0": 1.18,
-        "diff_std": 1.22,
-        "mape_std": 3.96,
-        "diff_num": 14.2,
-        "mape_num": 8.32,
-        "final_score": 4.49
+        "diff_f0": 2.17,
+        "mape_f0": 1.42,
+        "diff_std": 1.68,
+        "mape_std": 4.73,
+        "diff_num": 15.8,
+        "mape_num": 9.36,
+        "final_score": 5.17
       },
       "2. Đa đặc trưng 2D (Periodicity+ZCR)": {
-        "diff_f0": 1.47,
-        "mape_f0": 0.96,
-        "diff_std": 1.24,
-        "mape_std": 2.92,
-        "diff_num": 18.5,
-        "mape_num": 10.43,
-        "final_score": 4.77
+        "diff_f0": 1.92,
+        "mape_f0": 1.29,
+        "diff_std": 2.96,
+        "mape_std": 11.54,
+        "diff_num": 18.0,
+        "mape_num": 10.07,
+        "final_score": 7.63
       },
       "3. 2-State HMM (Viterbi Decoding)": {
-        "diff_f0": 4.01,
-        "mape_f0": 2.6,
-        "diff_std": 5.43,
-        "mape_std": 16.25,
-        "diff_num": 47.8,
-        "mape_num": 31.33,
-        "final_score": 16.73
+        "diff_f0": 4.21,
+        "mape_f0": 2.68,
+        "diff_std": 5.33,
+        "mape_std": 15.87,
+        "diff_num": 46.0,
+        "mape_num": 30.16,
+        "final_score": 16.24
       },
       "4. Ngưỡng Động Thích Nghi Ngữ Cảnh": {
-        "diff_f0": 1.39,
-        "mape_f0": 0.95,
-        "diff_std": 1.49,
-        "mape_std": 4.23,
-        "diff_num": 16.5,
-        "mape_num": 9.97,
-        "final_score": 5.04
+        "diff_f0": 1.79,
+        "mape_f0": 1.21,
+        "diff_std": 2.09,
+        "mape_std": 5.68,
+        "diff_num": 18.0,
+        "mape_num": 10.89,
+        "final_score": 5.93
       }
     }
   },
   "amdf": {
     "thresholds": {
-      "t_median": 0.4526,
-      "t_otsu": 0.4012,
-      "t_gmm": 0.4322,
-      "t_supervised": 0.438
+      "t_median": 0.4565,
+      "t_otsu": 0.395,
+      "t_gmm": 0.4239,
+      "t_supervised": 0.438,
+      "supervised_source": "historical_saved_parameters; not refit from current summary-only LAB"
     },
     "gmm_model": {
-      "mu0": 0.216,
-      "std0": 0.1098,
-      "mu1": 0.606,
-      "std1": 0.0925
+      "threshold": 0.42386885822909437,
+      "mu0": 0.21551329457596707,
+      "std0": 0.1102487971896288,
+      "mu1": 0.6066429481718895,
+      "std1": 0.09220970022340011,
+      "weight0": 0.5,
+      "weight1": 0.5,
+      "log_likelihood": 351.36589416320396,
+      "threshold_status": "between_means",
+      "converged": true,
+      "num_iter": 25
+    },
+    "protocol": {
+      "global_threshold_fit": "train_all_frames_including_silence",
+      "clustering_fit": "each_test_file_active_frames",
+      "hmm_fit": "shared_emissions_per_test_file_active_segments",
+      "hmm_A_pi": "fixed; reset pi at every active segment",
+      "dynamic_window_frames": 50,
+      "dynamic_window_offsets": [
+        -25,
+        24
+      ],
+      "dynamic_alpha": 0.3
     },
     "pipeline_eval": {
       "Supervised (Bayes Lab)": {
-        "diff_f0": 0.68,
-        "mape_f0": 0.41,
-        "diff_std": 1.28,
-        "mape_std": 3.5,
+        "diff_f0": 0.89,
+        "mape_f0": 0.54,
+        "diff_std": 3.11,
+        "mape_std": 10.39,
         "diff_num": 14.2,
         "mape_num": 8.15,
-        "final_score": 4.02
+        "final_score": 6.36
       },
       "Median 50% (Histogram)": {
-        "diff_f0": 1.48,
-        "mape_f0": 0.94,
-        "diff_std": 3.57,
-        "mape_std": 11.06,
-        "diff_num": 13.2,
-        "mape_num": 7.49,
-        "final_score": 6.5
+        "diff_f0": 1.38,
+        "mape_f0": 0.86,
+        "diff_std": 4.25,
+        "mape_std": 14.15,
+        "diff_num": 12.8,
+        "mape_num": 7.26,
+        "final_score": 7.43
       },
       "Otsu (Histogram)": {
-        "diff_f0": 0.34,
-        "mape_f0": 0.21,
-        "diff_std": 1.72,
-        "mape_std": 4.92,
-        "diff_num": 19.0,
-        "mape_num": 11.64,
-        "final_score": 5.59
+        "diff_f0": 0.25,
+        "mape_f0": 0.17,
+        "diff_std": 3.19,
+        "mape_std": 9.31,
+        "diff_num": 20.0,
+        "mape_num": 12.29,
+        "final_score": 7.25
       },
       "1. GMM-EM 1D (50/50 Liên tục)": {
-        "diff_f0": 0.5,
-        "mape_f0": 0.29,
-        "diff_std": 1.27,
-        "mape_std": 3.46,
-        "diff_num": 15.0,
-        "mape_num": 8.77,
-        "final_score": 4.17
+        "diff_f0": 0.67,
+        "mape_f0": 0.39,
+        "diff_std": 3.06,
+        "mape_std": 10.01,
+        "diff_num": 16.2,
+        "mape_num": 9.59,
+        "final_score": 6.67
       },
       "2. Đa đặc trưng 2D (Periodicity+ZCR)": {
-        "diff_f0": 0.96,
-        "mape_f0": 0.63,
-        "diff_std": 3.81,
-        "mape_std": 12.34,
-        "diff_num": 14.8,
-        "mape_num": 8.23,
-        "final_score": 7.07
+        "diff_f0": 1.37,
+        "mape_f0": 0.86,
+        "diff_std": 4.73,
+        "mape_std": 15.35,
+        "diff_num": 14.5,
+        "mape_num": 8.27,
+        "final_score": 8.16
       },
       "3. 2-State HMM (Viterbi Decoding)": {
-        "diff_f0": 3.79,
-        "mape_f0": 2.6,
-        "diff_std": 2.96,
-        "mape_std": 12.17,
-        "diff_num": 59.0,
-        "mape_num": 40.05,
-        "final_score": 18.27
+        "diff_f0": 3.75,
+        "mape_f0": 2.58,
+        "diff_std": 2.8,
+        "mape_std": 11.51,
+        "diff_num": 58.0,
+        "mape_num": 39.39,
+        "final_score": 17.82
       },
       "4. Ngưỡng Động Thích Nghi Ngữ Cảnh": {
-        "diff_f0": 0.33,
-        "mape_f0": 0.23,
-        "diff_std": 1.62,
-        "mape_std": 4.43,
-        "diff_num": 17.5,
-        "mape_num": 10.48,
-        "final_score": 5.04
+        "diff_f0": 0.44,
+        "mape_f0": 0.29,
+        "diff_std": 3.61,
+        "mape_std": 11.29,
+        "diff_num": 18.8,
+        "mape_num": 11.33,
+        "final_score": 7.63
       }
     }
   },
@@ -161,78 +201,98 @@
     "thresholds": {
       "t_median": 0.0779,
       "t_otsu": 0.1903,
-      "t_gmm": 0.0822,
-      "t_supervised": 0.06
+      "t_gmm": 0.1024,
+      "t_supervised": 0.06,
+      "supervised_source": "historical_saved_parameters; not refit from current summary-only LAB"
     },
     "gmm_model": {
-      "mu0": 0.0706,
-      "std0": 0.016,
-      "mu1": 0.1569,
-      "std1": 0.1025
+      "threshold": 0.1024264837935394,
+      "mu0": 0.07057451272136102,
+      "std0": 0.01591377046267963,
+      "mu1": 0.15679064339011123,
+      "std1": 0.10246305434792548,
+      "weight0": 0.5,
+      "weight1": 0.5,
+      "log_likelihood": 2139.789559434833,
+      "threshold_status": "between_means",
+      "converged": true,
+      "num_iter": 14
+    },
+    "protocol": {
+      "global_threshold_fit": "train_all_frames_including_silence",
+      "clustering_fit": "each_test_file_active_frames",
+      "hmm_fit": "shared_emissions_per_test_file_active_segments",
+      "hmm_A_pi": "fixed; reset pi at every active segment",
+      "dynamic_window_frames": 50,
+      "dynamic_window_offsets": [
+        -25,
+        24
+      ],
+      "dynamic_alpha": 0.3
     },
     "pipeline_eval": {
       "Supervised (Bayes Lab)": {
-        "diff_f0": 17.23,
-        "mape_f0": 12.05,
-        "diff_std": 19.27,
-        "mape_std": 98.55,
-        "diff_num": 23.2,
-        "mape_num": 18.24,
-        "final_score": 42.95
+        "diff_f0": 18.62,
+        "mape_f0": 12.96,
+        "diff_std": 22.7,
+        "mape_std": 113.57,
+        "diff_num": 23.0,
+        "mape_num": 18.04,
+        "final_score": 48.18
       },
       "Median 50% (Histogram)": {
-        "diff_f0": 14.24,
-        "mape_f0": 9.84,
-        "diff_std": 12.74,
-        "mape_std": 68.52,
-        "diff_num": 46.0,
-        "mape_num": 33.7,
-        "final_score": 37.35
+        "diff_f0": 15.04,
+        "mape_f0": 10.36,
+        "diff_std": 14.18,
+        "mape_std": 76.84,
+        "diff_num": 46.2,
+        "mape_num": 33.91,
+        "final_score": 40.37
       },
       "Otsu (Histogram)": {
-        "diff_f0": 44.41,
-        "mape_f0": 25.64,
-        "diff_std": 13.84,
-        "mape_std": 46.43,
+        "diff_f0": 44.47,
+        "mape_f0": 25.66,
+        "diff_std": 13.75,
+        "mape_std": 45.49,
         "diff_num": 128.5,
         "mape_num": 87.9,
-        "final_score": 53.33
+        "final_score": 53.02
       },
       "1. GMM-EM 1D (50/50 Liên tục)": {
-        "diff_f0": 13.12,
-        "mape_f0": 8.93,
-        "diff_std": 10.05,
-        "mape_std": 53.26,
-        "diff_num": 53.8,
-        "mape_num": 39.07,
-        "final_score": 33.75
+        "diff_f0": 15.13,
+        "mape_f0": 9.84,
+        "diff_std": 6.4,
+        "mape_std": 32.57,
+        "diff_num": 79.0,
+        "mape_num": 56.89,
+        "final_score": 33.11
       },
       "2. Đa đặc trưng 2D (Periodicity+ZCR)": {
-        "diff_f0": 12.62,
-        "mape_f0": 7.96,
-        "diff_std": 6.13,
-        "mape_std": 22.93,
-        "diff_num": 99.5,
-        "mape_num": 69.27,
-        "final_score": 33.38
+        "diff_f0": 12.57,
+        "mape_f0": 7.85,
+        "diff_std": 5.45,
+        "mape_std": 17.66,
+        "diff_num": 99.8,
+        "mape_num": 69.38,
+        "final_score": 31.63
       },
       "3. 2-State HMM (Viterbi Decoding)": {
-        "diff_f0": 16.46,
-        "mape_f0": 10.78,
-        "diff_std": 8.13,
-        "mape_std": 36.01,
-        "diff_num": 81.8,
-        "mape_num": 58.67,
-        "final_score": 35.16
+        "diff_f0": 8.71,
+        "mape_f0": 5.8,
+        "diff_std": 5.69,
+        "mape_std": 33.43,
+        "diff_num": 75.5,
+        "mape_num": 53.28,
+        "final_score": 30.84
       },
       "4. Ngưỡng Động Thích Nghi Ngữ Cảnh": {
-        "diff_f0": 12.31,
-        "mape_f0": 8.47,
-        "diff_std": 10.64,
-        "mape_std": 57.21,
-        "diff_num": 54.0,
-        "mape_num": 38.87,
-        "final_score": 34.85
+        "diff_f0": 12.61,
+        "mape_f0": 8.26,
+        "diff_std": 7.18,
+        "mape_std": 37.79,
+        "diff_num": 77.2,
+        "mape_num": 55.27,
+        "final_score": 33.77
       }
     }
   }

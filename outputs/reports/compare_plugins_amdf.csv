@@ -1,14 +1,14 @@
 Group,Config,Threshold,MAE_F0_Hz,MAPE_F0_Pct,MAE_Std_Hz,MAPE_Std_Pct,Delta_Num_Frames,MAPE_Num_Pct,Final_Score_Pct
-"Baseline (Gốc)","Baseline",0.438,1.49,0.93,2.31,11.34,14.75,8.77,7.01
-"Nhóm 1 (Top 1 F0)","BP + Energy + Viterbi",0.3734,0.86,0.48,1.02,3.81,11.75,7.64,3.98
-"Nhóm 1 (Top 2 F0)","BP + Viterbi",0.3734,1.11,0.67,1.24,4.78,17.25,11.39,5.61
-"Nhóm 1 (Top 3 F0)","BP + Energy",0.3734,1.11,0.68,2.16,10.53,11.75,7.64,6.29
-"Nhóm 2 (Top 1 Std)","Energy + Viterbi",0.438,1.3,0.8,0.96,3.42,9.25,5.64,3.29
-"Nhóm 2 (Top 2 Std)","BP + Energy + Viterbi",0.3734,0.86,0.48,1.02,3.81,11.75,7.64,3.98
-"Nhóm 2 (Top 3 Std)","Viterbi",0.438,1.46,0.92,1.16,4.37,14.75,8.77,4.69
-"Nhóm 3 (Top 1 Num)","BP + Clip + Energy",0.5628,1.9,1.16,1.79,7.29,7.75,4.93,4.46
-"Nhóm 3 (Top 2 Num)","BP + Clip + Energy + Viterbi",0.5628,1.85,1.14,1.79,7.29,7.75,4.93,4.45
-"Nhóm 3 (Top 3 Num)","Energy",0.438,1.27,0.76,2.04,10.0,9.25,5.64,5.47
-"Nhóm 4 (Top 1 Toàn diện)","Energy + Viterbi",0.438,1.3,0.8,0.96,3.42,9.25,5.64,3.29
-"Nhóm 4 (Top 2 Toàn diện)","BP + Energy + Viterbi",0.3734,0.86,0.48,1.02,3.81,11.75,7.64,3.98
-"Nhóm 4 (Top 3 Toàn diện)","Clip + Energy + Viterbi",0.6488,2.01,1.22,1.37,5.05,10.75,6.75,4.34
+"Baseline (Gốc)","Baseline",0.438,1.64,0.97,1.92,10.23,15.0,9.07,6.76
+"Nhóm 1 (Top 1 F0)","BP + Energy + Viterbi",0.3734,0.84,0.44,1.03,4.05,13.25,8.41,4.3
+"Nhóm 1 (Top 2 F0)","Energy + Viterbi",0.438,0.94,0.54,1.02,4.0,10.75,6.74,3.76
+"Nhóm 1 (Top 3 F0)","BP + Energy",0.3734,1.21,0.74,2.14,10.59,13.25,8.41,6.58
+"Nhóm 2 (Top 1 Std)","Viterbi",0.438,1.23,0.79,1.03,3.96,15.0,9.07,4.61
+"Nhóm 2 (Top 2 Std)","Energy + Viterbi",0.438,0.94,0.54,1.02,4.0,10.75,6.74,3.76
+"Nhóm 2 (Top 3 Std)","BP + Energy + Viterbi",0.3734,0.84,0.44,1.03,4.05,13.25,8.41,4.3
+"Nhóm 3 (Top 1 Num)","Clip + Energy",0.6488,6.69,4.47,15.04,65.67,7.75,4.62,24.92
+"Nhóm 3 (Top 2 Num)","Clip + Energy + Viterbi",0.6488,3.62,2.24,5.94,25.31,7.75,4.62,10.72
+"Nhóm 3 (Top 3 Num)","Clip",0.6488,7.65,5.31,16.68,72.26,8.75,5.62,27.73
+"Nhóm 4 (Top 1 Toàn diện)","Energy + Viterbi",0.438,0.94,0.54,1.02,4.0,10.75,6.74,3.76
+"Nhóm 4 (Top 2 Toàn diện)","BP + Energy + Viterbi",0.3734,0.84,0.44,1.03,4.05,13.25,8.41,4.3
+"Nhóm 4 (Top 3 Toàn diện)","Viterbi",0.438,1.23,0.79,1.03,3.96,15.0,9.07,4.61

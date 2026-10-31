@@ -1,0 +1,41 @@
+{
+  "threshold_source": "historical_saved_parameters; not refit from current summary-only LAB",
+  "file": "phone_M1.wav",
+  "threshold": 0.4408,
+  "frame_20ms": {
+    "num_frames": 415,
+    "num_voiced": 179,
+    "num_unvoiced": 83,
+    "num_silence": 153,
+    "f0_mean": 136.04,
+    "f0_std": 38.05,
+    "abs_error_mean": 12.34,
+    "rel_error_mean_pct": 9.98,
+    "accuracy": null,
+    "f1_score": null
+  },
+  "frame_25ms_standard": {
+    "num_frames": 414,
+    "num_voiced": 193,
+    "num_unvoiced": 70,
+    "num_silence": 151,
+    "f0_mean": 131.2,
+    "f0_std": 34.1,
+    "abs_error_mean": 7.5,
+    "rel_error_mean_pct": 6.06,
+    "accuracy": null,
+    "f1_score": null
+  },
+  "frame_30ms": {
+    "num_frames": 414,
+    "num_voiced": 203,
+    "num_unvoiced": 65,
+    "num_silence": 146,
+    "f0_mean": 130.71,
+    "f0_std": 32.36,
+    "abs_error_mean": 7.01,
+    "rel_error_mean_pct": 5.67,
+    "accuracy": null,
+    "f1_score": null
+  }
+}

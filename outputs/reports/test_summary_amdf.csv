@@ -1,0 +1,5 @@
+File,Fs_Hz,Ref_F0mean,Pred_F0mean,AbsErr_F0mean,MAPE_F0_Pct,Ref_F0std,Pred_F0std,AbsErr_F0std,MAPE_Std_Pct,Ref_F0num,Pred_F0num,AbsErr_F0num,MAPE_Num_Pct,Final_Score_Pct,Accuracy_Pct,F1_Pct
+phone_F2.wav,16000,150.2,149.91,0.29,0.2,30.7,33.06,2.36,7.69,219,183,36,16.44,8.11,,
+phone_M2.wav,16000,130.2,129.84,0.36,0.27,15.4,16.63,1.23,7.99,123,118,5,4.07,4.11,,
+studio_F2.wav,44100,198.6,199.88,1.28,0.65,47.8,45.04,2.76,5.78,139,127,12,8.63,5.02,,
+studio_M2.wav,44100,154.7,156.31,1.61,1.04,30.3,36.39,6.09,20.1,116,112,4,3.45,8.19,,
