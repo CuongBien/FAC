@@ -5,11 +5,13 @@
 - Áp dụng trên cả 3 thuật toán cốt lõi Bài Tập 2: ACF, AMDF, Cepstrum.
 - Đánh giá bằng bảng chuẩn 8 cột trên tập Kiểm thử (TinHieuKiemThu).
 """
+import argparse
+import csv
 import glob
 import json
 import os
 import sys
-from typing import Dict, List, Tuple
+from typing import Dict, List
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -30,13 +32,26 @@ from src.analysis.unsupervised_threshold import (
     compute_median_threshold,
     compute_kmeans_threshold,
 )
-from src.analysis.evaluation import evaluate_against_ground_truth
+from src.analysis.evaluation import (
+    evaluate_against_ground_truth, round_metric, mean_metric, format_metric,
+)
+from src import config
 from src.core.audio import load_wav, frame_signal, compute_ste
+from src.core.processing import silence_energy_threshold
 from src.core.acf import find_f0_acf
 from src.core.amdf import find_f0_amdf
 from src.core.cepstrum import find_f0_cepstrum
 from src.core.lab_parser import parse_lab_file
 from src.core.pitch_detector import PitchDetector
+
+
+STRATEGY_LABELS = {
+    "median": "Median (Tiên nghiệm 50/50)",
+    "otsu": "Otsu (Cực đại phương sai)",
+    "kmeans": "K-Means (Phân cụm 1D)",
+    "valley": "Đáy Thung Lũng (Valley)",
+    "supervised": "Chuẩn đối sánh (tham số lịch sử)",
+}
 
 
 def extract_all_and_active_metrics(
@@ -70,7 +85,7 @@ def extract_all_and_active_metrics(
             frame_duration_ms=frame_duration_ms,
             hop_duration_ms=hop_duration_ms,
         )
-        ste_thresh = ste_silence_ratio * np.max(ste) if len(ste) > 0 else 0.0
+        ste_thresh = silence_energy_threshold(ste, ste_silence_ratio)
 
         lab_path = wav_path.rsplit(".", 1)[0] + ".lab"
         if os.path.exists(lab_path):
@@ -156,13 +171,13 @@ def evaluate_pipeline_across_files(
         all_final_score.append(eval_res["final_score"])
 
     return {
-        "diff_f0": round(float(np.mean(all_diff_mean)), 2),
-        "mape_f0": round(float(np.mean(all_mape_f0)), 2),
-        "diff_std": round(float(np.mean(all_diff_std)), 2),
-        "mape_std": round(float(np.mean(all_mape_std)), 2),
-        "diff_num": round(float(np.mean(all_diff_num)), 2),
-        "mape_num": round(float(np.mean(all_mape_num)), 2),
-        "final_score": round(float(np.mean(all_final_score)), 2),
+        "diff_f0": mean_metric(all_diff_mean, 2),
+        "mape_f0": mean_metric(all_mape_f0, 2),
+        "diff_std": mean_metric(all_diff_std, 2),
+        "mape_std": mean_metric(all_mape_std, 2),
+        "diff_num": mean_metric(all_diff_num, 2),
+        "mape_num": mean_metric(all_mape_num, 2),
+        "final_score": mean_metric(all_final_score, 2),
     }
 
 
@@ -182,8 +197,8 @@ def plot_unsupervised_comparison(
     bins = np.linspace(min_val, max_val, n_bins)
 
     metric_name = {
-        "acf": "Cực đại tự tương quan chuẩn hóa R_max ∈ [0, 1]",
-        "amdf": "Cực tiểu hiệu biên độ chuẩn hóa D_min ∈ [0, 1]",
+        "acf": "Cực đại tự tương quan chuẩn hóa R_max trong [0, 1]",
+        "amdf": "Cực tiểu hiệu biên độ chuẩn hóa D_min trong [0, 1]",
         "cepstrum": "Đỉnh biên độ quefrency c[q_0]",
     }.get(method, "Đặc trưng chu kỳ")
 
@@ -200,23 +215,12 @@ def plot_unsupervised_comparison(
     )
 
     # Color palette & styles for thresholds
-    th_styles = {
-        "Median (Tiên nghiệm 50/50)": (thresholds["Median (50/50 All)"], "#d35400", "-", 2.5),
-        "Otsu (Cực đại phương sai)": (thresholds["Otsu (All Frames)"], "#8e44ad", "--", 2.2),
-        "K-Means (Phân cụm 1D)": (thresholds["K-Means (All Frames)"], "#16a085", "-.", 2.2),
-        "Đáy Thung Lũng (Valley)": (thresholds["Valley (All Frames)"], "#27ae60", ":", 2.2),
-        "Chuẩn đối sánh (Có giám sát)": (thresholds["Supervised Baseline"], "#2c3e50", "-", 2.5),
-    }
-
-    for name, (t_val, color, ls, lw) in th_styles.items():
-        score_val = pipeline_eval.get(name, {}).get("final_score", 0.0)
-        ax1.axvline(
-            t_val,
-            color=color,
-            linestyle=ls,
-            linewidth=lw,
-            label=f"{name}: T = {t_val:.4f} [Score = {score_val:.2f}%]",
-        )
+    styles = [("#d35400", "-"), ("#8e44ad", "--"), ("#16a085", "-."),
+              ("#27ae60", ":"), ("#2c3e50", "-")]
+    for (strategy, label), (color, style) in zip(STRATEGY_LABELS.items(), styles):
+        score = pipeline_eval[strategy]["final_score"]
+        ax1.axvline(thresholds[strategy], color=color, linestyle=style, linewidth=2.2,
+                    label=f"{label}: T = {format_metric(thresholds[strategy], '.4f')} [Score = {format_metric(score)}%]")
 
     direction_note = "Voiced nếu D_min ≤ T (Hõm cực tiểu)" if method == "amdf" else "Voiced nếu R_max ≥ T (Đỉnh chu kỳ)"
     ax1.set_title(
@@ -232,9 +236,9 @@ def plot_unsupervised_comparison(
     ax1.grid(True, linestyle=":", alpha=0.6)
 
     # Bottom Subplot: Bar chart comparing FINAL SCORE and MAPE Num
-    strategies = list(th_styles.keys())
-    scores = [pipeline_eval[name]["final_score"] for name in strategies]
-    mape_nums = [pipeline_eval[name]["mape_num"] for name in strategies]
+    strategies = list(STRATEGY_LABELS)
+    scores = np.asarray([pipeline_eval[name]["final_score"] for name in strategies], dtype=float)
+    mape_nums = np.asarray([pipeline_eval[name]["mape_num"] for name in strategies], dtype=float)
 
     x = np.arange(len(strategies))
     bar_width = 0.35
@@ -244,16 +248,18 @@ def plot_unsupervised_comparison(
 
     for bar in bars1:
         yval = bar.get_height()
-        ax2.text(bar.get_x() + bar.get_width() / 2.0, yval + 0.6, f"{yval:.2f}%", ha="center", va="bottom", fontsize=8.5, fontweight="bold")
+        ax2.text(bar.get_x() + bar.get_width() / 2.0, (yval + 0.6 if np.isfinite(yval) else 0.6), f"{format_metric(yval, '.2f')}%", ha="center", va="bottom", fontsize=8.5, fontweight="bold")
     for bar in bars2:
         yval = bar.get_height()
-        ax2.text(bar.get_x() + bar.get_width() / 2.0, yval + 0.6, f"{yval:.2f}%", ha="center", va="bottom", fontsize=8.5)
+        ax2.text(bar.get_x() + bar.get_width() / 2.0, (yval + 0.6 if np.isfinite(yval) else 0.6), f"{format_metric(yval, '.2f')}%", ha="center", va="bottom", fontsize=8.5)
 
     ax2.set_ylabel("Sai số (%)", fontsize=10)
     ax2.set_title("So sánh Sai số Toàn chu trình Pitch (Final Score & MAPE Khung Voiced) trên TinHieuKiemThu", fontsize=11, fontweight="bold")
     ax2.set_xticks(x)
-    ax2.set_xticklabels(strategies, fontsize=9.5)
-    max_y = max(max(scores), max(mape_nums)) * 1.18
+    ax2.set_xticklabels([STRATEGY_LABELS[s] for s in strategies], fontsize=9.5)
+    finite_values = np.r_[scores, mape_nums]
+    finite_values = finite_values[np.isfinite(finite_values)]
+    max_y = float(np.max(finite_values)) * 1.18 if len(finite_values) else 20.0
     ax2.set_ylim(0, max(max_y, 20))
     ax2.legend(loc="upper left", fontsize=9.5)
     ax2.grid(True, linestyle=":", alpha=0.6)
@@ -265,147 +271,69 @@ def plot_unsupervised_comparison(
     print(f"Saved figure: {save_path}")
 
 
-def run_benchmark():
-    train_dir = "TinHieuHuanLuyen"
-    test_dir = "TinHieuKiemThu"
+def write_benchmark_results(all_results, output_dir):
+    """Use canonical strategy IDs for JSON, CSV and the thresholds actually used."""
+    reports_dir = os.path.join(output_dir, "reports")
+    os.makedirs(reports_dir, exist_ok=True)
+    json_path = os.path.join(reports_dir, "15_unsupervised_thresholds_results.json")
+    with open(json_path, "w", encoding="utf-8") as stream:
+        json.dump(all_results, stream, indent=2, ensure_ascii=False, allow_nan=False)
+    csv_path = os.path.join(reports_dir, "15_unsupervised_thresholds_results.csv")
+    keys = ["diff_f0", "mape_f0", "diff_std", "mape_std", "diff_num", "mape_num", "final_score"]
+    with open(csv_path, "w", encoding="utf-8", newline="") as stream:
+        writer = csv.writer(stream)
+        writer.writerow(["Algorithm", "Strategy", "Strategy_Label", "Threshold_T", "Diff_F0_Hz",
+                         "MAPE_F0_Pct", "Diff_Std_Hz", "MAPE_Std_Pct", "Diff_Num_Frames", "MAPE_Num_Pct", "Final_Score_Pct"])
+        for method, result in all_results.items():
+            for strategy, metrics in result["pipeline_eval"].items():
+                writer.writerow([method.upper(), strategy, STRATEGY_LABELS[strategy],
+                                 result["thresholds"][strategy]] + [metrics[key] for key in keys])
+    return json_path, csv_path
 
-    train_wavs = sorted(glob.glob(os.path.join(train_dir, "*.wav")))
-    test_wavs = sorted(glob.glob(os.path.join(test_dir, "*.wav")))
 
-    methods = ["acf", "amdf", "cepstrum"]
+def run_benchmark(output_dir="outputs"):
+    train_wavs = sorted(glob.glob(os.path.join("TinHieuHuanLuyen", "*.wav")))
+    test_wavs = sorted(glob.glob(os.path.join("TinHieuKiemThu", "*.wav")))
     all_results = {}
-
-    print("=" * 125)
-    print("        BÁO CÁO THỰC NGHIỆM: 4 GIẢI PHÁP HỌC KHÔNG GIÁM SÁT TÌM NGƯỠNG TỐI ƯU VOICED / UNVOICED")
-    print("        (Yêu cầu: Không dùng nhãn .lab | Khai thác triệt để giả định tiên nghiệm P(V) ≈ P(UV) ≈ 50%)")
-    print("=" * 125)
-
-    for method in methods:
-        print(f"\n{'#' * 45} THUẬT TOÁN: {method.upper()} {'#' * 45}")
-
-        # 1. Trích xuất đặc trưng
-        train_stats = extract_all_and_active_metrics(train_wavs, method=method)
-        all_vals = train_stats["all_values"]
-        act_vals = train_stats["active_values"]
-        tot_frames = train_stats["total_frames"]
-        ref_v = train_stats["total_ref_voiced"]
-        v_ratio = (ref_v / tot_frames * 100.0) if tot_frames > 0 else 0.0
-
-        print(f"1. Thống kê tập Huấn luyện (TinHieuHuanLuyen):")
-        print(f"   * Tổng số khung tín hiệu: {tot_frames} khung")
-        print(f"   * Số khung Voiced chuẩn (F0num ground-truth): {ref_v} khung")
-        print(f"   * Tỉ lệ thực tế: Voiced = {v_ratio:.1f}%, Non-Voiced = {100.0 - v_ratio:.1f}%")
-        print(f"   * NHẬN XÉT: Tỉ lệ thực tế ({v_ratio:.1f}%) sát tuyệt đối với giả định tiên nghiệm 50/50 của đề bài!")
-
-        # 2. Tính 4 ngưỡng không giám sát trên toàn bộ phân bố tín hiệu
-        t_otsu = compute_otsu_threshold(all_vals)
-        t_median = compute_median_threshold(all_vals)
-        t_kmeans = compute_kmeans_threshold(all_vals)
-        t_valley = compute_histogram_valley_threshold(all_vals)
-
-        # Ngưỡng có giám sát đối chứng
-        if method == "acf":
-            t_sup = 0.4408
-        elif method == "amdf":
-            t_sup = 0.4380
-        else:
-            t_sup = 0.0600  # Baseline Cepstrum
-
-        threshold_dict = {
-            "Median (Tiên nghiệm 50/50)": t_median,
-            "Otsu (Cực đại phương sai)": t_otsu,
-            "K-Means (Phân cụm 1D)": t_kmeans,
-            "Đáy Thung Lũng (Valley)": t_valley,
-            "Chuẩn đối sánh (Có giám sát)": t_sup,
+    for method in ("acf", "amdf", "cepstrum"):
+        stats = extract_all_and_active_metrics(train_wavs, method=method)
+        values = stats["all_values"]
+        thresholds = {
+            "median": compute_median_threshold(values),
+            "otsu": compute_otsu_threshold(values),
+            "kmeans": compute_kmeans_threshold(values),
+            "valley": compute_histogram_valley_threshold(values),
+            "supervised": config.baseline_threshold(method),
         }
-
-        # Lưu lại cho pipeline
-        raw_th_dict = {
-            "Median (50/50 All)": t_median,
-            "Otsu (All Frames)": t_otsu,
-            "K-Means (All Frames)": t_kmeans,
-            "Valley (All Frames)": t_valley,
-            "Supervised Baseline": t_sup,
-        }
-
-        print("\n2. Bảng Đối Sánh Giá Trị Ngưỡng Khai Thác Tiên Nghiệm 50/50:")
-        print(f"   {'Chiến lược phân ngưỡng':<30} | {'Ngưỡng T':<9} | {'Nguyên lý toán học cốt lõi'}")
-        print("   " + "-" * 90)
-        print(f"   {'Median (Tiên nghiệm 50/50)':<30} | {t_median:<9.4f} | Phân vị thứ 50 (P50), chia đôi 50% V và 50% UV")
-        print(f"   {'Otsu (Cực đại phương sai)':<30} | {t_otsu:<9.4f} | Cực đại hóa phương sai giữa 2 lớp (Between-class variance)")
-        print(f"   {'K-Means (Phân cụm 1D)':<30} | {t_kmeans:<9.4f} | Ranh giới trung điểm giữa 2 tâm cụm k-means (K=2)")
-        print(f"   {'Đáy Thung Lũng (Valley)':<30} | {t_valley:<9.4f} | Cực tiểu cục bộ giữa 2 đỉnh phân bố hai đỉnh (Bimodal)")
-        print(f"   {'Chuẩn đối sánh (Có giám sát)':<30} | {t_sup:<9.4f} | Giao điểm phân bố Gauss Bayes (cần nhãn .lab)")
-
-        # 3. Đánh giá chu trình Pitch trên TinHieuKiemThu (Bảng chuẩn 8 cột)
-        print("\n3. Bảng Đánh Giá Định Lượng Toàn Chu Trình Pitch Trên Tập Kiểm Thử (TinHieuKiemThu):")
-        print(f"   {'Phương pháp / Ngưỡng':<30} | {'ΔF0 (Hz)':<9} | {'MAPE F0 (%)':<12} | {'ΔStd (Hz)':<10} | {'MAPE Std (%)':<13} | {'ΔNum':<7} | {'MAPE Num (%)':<13} | {'FINAL SCORE (%)':<15}")
-        print("   " + "-" * 125)
-
+        print(f"\n{method.upper()}: fit trên {stats['total_frames']} khung train (có silence).")
+        print(f"Đối chứng dùng {config.THRESHOLD_SOURCE}")
         pipeline_eval = {}
-        for display_name, raw_key in [
-            ("Median (Tiên nghiệm 50/50)", "Median (50/50 All)"),
-            ("Otsu (Cực đại phương sai)", "Otsu (All Frames)"),
-            ("K-Means (Phân cụm 1D)", "K-Means (All Frames)"),
-            ("Đáy Thung Lũng (Valley)", "Valley (All Frames)"),
-            ("Chuẩn đối sánh (Có giám sát)", "Supervised Baseline"),
-        ]:
-            t_val = raw_th_dict[raw_key]
-            p_res = evaluate_pipeline_across_files(test_wavs, method=method, threshold=t_val)
-            pipeline_eval[display_name] = p_res
-            print(
-                f"   {display_name:<30} | "
-                f"{p_res['diff_f0']:<9.2f} | "
-                f"{p_res['mape_f0']:<12.2f} | "
-                f"{p_res['diff_std']:<10.2f} | "
-                f"{p_res['mape_std']:<13.2f} | "
-                f"{p_res['diff_num']:<7.1f} | "
-                f"{p_res['mape_num']:<13.2f} | "
-                f"{p_res['final_score']:<15.2f}"
-            )
-
-        # 4. Xuất đồ thị hình vẽ
-        fig_path = f"outputs/figures/15_unsupervised_thresholds_{method}.png"
-        plot_unsupervised_comparison(
-            all_values=all_vals,
-            thresholds=raw_th_dict,
-            pipeline_eval=pipeline_eval,
-            method=method,
-            save_path=fig_path,
-        )
-
+        for strategy, label in STRATEGY_LABELS.items():
+            metrics = evaluate_pipeline_across_files(test_wavs, method, thresholds[strategy])
+            pipeline_eval[strategy] = metrics
+            print(f"  {label}: T={format_metric(thresholds[strategy], '.6f')}; Final Score={format_metric(metrics['final_score'])}%")
+        figure_path = os.path.join(output_dir, "figures", f"15_unsupervised_thresholds_{method}.png")
+        plot_unsupervised_comparison(values, thresholds, pipeline_eval, method, figure_path)
+        ratio = stats["total_ref_voiced"] / stats["total_frames"] * 100 if stats["total_frames"] else None
         all_results[method] = {
-            "distribution_stats": {
-                "total_frames": tot_frames,
-                "total_ref_voiced": ref_v,
-                "voiced_ratio_pct": round(v_ratio, 2),
-                "unvoiced_ratio_pct": round(100.0 - v_ratio, 2),
-            },
-            "thresholds": {k: round(v, 4) for k, v in raw_th_dict.items()},
+            "distribution_stats": {"total_frames": stats["total_frames"],
+                                   "total_ref_voiced": stats["total_ref_voiced"],
+                                   "voiced_ratio_pct": round_metric(ratio),
+                                   "non_voiced_ratio_pct": round_metric(100-ratio) if ratio is not None else None},
+            "thresholds": thresholds,
+            "strategy_labels": dict(STRATEGY_LABELS),
             "pipeline_eval": pipeline_eval,
-            "figure_path": fig_path,
+            "threshold_source": config.THRESHOLD_SOURCE,
+            "protocol": {"unsupervised_fit": "train_all_frames_including_silence",
+                         "evaluation": "test_with_shared_silence_gate_and_segment_median"},
+            "figure_path": figure_path,
         }
-
-    # 5. Lưu báo cáo JSON và CSV
-    json_path = "outputs/reports/15_unsupervised_thresholds_results.json"
-    with open(json_path, "w", encoding="utf-8") as f:
-        json.dump(all_results, f, indent=2, ensure_ascii=False)
-    print(f"\n[OK] Đã lưu báo cáo JSON tại: {json_path}")
-
-    csv_path = "outputs/reports/15_unsupervised_thresholds_results.csv"
-    with open(csv_path, "w", encoding="utf-8") as f:
-        f.write("Algorithm,Strategy,Threshold_T,Diff_F0_Hz,MAPE_F0_Pct,Diff_Std_Hz,MAPE_Std_Pct,Diff_Num_Frames,MAPE_Num_Pct,Final_Score_Pct\n")
-        for method, m_data in all_results.items():
-            for name, p_ev in m_data["pipeline_eval"].items():
-                t_val = m_data["thresholds"].get(name, 0.0)
-                f.write(
-                    f"{method.upper()},{name},{t_val},"
-                    f"{p_ev['diff_f0']},{p_ev['mape_f0']},{p_ev['diff_std']},{p_ev['mape_std']},"
-                    f"{p_ev['diff_num']},{p_ev['mape_num']},{p_ev['final_score']}\n"
-                )
-    print(f"[OK] Đã lưu báo cáo CSV tại: {csv_path}")
-    print("=" * 125)
+    json_path, csv_path = write_benchmark_results(all_results, output_dir)
+    print(f"Saved: {json_path}\nSaved: {csv_path}")
+    return all_results
 
 
 if __name__ == "__main__":
-    run_benchmark()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output-dir", default="outputs", help="Root for figures/ and reports/")
+    run_benchmark(parser.parse_args().output_dir)

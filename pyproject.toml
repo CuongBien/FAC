@@ -1,7 +1,7 @@
 [project]
 name = "fac-speech-f0"
 version = "0.1.0"
-description = "Ước lượng tần số cơ bản F0 và phân loại Voiced/Unvoiced bằng ACF và AMDF"
+description = "Ước lượng F0 và phân loại Voiced/Unvoiced bằng ACF, AMDF và Cepstrum"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
@@ -14,5 +14,5 @@ dependencies = [
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-packages = ["src", "src.core", "src.analysis", "src.visualization", "src.plugins"]
+[tool.setuptools.packages.find]
+include = ["src", "src.*"]

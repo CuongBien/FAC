@@ -1,9 +1,9 @@
 """Stage 3 Post-processing Plugin: Bù trễ biên dựa trên Năng lượng (Edge Extension by Energy)."""
 from typing import Any, Dict
 import numpy as np
-from scipy.ndimage import median_filter
 
 from src.plugins.base import PostProcessingPlugin
+from src.core.processing import smooth_voiced_segments
 
 
 class EnergyExtensionPlugin(PostProcessingPlugin):
@@ -41,6 +41,8 @@ class EnergyExtensionPlugin(PostProcessingPlugin):
             return result
 
         num_frames = len(labels)
+        f0_min = result.get("f0_min", 70.0)
+        f0_max = result.get("f0_max", 400.0)
         method = result.get("method", "acf").lower()
         if method == "amdf":
             # For AMDF: smaller dip is better, discount increases tolerable threshold
@@ -53,6 +55,14 @@ class EnergyExtensionPlugin(PostProcessingPlugin):
                 return val >= effective_thresh
 
         min_energy = self.ste_multiplier * ste_thresh
+
+        def valid_candidate(index):
+            return (
+                labels[index] == "uv"
+                and np.isfinite(candidate_f0[index])
+                and f0_min <= candidate_f0[index] <= f0_max
+                and check_periodicity(peak_values[index])
+            )
 
         # Find continuous voiced segments
         in_segment = False
@@ -84,7 +94,7 @@ class EnergyExtensionPlugin(PostProcessingPlugin):
                     break
                 if ste[curr] < min_energy:
                     break
-                if not check_periodicity(peak_values[curr]):
+                if not valid_candidate(curr):
                     break
 
                 cand = candidate_f0[curr]
@@ -103,7 +113,7 @@ class EnergyExtensionPlugin(PostProcessingPlugin):
                     break
                 if ste[curr] < min_energy:
                     break
-                if not check_periodicity(peak_values[curr]):
+                if not valid_candidate(curr):
                     break
 
                 cand = candidate_f0[curr]
@@ -115,22 +125,26 @@ class EnergyExtensionPlugin(PostProcessingPlugin):
                 f0_contour[curr] = cand
                 curr += 1
 
-        # 3. Morphological Gap Filling (Fill 1-frame and 2-frame false UV gaps within speech)
-        for i in range(1, num_frames - 1):
-            if labels[i] != "v" and labels[i - 1] == "v" and labels[i + 1] == "v":
-                if ste[i] >= min_energy * 0.7:
-                    cand = candidate_f0[i]
-                    mean_f0 = 0.5 * (f0_contour[i - 1] + f0_contour[i + 1])
-                    labels[i] = "v"
-                    f0_contour[i] = cand if cand > 0 and abs(cand - mean_f0) <= self.max_pitch_diff else mean_f0
-
-        for i in range(1, num_frames - 2):
-            if labels[i] != "v" and labels[i + 1] != "v" and labels[i - 1] == "v" and labels[i + 2] == "v":
-                if ste[i] >= min_energy * 0.7 and ste[i + 1] >= min_energy * 0.7:
-                    labels[i] = "v"
-                    labels[i + 1] = "v"
-                    f0_contour[i] = f0_contour[i - 1] + (f0_contour[i + 2] - f0_contour[i - 1]) / 3.0
-                    f0_contour[i + 1] = f0_contour[i - 1] + 2.0 * (f0_contour[i + 2] - f0_contour[i - 1]) / 3.0
+        # Fill only complete 1/2-frame UV gaps with acoustic and pitch support.
+        # A silence frame is a hard boundary, regardless of its stored energy.
+        i = 1
+        while i < num_frames - 1:
+            if labels[i] != "uv" or labels[i - 1] != "v":
+                i += 1
+                continue
+            end = i
+            while end < num_frames and labels[end] == "uv":
+                end += 1
+            if end - i <= 2 and end < num_frames and labels[end] == "v":
+                gap = range(i, end)
+                supported = all(
+                    valid_candidate(j) and ste[j] >= min_energy * 0.7 for j in gap
+                )
+                path = np.r_[f0_contour[i - 1], candidate_f0[i:end], f0_contour[end]]
+                if supported and np.all(np.abs(np.diff(path)) <= self.max_pitch_diff):
+                    labels[i:end] = "v"
+                    f0_contour[i:end] = candidate_f0[i:end]
+            i = end
 
         # 4. Isolated Spike Suppression (Remove isolated 1-frame false voiced spikes)
         for i in range(1, num_frames - 1):
@@ -140,9 +154,10 @@ class EnergyExtensionPlugin(PostProcessingPlugin):
                     f0_contour[i] = 0.0
 
         # Smooth newly added pitch frames with a local median filter
-        v_idx = np.where(labels == "v")[0]
-        if len(v_idx) >= 3:
-            f0_contour[v_idx] = median_filter(f0_contour[v_idx], size=3)
+        if result.get("use_median_filter", True):
+            f0_contour = smooth_voiced_segments(
+                f0_contour, labels, result.get("median_size", 3)
+            )
 
         result["labels"] = labels
         result["f0_contour"] = f0_contour

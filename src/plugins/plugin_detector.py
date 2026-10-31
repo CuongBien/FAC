@@ -5,13 +5,18 @@
 """
 from typing import Dict, List, Optional
 import numpy as np
-from scipy.ndimage import median_filter
 
 from src.core.audio import load_wav, frame_signal, compute_ste
 from src.core.acf import find_f0_acf
 from src.core.amdf import find_f0_amdf
 from src.core.cepstrum import find_f0_cepstrum
 from src.core.pitch_detector import PitchDetector
+from src.core.processing import (
+    center_frame,
+    prepare_analysis_signal,
+    silence_energy_threshold,
+    smooth_voiced_segments,
+)
 from .base import (
     BasePlugin,
     PluginStage,
@@ -85,6 +90,9 @@ class PluginPitchDetector:
         duration: Optional[float] = None,
     ) -> Dict:
         """Process an in-memory 1D audio array through the 3-stage plugin pipeline."""
+        analysis_signal = prepare_analysis_signal(
+            signal, sample_rate, self.base_detector.frame_duration_ms
+        )
         if duration is None:
             duration = len(signal) / sample_rate
 
@@ -95,7 +103,7 @@ class PluginPitchDetector:
         # =========================================================================
         # STAGE 1: PRE-PROCESSING (Signal-level filtering)
         # =========================================================================
-        processed_signal = np.copy(signal)
+        processed_signal = np.copy(analysis_signal)
         for p in self.pre_processors:
             processed_signal = p.pre_process_signal(processed_signal, sample_rate)
 
@@ -107,16 +115,15 @@ class PluginPitchDetector:
             hop_duration_ms=self.base_detector.hop_duration_ms,
             window="rectangular",
         )
-        # Compute STE on raw signal to maintain true energy profile
+        # Gate on DC-free speech energy before signal-level plugins.
         ste, _ = compute_ste(
-            signal,
+            analysis_signal,
             sample_rate,
             frame_duration_ms=self.base_detector.frame_duration_ms,
             hop_duration_ms=self.base_detector.hop_duration_ms,
         )
 
-        max_ste = np.max(ste) if len(ste) > 0 else 1.0
-        ste_thresh = self.base_detector.ste_silence_ratio * max_ste
+        ste_thresh = silence_energy_threshold(ste, self.base_detector.ste_silence_ratio)
 
         num_frames = len(frames)
         f0_raw = np.zeros(num_frames, dtype=np.float64)
@@ -124,6 +131,7 @@ class PluginPitchDetector:
         peak_values = np.zeros(num_frames, dtype=np.float64)
         lags = np.zeros(num_frames, dtype=int)
         candidate_f0 = np.zeros(num_frames, dtype=np.float64)
+        pitch_frames = np.copy(frames)
 
         method = getattr(self.base_detector, "method", "acf").lower()
 
@@ -151,9 +159,10 @@ class PluginPitchDetector:
                 continue
 
             # Stage 1 (cont.): Frame-level pre-processing (Center Clipping)
-            pitch_frame = np.copy(frames[i])
+            pitch_frame = center_frame(frames[i])
             for p in self.pre_processors:
                 pitch_frame = p.pre_process_frame(pitch_frame, sample_rate)
+            pitch_frames[i] = pitch_frame
 
             # Core pitch extraction
             if method == "amdf":
@@ -204,7 +213,7 @@ class PluginPitchDetector:
                     i, current_metric, f0_val, is_voiced, context
                 )
 
-            if is_voiced:
+            if is_voiced and np.isfinite(f0_val) and self.base_detector.f0_min <= f0_val <= self.base_detector.f0_max:
                 labels[i] = "v"
                 f0_raw[i] = f0_val
             else:
@@ -214,17 +223,22 @@ class PluginPitchDetector:
         # Baseline Median filter smoothing
         f0_contour = np.copy(f0_raw)
         if self.base_detector.use_median_filter:
-            voiced_idx = np.where(f0_contour > 0)[0]
-            if len(voiced_idx) >= self.base_detector.median_size:
-                f0_contour[voiced_idx] = median_filter(
-                    f0_contour[voiced_idx], size=self.base_detector.median_size
-                )
+            f0_contour = smooth_voiced_segments(
+                f0_contour, labels, self.base_detector.median_size
+            )
 
         initial_result = {
             "wav_path": wav_path,
             "sample_rate": sample_rate,
             "signal": signal,
             "processed_signal": processed_signal,
+            "pitch_frames": pitch_frames,
+            "frame_duration_ms": self.base_detector.frame_duration_ms,
+            "hop_duration_ms": self.base_detector.hop_duration_ms,
+            "f0_min": self.base_detector.f0_min,
+            "f0_max": self.base_detector.f0_max,
+            "use_median_filter": self.base_detector.use_median_filter,
+            "median_size": self.base_detector.median_size,
             "duration": duration,
             "frame_times": frame_times,
             "f0_contour": f0_contour,
@@ -247,6 +261,15 @@ class PluginPitchDetector:
         result = initial_result
         for p in self.post_processors:
             result = p.post_process_results(result)
+
+        # Keep final labels/counts consistent even if a post-processor rejects pitch.
+        valid_pitch = (
+            np.isfinite(result["f0_contour"])
+            & (result["f0_contour"] >= self.base_detector.f0_min)
+            & (result["f0_contour"] <= self.base_detector.f0_max)
+        )
+        result["labels"][(result["labels"] == "v") & ~valid_pitch] = "uv"
+        result["f0_contour"][result["labels"] != "v"] = 0.0
 
         # Final statistics recalculation
         v_f0 = result["f0_contour"][result["f0_contour"] > 0]

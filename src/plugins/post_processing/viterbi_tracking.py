@@ -1,37 +1,23 @@
-"""Stage 3 Post-processing Plugin: Quy hoạch động Viterbi làm mượt cao độ (Viterbi Tracking).
-
-Giải quyết triệt để lỗi nhảy quãng tám (Pitch Doubling / Pitch Halving) và formant ripple:
-- Hoạt động trên các đoạn âm hữu thanh (Voiced segments) đã được phân loại chuẩn xác.
-- Tại mỗi khung, trích xuất Top-K cực trị cục bộ (Local Peaks đối với ACF, Local Dips đối với AMDF).
-- Thuật toán Viterbi tìm đường đi mượt mà nhất tối ưu toàn cục dựa trên:
-  * Chi phí cục bộ (Local cost): Độ cao tương quan 1 - R(tau) (ACF) hoặc độ sâu D(tau) (AMDF).
-  * Chi phí chuyển tiếp (Transition cost): Phạt bước nhảy tần số log2 (bán âm) và phạt nặng bước nhảy quãng tám (0.8 - 1.2 octave).
-"""
-from typing import Any, Dict, List, Optional
+"""Viterbi pitch tracking on the detector's actual preprocessed frames."""
+from typing import Any, Dict, List
 import numpy as np
 
 from src.plugins.base import PostProcessingPlugin
-from src.core.audio import frame_signal
 from src.core.acf import compute_acf
 from src.core.amdf import compute_amdf
 from src.core.cepstrum import compute_real_cepstrum
+from src.core.processing import center_frame, pitch_lag_bounds, refined_f0, voiced_segments
 
 
 class ViterbiTrackingPlugin(PostProcessingPlugin):
-    """Dynamic programming (Viterbi) pitch tracker for voiced segments.
+    """Optimize candidate pitch paths independently within voiced segments.
 
-    Eliminates octave jumps and sudden pitch contours anomalies by solving the shortest
-    path problem across candidate peaks/dips in continuous voiced segments.
+    Pipeline results supply pitch_frames and detector configuration. No signal is
+    reframed here, so center clipping, frame duration and frame alignment survive.
     """
 
-    def __init__(
-        self,
-        w_freq: float = 3.0,
-        w_octave: float = 4.0,
-        max_candidates: int = 5,
-        f0_min: float = 70.0,
-        f0_max: float = 400.0,
-    ):
+    def __init__(self, w_freq=3.0, w_octave=4.0, max_candidates=5,
+                 f0_min=70.0, f0_max=400.0):
         super().__init__(name="ViterbiTracking")
         self.w_freq = w_freq
         self.w_octave = w_octave
@@ -39,266 +25,142 @@ class ViterbiTrackingPlugin(PostProcessingPlugin):
         self.f0_min = f0_min
         self.f0_max = f0_max
 
-    def _extract_acf_candidates(
-        self, frame: np.ndarray, sample_rate: int
-    ) -> List[Dict[str, float]]:
-        r = compute_acf(frame, mode="normalized")
-        lag_min = max(1, int(round(sample_rate / self.f0_max)))
-        lag_max = min(len(r) - 2, int(round(sample_rate / self.f0_min)))
-
-        if lag_min >= lag_max or lag_max >= len(r) - 1:
-            return [{"f0": 0.0, "cost": 1.0}]
-
-        search_slice = r[lag_min : lag_max + 1]
-        peaks = []
-        for i in range(1, len(search_slice) - 1):
-            if search_slice[i] > search_slice[i - 1] and search_slice[i] >= search_slice[i + 1]:
-                lag = lag_min + i
-                val = float(search_slice[i])
-                # 3-point parabolic refinement
-                alpha = float(r[lag - 1])
-                beta = float(r[lag])
-                gamma = float(r[lag + 1])
-                denom = alpha - 2.0 * beta + gamma
-                delta = 0.5 * (alpha - gamma) / denom if abs(denom) > 1e-12 else 0.0
-                refined_lag = lag + float(np.clip(delta, -1.0, 1.0))
-                f0 = float(sample_rate / refined_lag) if refined_lag > 0 else 0.0
-                peaks.append((val, f0))
-
-        if not peaks:
-            best_idx = int(np.argmax(search_slice))
-            best_lag = lag_min + best_idx
-            best_val = float(search_slice[best_idx])
-            peaks.append((best_val, float(sample_rate / best_lag)))
-
-        peaks.sort(key=lambda x: x[0], reverse=True)
-        peaks = peaks[: self.max_candidates]
-
+    def _curve_candidates(self, curve, sample_rate, method, f0_min, f0_max):
+        last_lag = len(curve) // 2 if method == "cepstrum" else len(curve) - 2
+        low, high = pitch_lag_bounds(sample_rate, f0_min, f0_max, last_lag)
+        if low > high:
+            return []
+        minimize = method == "amdf"
+        extrema = []
+        for lag in range(low, high + 1):
+            if minimize:
+                is_extremum = curve[lag] < curve[lag - 1] and curve[lag] <= curve[lag + 1]
+            else:
+                is_extremum = curve[lag] > curve[lag - 1] and curve[lag] >= curve[lag + 1]
+            if is_extremum:
+                extrema.append(lag)
+        if not extrema:
+            select = np.argmin if minimize else np.argmax
+            extrema = [low + int(select(curve[low:high + 1]))]
+        extrema.sort(key=lambda lag: curve[lag], reverse=not minimize)
+        extrema = extrema[:self.max_candidates]
+        peak_scale = max((float(curve[lag]) for lag in extrema), default=1.0)
+        if peak_scale <= 0:
+            peak_scale = 1.0
         candidates = []
-        for val, f0 in peaks:
-            cost = max(0.0, 1.0 - val)
-            candidates.append({"f0": f0, "cost": cost})
-
+        for lag in extrema:
+            value = float(curve[lag])
+            if minimize:
+                cost = float(np.clip(value, 0.0, 1.0))
+            elif method == "cepstrum":
+                cost = max(0.0, 1.0 - value / peak_scale)
+            else:
+                cost = max(0.0, 1.0 - value)
+            candidates.append({
+                "f0": refined_f0(curve, lag, sample_rate, f0_min, f0_max),
+                "cost": cost,
+            })
         return candidates
 
-    def _extract_amdf_candidates(
-        self, frame: np.ndarray, sample_rate: int
-    ) -> List[Dict[str, float]]:
-        d = compute_amdf(frame, mode="normalized")
-        lag_min = max(1, int(round(sample_rate / self.f0_max)))
-        lag_max = min(len(d) - 2, int(round(sample_rate / self.f0_min)))
+    def _extract_acf_candidates(self, frame, sample_rate, f0_min=None, f0_max=None):
+        frame = center_frame(frame)
+        if not len(frame) or np.mean(frame ** 2) <= 1e-12:
+            return []
+        return self._curve_candidates(
+            compute_acf(frame), sample_rate, "acf",
+            self.f0_min if f0_min is None else f0_min,
+            self.f0_max if f0_max is None else f0_max,
+        )
 
-        if lag_min >= lag_max or lag_max >= len(d) - 1:
-            return [{"f0": 0.0, "cost": 1.0}]
+    def _extract_amdf_candidates(self, frame, sample_rate, f0_min=None, f0_max=None):
+        frame = center_frame(frame)
+        if not len(frame) or np.mean(frame ** 2) <= 1e-12:
+            return []
+        return self._curve_candidates(
+            compute_amdf(frame), sample_rate, "amdf",
+            self.f0_min if f0_min is None else f0_min,
+            self.f0_max if f0_max is None else f0_max,
+        )
 
-        search_slice = d[lag_min : lag_max + 1]
-        dips = []
-        for i in range(1, len(search_slice) - 1):
-            if search_slice[i] < search_slice[i - 1] and search_slice[i] <= search_slice[i + 1]:
-                lag = lag_min + i
-                val = float(search_slice[i])
-                # 3-point parabolic refinement
-                alpha = float(d[lag - 1])
-                beta = float(d[lag])
-                gamma = float(d[lag + 1])
-                denom = alpha - 2.0 * beta + gamma
-                delta = 0.5 * (alpha - gamma) / denom if abs(denom) > 1e-12 else 0.0
-                refined_lag = lag + float(np.clip(delta, -1.0, 1.0))
-                f0 = float(sample_rate / refined_lag) if refined_lag > 0 else 0.0
-                dips.append((val, f0))
+    def _extract_cepstrum_candidates(self, frame, sample_rate, f0_min=None, f0_max=None):
+        frame = center_frame(frame)
+        if not len(frame) or np.mean(frame ** 2) <= 1e-12:
+            return []
+        cepstrum, _ = compute_real_cepstrum(frame, sample_rate, window="hamming", n_fft=2048)
+        return self._curve_candidates(
+            cepstrum, sample_rate, "cepstrum",
+            self.f0_min if f0_min is None else f0_min,
+            self.f0_max if f0_max is None else f0_max,
+        )
 
-        if not dips:
-            best_idx = int(np.argmin(search_slice))
-            best_lag = lag_min + best_idx
-            best_val = float(search_slice[best_idx])
-            dips.append((best_val, float(sample_rate / best_lag)))
-
-        dips.sort(key=lambda x: x[0])
-        dips = dips[: self.max_candidates]
-
-        candidates = []
-        for val, f0 in dips:
-            cost = max(0.0, min(1.0, val))
-            candidates.append({"f0": f0, "cost": cost})
-
-        return candidates
-
-    def _extract_cepstrum_candidates(
-        self, frame: np.ndarray, sample_rate: int
-    ) -> List[Dict[str, float]]:
-        cep, _ = compute_real_cepstrum(frame, sample_rate, window="hamming", n_fft=2048)
-        lag_min = max(1, int(round(sample_rate / self.f0_max)))
-        lag_max = min(len(cep) // 2, int(round(sample_rate / self.f0_min)))
-
-        if lag_min >= lag_max or lag_max >= len(cep):
-            return [{"f0": 0.0, "cost": 1.0}]
-
-        search_slice = cep[lag_min : lag_max + 1]
-        peaks = []
-        for i in range(1, len(search_slice) - 1):
-            if search_slice[i] > search_slice[i - 1] and search_slice[i] >= search_slice[i + 1]:
-                lag = lag_min + i
-                val = float(search_slice[i])
-                # 3-point parabolic refinement
-                alpha = float(cep[lag - 1])
-                beta = float(cep[lag])
-                gamma = float(cep[lag + 1])
-                denom = alpha - 2.0 * beta + gamma
-                delta = 0.5 * (alpha - gamma) / denom if abs(denom) > 1e-12 else 0.0
-                refined_lag = lag + float(np.clip(delta, -1.0, 1.0))
-                f0 = float(sample_rate / refined_lag) if refined_lag > 0 else 0.0
-                peaks.append((val, f0))
-
-        if not peaks:
-            best_idx = int(np.argmax(search_slice))
-            best_lag = lag_min + best_idx
-            peaks.append((float(search_slice[best_idx]), float(sample_rate / best_lag)))
-
-        peaks.sort(key=lambda x: x[0], reverse=True)
-        peaks = peaks[: self.max_candidates]
-
-        max_val = max([p[0] for p in peaks]) if peaks and max([p[0] for p in peaks]) > 0 else 1.0
-        candidates = []
-        for val, f0 in peaks:
-            cost = max(0.0, 1.0 - (val / max_val))
-            candidates.append({"f0": f0, "cost": cost})
-
-        if not candidates:
-            return [{"f0": 0.0, "cost": 1.0}]
-        return candidates
-
-    def _transition_cost(self, f0_prev: float, f0_curr: float) -> float:
+    def _transition_cost(self, f0_prev, f0_curr):
         if f0_prev <= 0 or f0_curr <= 0:
             return 1.0
-
         octave_diff = abs(np.log2(f0_curr / f0_prev))
-        cost = self.w_freq * (octave_diff ** 2)
-
+        cost = self.w_freq * octave_diff ** 2
         if 0.8 <= octave_diff <= 1.2 or 1.8 <= octave_diff <= 2.2:
             cost += self.w_octave
-
         return cost
 
-    def _viterbi_segment(
-        self, segment_candidates: List[List[Dict[str, float]]]
-    ) -> List[float]:
-        t_len = len(segment_candidates)
-        if t_len == 0:
+    def _viterbi_segment(self, segment_candidates: List[List[Dict[str, float]]]):
+        if not segment_candidates:
             return []
-        if t_len == 1:
-            return [min(segment_candidates[0], key=lambda c: c["cost"])["f0"]]
-
-        trellis = []
-        backpointers = []
-
-        first_cands = segment_candidates[0]
-        trellis.append([c["cost"] for c in first_cands])
-        backpointers.append([-1] * len(first_cands))
-
-        for t in range(1, t_len):
-            curr_cands = segment_candidates[t]
-            prev_cands = segment_candidates[t - 1]
-            prev_trellis = trellis[t - 1]
-
-            curr_trellis = []
-            curr_bp = []
-
-            for j, c_curr in enumerate(curr_cands):
-                min_total_cost = float("inf")
-                best_prev_idx = 0
-
-                for i, c_prev in enumerate(prev_cands):
-                    trans = self._transition_cost(c_prev["f0"], c_curr["f0"])
-                    total_cost = prev_trellis[i] + trans + c_curr["cost"]
-
-                    if total_cost < min_total_cost:
-                        min_total_cost = total_cost
-                        best_prev_idx = i
-
-                curr_trellis.append(min_total_cost)
-                curr_bp.append(best_prev_idx)
-
-            trellis.append(curr_trellis)
-            backpointers.append(curr_bp)
-
-        best_last_idx = int(np.argmin(trellis[-1]))
-        best_path = [best_last_idx]
-
-        for t in range(t_len - 1, 0, -1):
-            prev_idx = backpointers[t][best_path[-1]]
-            best_path.append(prev_idx)
-
-        best_path.reverse()
-
-        smooth_f0 = [
-            segment_candidates[t][best_path[t]]["f0"] for t in range(t_len)
-        ]
-        return smooth_f0
+        costs = [[c["cost"] for c in segment_candidates[0]]]
+        pointers = [[-1] * len(segment_candidates[0])]
+        for t in range(1, len(segment_candidates)):
+            current_costs, current_pointers = [], []
+            for current in segment_candidates[t]:
+                totals = [
+                    costs[-1][i] + self._transition_cost(previous["f0"], current["f0"])
+                    + current["cost"]
+                    for i, previous in enumerate(segment_candidates[t - 1])
+                ]
+                best = int(np.argmin(totals))
+                current_costs.append(totals[best])
+                current_pointers.append(best)
+            costs.append(current_costs)
+            pointers.append(current_pointers)
+        path = [int(np.argmin(costs[-1]))]
+        for t in range(len(segment_candidates) - 1, 0, -1):
+            path.append(pointers[t][path[-1]])
+        path.reverse()
+        return [segment_candidates[t][i]["f0"] for t, i in enumerate(path)]
 
     def post_process_results(self, result: Dict[str, Any]) -> Dict[str, Any]:
         labels = result["labels"]
-        num_frames = len(labels)
-        if num_frames == 0 or np.sum(labels == "v") == 0:
+        if not len(labels) or not np.any(labels == "v"):
             return result
-
+        if "pitch_frames" not in result:
+            raise ValueError("Viterbi requires the detector's preprocessed pitch_frames")
+        frames = result["pitch_frames"]
+        if len(frames) != len(labels):
+            raise ValueError("Viterbi pitch_frames and labels must have the same length")
+        sample_rate = result["sample_rate"]
+        f0_min = result.get("f0_min", self.f0_min)
+        f0_max = result.get("f0_max", self.f0_max)
         method = result.get("method", "acf").lower()
-        signal = result.get("processed_signal", result.get("signal"))
-        sample_rate = result.get("sample_rate", 16000)
-
-        frames, _ = frame_signal(
-            signal,
-            sample_rate,
-            frame_duration_ms=25.0,
-            hop_duration_ms=10.0,
-            window="rectangular",
-        )
-
-        in_voiced = False
-        seg_start = 0
-        segments = []
-
-        for i in range(num_frames):
-            if labels[i] == "v":
-                if not in_voiced:
-                    in_voiced = True
-                    seg_start = i
-            else:
-                if in_voiced:
-                    in_voiced = False
-                    segments.append((seg_start, i - 1))
-        if in_voiced:
-            segments.append((seg_start, num_frames - 1))
-
-        f0_optimized = np.copy(result["f0_contour"])
-
-        for start_idx, end_idx in segments:
-            seg_len = end_idx - start_idx + 1
-            if seg_len < 2:
+        extract = {
+            "acf": self._extract_acf_candidates,
+            "amdf": self._extract_amdf_candidates,
+            "cepstrum": self._extract_cepstrum_candidates,
+        }[method]
+        optimized = np.copy(result["f0_contour"])
+        for start, end in voiced_segments(labels == "v"):
+            if end - start < 2:
                 continue
-
-            seg_cands = []
-            for idx in range(start_idx, end_idx + 1):
-                if idx < len(frames):
-                    frame_data = frames[idx]
-                    if method == "amdf":
-                        cands = self._extract_amdf_candidates(frame_data, sample_rate)
-                    elif method == "cepstrum":
-                        cands = self._extract_cepstrum_candidates(frame_data, sample_rate)
-                    else:
-                        cands = self._extract_acf_candidates(frame_data, sample_rate)
-                else:
-                    cands = [{"f0": float(f0_optimized[idx]), "cost": 0.0}]
-
-                orig_f0 = float(f0_optimized[idx])
-                if orig_f0 > 0 and not any(abs(c["f0"] - orig_f0) < 1.0 for c in cands):
-                    cands.append({"f0": orig_f0, "cost": 0.1})
-
-                seg_cands.append(cands)
-
-            smooth_seg = self._viterbi_segment(seg_cands)
-
-            for offset, f0_val in enumerate(smooth_seg):
-                f0_optimized[start_idx + offset] = f0_val
-
-        result["f0_contour"] = f0_optimized
+            segment_candidates = []
+            for index in range(start, end):
+                candidates = extract(frames[index], sample_rate, f0_min=f0_min, f0_max=f0_max)
+                candidates = [
+                    c for c in candidates if np.isfinite(c["f0"]) and f0_min <= c["f0"] <= f0_max
+                ]
+                original = float(optimized[index])
+                if np.isfinite(original) and f0_min <= original <= f0_max:
+                    if not any(abs(c["f0"] - original) < 1.0 for c in candidates):
+                        candidates.append({"f0": original, "cost": 0.1})
+                if not candidates:
+                    candidates = [{"f0": 0.0, "cost": 1.0}]
+                segment_candidates.append(candidates)
+            optimized[start:end] = self._viterbi_segment(segment_candidates)
+        result["f0_contour"] = optimized
         return result

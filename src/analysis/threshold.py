@@ -1,7 +1,7 @@
 """Statistical distribution extraction and optimal threshold calculation (Gaussian threshold / histogram)."""
 import glob
 import os
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 import numpy as np
 
 from src.core.audio import load_wav, frame_signal
@@ -9,6 +9,8 @@ from src.core.lab_parser import parse_lab_file, get_frame_labels
 from src.core.acf import find_f0_acf
 from src.core.amdf import find_f0_amdf
 from src.core.cepstrum import find_f0_cepstrum
+from src.core.processing import center_frame, prepare_analysis_signal
+from src.analysis.advanced_unsupervised import _gaussian_intersection
 
 
 def extract_training_distributions(
@@ -44,6 +46,9 @@ def extract_training_distributions(
             'files_processed': List[str]
         }
     """
+    method = method.lower()
+    if method not in ("acf", "amdf", "cepstrum"):
+        raise ValueError(f"Unknown pitch method: {method}")
     wav_files = sorted(glob.glob(os.path.join(training_dir, "*.wav")))
     if not wav_files:
         raise FileNotFoundError(f"No WAV files found in directory: {training_dir}")
@@ -57,14 +62,18 @@ def extract_training_distributions(
         if not os.path.exists(lab_path):
             continue
 
+        lab_data = parse_lab_file(lab_path)
+        if not lab_data["segments"]:
+            continue
         sr, signal, _ = load_wav(wav_path)
+        signal = prepare_analysis_signal(signal, sr, frame_duration_ms)
 
         if plugins:
             for p in plugins:
+                if hasattr(p, "reset"):
+                    p.reset()
                 if hasattr(p, "pre_process_signal"):
                     signal = p.pre_process_signal(signal, sr)
-
-        lab_data = parse_lab_file(lab_path)
 
         frames, frame_times = frame_signal(
             signal, sr, frame_duration_ms=frame_duration_ms, hop_duration_ms=hop_duration_ms, window="rectangular"
@@ -72,6 +81,7 @@ def extract_training_distributions(
         labels = get_frame_labels(frame_times, lab_data["segments"])
 
         for frame, label in zip(frames, labels):
+            frame = center_frame(frame)
             if plugins:
                 for p in plugins:
                     if hasattr(p, "pre_process_frame"):
@@ -103,6 +113,13 @@ def extract_training_distributions(
     values_v = np.array(all_values_v, dtype=np.float64)
     values_u = np.array(all_values_u, dtype=np.float64)
 
+    if len(values_v) < 2 or len(values_u) < 2:
+        raise ValueError(
+            "Gaussian training needs at least 2 labeled frames in each class "
+            f"(V={len(values_v)}, UV={len(values_u)}). LAB must contain timed v/uv "
+            "segments; F0mean/F0std/F0num summaries cannot train the distributions."
+        )
+
     mean_v = float(np.mean(values_v)) if len(values_v) > 0 else 0.0
     std_v = float(np.std(values_v)) if len(values_v) > 0 else 0.0
     mean_u = float(np.mean(values_u)) if len(values_u) > 0 else 0.0
@@ -127,35 +144,10 @@ def find_gaussian_threshold(mean_v: float, std_v: float, mean_u: float, std_u: f
     Solves for the intersection point where P(x|V) = P(x|U).
     Quadratic equation: A*T^2 + B*T + C = 0.
     """
-    var_v = std_v ** 2
-    var_u = std_u ** 2
-
-    if abs(var_v - var_u) < 1e-6:
-        # Equal variances: midpoint
-        return float((mean_v + mean_u) / 2.0)
-
-    # Coefficients of quadratic equation:
-    # (T - mean_v)^2 / var_v - (T - mean_u)^2 / var_u + 2 * ln(std_v / std_u) = 0
-    a = 1.0 / var_v - 1.0 / var_u
-    b = -2.0 * (mean_v / var_v - mean_u / var_u)
-    c = (mean_v ** 2) / var_v - (mean_u ** 2) / var_u + 2.0 * np.log(std_v / std_u)
-
-    discriminant = b ** 2 - 4.0 * a * c
-    if discriminant < 0:
-        # Fallback to weighted mean
-        return float((mean_v * std_u + mean_u * std_v) / (std_v + std_u))
-
-    root1 = (-b - np.sqrt(discriminant)) / (2.0 * a)
-    root2 = (-b + np.sqrt(discriminant)) / (2.0 * a)
-
-    min_mean = min(mean_v, mean_u)
-    max_mean = max(mean_v, mean_u)
-
-    # Pick root that lies between mean_u and mean_v
-    in_range_roots = [r for r in (root1, root2) if min_mean <= r <= max_mean]
-    if in_range_roots:
-        return float(in_range_roots[0])
-
-    # If neither or both outside, pick the one closest to midpoint
-    midpoint = (mean_v + mean_u) / 2.0
-    return float(min((root1, root2), key=lambda r: abs(r - midpoint)))
+    parameters = np.array([mean_v, std_v, mean_u, std_u], dtype=float)
+    if not np.all(np.isfinite(parameters)) or std_v <= 0 or std_u <= 0:
+        raise ValueError("Gaussian fitting requires finite means and positive standard deviations in both labeled classes")
+    threshold, status = _gaussian_intersection(mean_v, std_v, mean_u, std_u)
+    if status not in ("between_means", "outside_means"):
+        raise ValueError(f"No identifiable Gaussian separation threshold: {status}")
+    return threshold

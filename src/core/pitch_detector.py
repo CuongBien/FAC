@@ -1,12 +1,13 @@
 """Pitch Detector engine: combines framing, ACF/AMDF/Cepstrum, silence detection, and V/UV thresholding."""
 from typing import Dict, Literal, Optional
 import numpy as np
-from scipy.ndimage import median_filter
 
 from src.core.audio import load_wav, frame_signal, compute_ste
 from src.core.acf import find_f0_acf
 from src.core.amdf import find_f0_amdf
 from src.core.cepstrum import find_f0_cepstrum
+from src.core.processing import prepare_analysis_signal, silence_energy_threshold, smooth_voiced_segments
+from src import config
 
 
 class PitchDetector:
@@ -15,29 +16,22 @@ class PitchDetector:
     def __init__(
         self,
         method: Literal["acf", "amdf", "cepstrum"] = "acf",
-        frame_duration_ms: float = 25.0,
-        hop_duration_ms: float = 10.0,
-        f0_min: float = 70.0,
-        f0_max: float = 400.0,
+        frame_duration_ms: float = config.FRAME_DURATION_MS,
+        hop_duration_ms: float = config.HOP_DURATION_MS,
+        f0_min: float = config.F0_MIN,
+        f0_max: float = config.F0_MAX,
         threshold: Optional[float] = None,
-        ste_silence_ratio: float = 0.008,
+        ste_silence_ratio: float = config.STE_SILENCE_RATIO,
         use_median_filter: bool = True,
-        median_size: int = 3,
+        median_size: int = config.MEDIAN_SIZE,
     ):
         self.method = method.lower()
+        default_threshold = config.baseline_threshold(self.method)
         self.frame_duration_ms = frame_duration_ms
         self.hop_duration_ms = hop_duration_ms
         self.f0_min = f0_min
         self.f0_max = f0_max
-        if threshold is None:
-            if self.method == "amdf":
-                self.threshold = 0.35
-            elif self.method == "cepstrum":
-                self.threshold = 0.18
-            else:
-                self.threshold = 0.4408
-        else:
-            self.threshold = threshold
+        self.threshold = default_threshold if threshold is None else threshold
         self.ste_silence_ratio = ste_silence_ratio
         self.use_median_filter = use_median_filter
         self.median_size = median_size
@@ -55,26 +49,26 @@ class PitchDetector:
         duration: Optional[float] = None,
     ) -> Dict:
         """Process a 1D audio signal array."""
+        analysis_signal = prepare_analysis_signal(signal, sample_rate, self.frame_duration_ms)
         if duration is None:
             duration = len(signal) / sample_rate
 
         frames, frame_times = frame_signal(
-            signal,
+            analysis_signal,
             sample_rate,
             frame_duration_ms=self.frame_duration_ms,
             hop_duration_ms=self.hop_duration_ms,
             window="rectangular",
         )
         ste, _ = compute_ste(
-            signal,
+            analysis_signal,
             sample_rate,
             frame_duration_ms=self.frame_duration_ms,
             hop_duration_ms=self.hop_duration_ms,
         )
 
         # Silence threshold: ratio of maximum short-time energy
-        max_ste = np.max(ste) if len(ste) > 0 else 1.0
-        ste_thresh = self.ste_silence_ratio * max_ste
+        ste_thresh = silence_energy_threshold(ste, self.ste_silence_ratio)
 
         num_frames = len(frames)
         f0_raw = np.zeros(num_frames, dtype=np.float64)
@@ -99,7 +93,7 @@ class PitchDetector:
                 peak_values[i] = peak_val
                 lags[i] = lag
 
-                if peak_val >= self.threshold:
+                if f0_val > 0 and peak_val >= self.threshold:
                     labels[i] = "v"
                     f0_raw[i] = f0_val
                 else:
@@ -117,7 +111,7 @@ class PitchDetector:
                 lags[i] = lag
 
                 # In AMDF: Periodic (Voiced) frames have a deep dip <= threshold
-                if dip_val <= self.threshold:
+                if f0_val > 0 and dip_val <= self.threshold:
                     labels[i] = "v"
                     f0_raw[i] = f0_val
                 else:
@@ -137,7 +131,7 @@ class PitchDetector:
                 lags[i] = lag
 
                 # In Cepstrum: Periodic (Voiced) frames have a prominent peak >= threshold
-                if peak_val >= self.threshold:
+                if f0_val > 0 and peak_val >= self.threshold:
                     labels[i] = "v"
                     f0_raw[i] = f0_val
                 else:
@@ -147,9 +141,7 @@ class PitchDetector:
         # Post-processing: Median filter on continuous voiced segments to remove isolated octave jumps
         f0_contour = np.copy(f0_raw)
         if self.use_median_filter:
-            voiced_idx = np.where(f0_contour > 0)[0]
-            if len(voiced_idx) >= self.median_size:
-                f0_contour[voiced_idx] = median_filter(f0_contour[voiced_idx], size=self.median_size)
+            f0_contour = smooth_voiced_segments(f0_contour, labels, self.median_size)
 
         voiced_f0 = f0_contour[f0_contour > 0]
         f0_mean = float(np.mean(voiced_f0)) if len(voiced_f0) > 0 else 0.0

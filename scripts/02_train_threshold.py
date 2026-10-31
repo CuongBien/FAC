@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from src.analysis.threshold import extract_training_distributions, find_gaussian_threshold
 from src.visualization.plotter import plot_distributions_and_threshold
-from src.plugins.bandpass_filter import BandpassFilterPlugin
+from src.plugins.pre_processing import BandpassFilterPlugin
 
 
 def run_training(
@@ -100,6 +100,7 @@ def run_training(
     # 5. Lưu báo cáo dạng JSON
     report_data = {
         "method": method,
+        "threshold_source": "supervised_gaussian_from_timed_v_uv_labels",
         "frame_duration_ms": frame_duration_ms,
         "hop_duration_ms": hop_duration_ms,
         "f0_min": f0_min,
@@ -136,14 +137,17 @@ if __name__ == "__main__":
     parser.add_argument("--out_json", type=str, default=None, help="Đường dẫn lưu JSON (mặc định tự chọn)")
 
     args = parser.parse_args()
-    run_training(
-        train_dir=args.train_dir,
-        method=args.method,
-        frame_duration_ms=args.frame_len,
-        hop_duration_ms=args.hop_len,
-        f0_min=args.f0_min,
-        f0_max=args.f0_max,
-        plugins=args.plugins,
-        output_fig=args.out_fig,
-        output_json=args.out_json,
-    )
+    try:
+        run_training(
+            train_dir=args.train_dir,
+            method=args.method,
+            frame_duration_ms=args.frame_len,
+            hop_duration_ms=args.hop_len,
+            f0_min=args.f0_min,
+            f0_max=args.f0_max,
+            plugins=args.plugins,
+            output_fig=args.out_fig,
+            output_json=args.out_json,
+        )
+    except (ValueError, FileNotFoundError) as exc:
+        parser.exit(2, f"[!] {exc}\n")

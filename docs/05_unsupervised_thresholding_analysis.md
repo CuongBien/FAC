@@ -1,5 +1,10 @@
 # CHƯƠNG V: NGHIÊN CỨU & THỰC NGHIỆM CÁC GIẢI PHÁP HỌC KHÔNG GIÁM SÁT TÌM NGƯỠNG TỐI ƯU VOICED / UNVOICED (ACF - AMDF - CEPSTRUM)
 
+> **Cập nhật 30/10/2026:** Bảng/hình gốc trong chương là kết quả lịch sử. Phần bổ sung cuối chương và [báo cáo đợt 4](STAGE4_RESULTS.md) ghi kết quả hiện hành, giao thức chọn cấu hình trên train và nguyên nhân chênh lệch Cepstrum.
+
+
+> **Trạng thái sau sửa đợt 2 ngày 28/10/2026:** Các bảng và hình trong chương là snapshot lịch sử trước sửa pipeline/phân ngưỡng. GMM, K-Means, HMM và cửa sổ ngưỡng động đã được sửa, chạy lại và lưu riêng trong [nhật ký đợt 2](STAGE2_FIXES.md). HMM giữ A/pi cố định và reset qua silence. Các kết luận về Accuracy/F1 và khử sạch lỗi từng khung chưa được kiểm chứng bởi LAB hiện hành. Xem [các vấn đề cần xử lý](KNOWN_ISSUES.md).
+
 > **Tác giả:** Nhóm sinh viên thực hiện Đồ án Xử lý Tín hiệu Tiếng nói  
 > **Chủ đề bổ sung:** Nghiên cứu và hiện thực hóa yêu cầu mở rộng của Giảng viên: *"Trình bày giải pháp tìm ngưỡng tối ưu để phân biệt 1 khung là Voiced hay Unvoiced dùng thuật toán học không giám sát (vd: dùng histogram,... với giả định là tỉ lệ khung V và UV trong tín hiệu xấp xỉ 50/50)."*  
 > **Phạm vi khảo sát:** 3 thuật toán cốt lõi Bài Tập 2 — **ACF**, **AMDF**, **Cepstrum**.
@@ -133,7 +138,7 @@ Một điểm lưu ý cốt tử trong lập trình xử lý tín hiệu là **c
 
 ## III. KẾT QUẢ THỰC NGHIỆM ĐỐI SÁNH TRÊN TẬP KIỂM THỬ (TINHIEUKIEMTHU)
 
-Tất cả các giải pháp được triển khai và đánh giá nghiêm ngặt bằng quy trình tự động qua script [`scripts/15_evaluate_unsupervised_thresholds.py`](file:///d:/College/Year%204th/Semester%201/SpeechProcessing/FAC/scripts/15_evaluate_unsupervised_thresholds.py).  
+Tất cả các giải pháp được triển khai và đánh giá nghiêm ngặt bằng quy trình tự động qua script [`scripts/15_evaluate_unsupervised_thresholds.py`](../scripts/15_evaluate_unsupervised_thresholds.py).
 Các chỉ số sai số được tính trung bình trên toàn bộ 4 file kiểm thử (`phone_F2`, `phone_M2`, `studio_F2`, `studio_M2`) theo cấu trúc **Bảng chuẩn 8 cột**:
 $$\text{FINAL SCORE} = \frac{\text{MAPE } F_0 + \text{MAPE Std} + \text{MAPE Num}}{3}$$
 
@@ -216,13 +221,9 @@ $$\text{FINAL SCORE} = \frac{\text{MAPE } F_0 + \text{MAPE Std} + \text{MAPE Num
 
 Dưới đây là các biểu đồ phân bố phân giải cao được sinh ra tự động, minh họa trực quan vị trí tương đối của 4 ngưỡng không giám sát đối sánh với ngưỡng có giám sát chuẩn:
 
-````carousel
-![Phân bố và ngưỡng không giám sát ACF](file:///C:/Users/ADMIN/.gemini/antigravity/brain/3d7de891-f834-4498-af50-7aa5c9746317/15_unsupervised_thresholds_acf.png)
-<!-- slide -->
-![Phân bố và ngưỡng không giám sát AMDF](file:///C:/Users/ADMIN/.gemini/antigravity/brain/3d7de891-f834-4498-af50-7aa5c9746317/15_unsupervised_thresholds_amdf.png)
-<!-- slide -->
-![Phân bố và ngưỡng không giám sát Cepstrum](file:///C:/Users/ADMIN/.gemini/antigravity/brain/3d7de891-f834-4498-af50-7aa5c9746317/15_unsupervised_thresholds_cepstrum.png)
-````
+![Phân bố và ngưỡng không giám sát ACF](../outputs/figures/15_unsupervised_thresholds_acf.png)
+![Phân bố và ngưỡng không giám sát AMDF](../outputs/figures/15_unsupervised_thresholds_amdf.png)
+![Phân bố và ngưỡng không giám sát Cepstrum](../outputs/figures/15_unsupervised_thresholds_cepstrum.png)
 
 * **Hình 1 (ACF):** Các đường phân ngưỡng Median ($0.4333$), Otsu ($0.4560$), K-Means ($0.4615$) và Supervised ($0.4408$) tạo thành một bó đường thẳng cực kỳ tập trung ngay tại eo thắt phân tách giữa cụm vô thanh (thấp) và cụm hữu thanh (cao).
 * **Hình 2 (AMDF):** Bản chất đảo chiều (cực tiểu sâu tại khung Voiced) được thể hiện rõ ràng. Vùng Voiced nằm ở bên trái ngưỡng $T$, với Otsu ($0.4012$) và K-Means ($0.4008$) định vị ranh giới tối ưu nhất.
@@ -243,14 +244,14 @@ Dưới đây là các biểu đồ phân bố phân giải cao được sinh ra
 ### 2. Kết luận giải đáp yêu cầu của Giảng viên
 1. **Tính khả thi của Học không giám sát:** Hoàn toàn có thể phân loại Voiced / Unvoiced chính xác cao mà **không cần bất kỳ nhãn `.lab` nào**.
 2. **Giá trị của giả thiết tiên nghiệm $50/50$:** Không chỉ là một giả định lý thuyết, tỉ lệ $P(V) \approx 45.6\% - 45.7\%$ là một đặc trưng tự nhiên của chuỗi tiếng nói liên tục. Khi đưa giả định này vào thuật toán (thông qua Phân vị Median $P_{50}$ hoặc tính đối xứng của phương sai Otsu $\omega_0 \omega_1$), hệ thống đạt được hiệu năng ngang bằng, thậm chí vượt trội mô hình phân loại Bayes có giám sát phụ thuộc nhãn con người.
-3. **Mã nguồn và script kiểm chứng:** Tất cả mã nguồn giải thuật đã được module hóa tại [`src/analysis/unsupervised_threshold.py`](file:///d:/College/Year%204th/Semester%201/SpeechProcessing/FAC/src/analysis/unsupervised_threshold.py) và script thực nghiệm kiểm chứng tự động tại [`scripts/15_evaluate_unsupervised_thresholds.py`](file:///d:/College/Year%204th/Semester%201/SpeechProcessing/FAC/scripts/15_evaluate_unsupervised_thresholds.py).
+3. **Mã nguồn và script kiểm chứng:** Tất cả mã nguồn giải thuật đã được module hóa tại [`src/analysis/unsupervised_threshold.py`](../src/analysis/unsupervised_threshold.py) và script thực nghiệm kiểm chứng tự động tại [`scripts/15_evaluate_unsupervised_thresholds.py`](../scripts/15_evaluate_unsupervised_thresholds.py).
 
 
 ---
 
 ## VI. NGHIÊN CỨU CHUYÊN SÂU: 4 GIẢI PHÁP NÂNG CAO VƯỢT GIỚI HẠN HISTOGRAM 1D
 
-Nhằm giải quyết triệt để các hạn chế cố hữu của biểu đồ Histogram 1D rời rạc (lỗi chia bin, giới hạn đơn biến, và giả định độc lập thời gian i.i.d), nhóm đã phát triển và thử nghiệm 4 giải pháp học không giám sát nâng cao tại [`src/analysis/advanced_unsupervised.py`](file:///d:/College/Year%204th/Semester%201/SpeechProcessing/FAC/src/analysis/advanced_unsupervised.py) và script benchmark [`scripts/16_evaluate_advanced_unsupervised.py`](file:///d:/College/Year%204th/Semester%201/SpeechProcessing/FAC/scripts/16_evaluate_advanced_unsupervised.py).
+Nhằm giải quyết triệt để các hạn chế cố hữu của biểu đồ Histogram 1D rời rạc (lỗi chia bin, giới hạn đơn biến, và giả định độc lập thời gian i.i.d), nhóm đã phát triển và thử nghiệm 4 giải pháp học không giám sát nâng cao tại [`src/analysis/advanced_unsupervised.py`](../src/analysis/advanced_unsupervised.py) và script benchmark [`scripts/16_evaluate_advanced_unsupervised.py`](../scripts/16_evaluate_advanced_unsupervised.py).
 
 ```mermaid
 flowchart TD
@@ -285,27 +286,27 @@ flowchart TD
   $$p(x) = 0.5 \cdot \mathcal{N}(x; \mu_{UV}, \sigma_{UV}^2) + 0.5 \cdot \mathcal{N}(x; \mu_V, \sigma_V^2)$$
 * **Thuật toán EM:** Cố định trọng số tiên nghiệm $\pi_{UV} = \pi_V = 0.5$, lặp bước E (tính trách nhiệm $\gamma$) và bước M (cập nhật $\mu, \sigma$).
 * **Nghiệm ngưỡng tối ưu liên tục:** Giải chính xác phương trình bậc hai $p(x|V) = p(x|UV)$ trong miền liên tục, hoàn toàn không phụ thuộc vào số lượng bin:
-  $$A x^2 + B x + C = 0 \implies T^* = rac{-B \pm \sqrt{B^2 - 4AC}}{2A}$$
+  $$A x^2 + B x + C = 0 \implies T^* = \frac{-B \pm \sqrt{B^2 - 4AC}}{2A}$$
 
 #### 1.2. Học Không Giám Sát Đa Đặc Trưng Không Gian 2D (Periodicity + Zero Crossing Rate ZCR)
 * **Khắc phục:** Giới hạn đơn biến (Univariate failure) — các phụ âm vô thanh xát mạnh (/s/, /sh/) có năng lượng cao dễ bị nhận nhầm thành Voiced.
 * **Đặc trưng bổ trợ:**
-  $$	ext{ZCR} = rac{1}{2(N-1)} \sum_{n=1}^{N-1} |	ext{sgn}(x[n]) - 	ext{sgn}(x[n-1])|$$
-  * Âm hữu thanh (Voiced): Sóng hài tần số thấp chiếm ưu thế $\implies 	ext{ZCR} < 0.15$.
-  * Âm vô thanh (Unvoiced): Nhiễu xát tần số cao chiếm ưu thế $\implies 	ext{ZCR} > 0.35$.
-* **Phân cụm K-Means 2D:** Chuẩn hóa z-score trên không gian $[	ext{Periodicity}, 	ext{ZCR}]$, tách biệt dữ liệu thành 2 cụm riêng biệt trong mặt phẳng 2 chiều.
+  $$\text{ZCR} = \frac{1}{2(N-1)} \sum_{n=1}^{N-1} |\text{sgn}(x[n]) - \text{sgn}(x[n-1])|$$
+  * Âm hữu thanh (Voiced): Sóng hài tần số thấp chiếm ưu thế $\implies \text{ZCR} < 0.15$.
+  * Âm vô thanh (Unvoiced): Nhiễu xát tần số cao chiếm ưu thế $\implies \text{ZCR} > 0.35$.
+* **Phân cụm K-Means 2D:** Chuẩn hóa z-score trên không gian $[\text{Periodicity}, \text{ZCR}]$, tách biệt dữ liệu thành 2 cụm riêng biệt trong mặt phẳng 2 chiều.
 
 #### 1.3. Mô Hình Markov Ẩn 2 Trạng Thái Không Giám Sát (2-State HMM với Baum-Welch & Viterbi)
 * **Khắc phục:** Giả định độc lập thời gian (i.i.d) của các bộ phân ngưỡng tĩnh đơn khung.
 * **Mô hình trạng thái:** $S_0 = UV$, $S_1 = V$. Khai thác quán tính chuyển động thanh đới qua ma trận chuyển đối xứng:
-  $$A = egin{bmatrix} 0.85 & 0.15 \ 0.15 & 0.85 \end{bmatrix}$$
-* **Học không giám sát & Giải mã:** Thuật toán Baum-Welch tự động học phân bố phát xạ Gaussian mà không cần nhãn; thuật toán Viterbi giải mã chuỗi trạng thái tối ưu toàn cục, loại bỏ triệt để các khung rung giật nhấp nháy $V 	o UV 	o V$.
+  $$A = \begin{bmatrix} 0.85 & 0.15 \\ 0.15 & 0.85 \end{bmatrix}$$
+* **Học không giám sát & Giải mã:** Thuật toán Baum-Welch tự động học phân bố phát xạ Gaussian mà không cần nhãn; thuật toán Viterbi giải mã chuỗi trạng thái tối ưu toàn cục, loại bỏ triệt để các khung rung giật nhấp nháy $V \to UV \to V$.
 
 #### 1.4. Ngưỡng Động Thích Nghi Theo Ngữ Cảnh Cửa Sổ Trượt (Context-Adaptive Dynamic Thresholding)
 * **Khắc phục:** Sự trôi dạt mức năng lượng và tỷ số tín hiệu trên nhiễu (SNR) theo thời gian.
-* **Cơ chế cửa sổ trượt:** Sử dụng cửa sổ trượt $50	ext{ khung} pprox 500	ext{ ms}$, tính ngưỡng thích ứng động:
-  $$T_{	ext{dynamic}}(t) = (1 - lpha) \cdot T_{	ext{global}} + lpha \cdot T_{	ext{local}}(t)$$
-  với $lpha = 0.30$ giúp ngưỡng tự động hạ thấp ở các đoạn âm thì thầm và nâng cao ở các đoạn hô lớn.
+* **Cơ chế cửa sổ trượt:** Sử dụng cửa sổ trượt $50\text{ khung} \approx 500\text{ ms}$, tính ngưỡng thích ứng động:
+  $$T_{\text{dynamic}}(t) = (1 - \alpha) \cdot T_{\text{global}} + \alpha \cdot T_{\text{local}}(t)$$
+  với $\alpha = 0.30$ giúp ngưỡng tự động hạ thấp ở các đoạn âm thì thầm và nâng cao ở các đoạn hô lớn.
 
 ---
 
@@ -314,7 +315,7 @@ flowchart TD
 Toàn bộ 7 chiến lược (Supervised Bayes, Median 50%, Otsu, GMM-EM 1D, Đa đặc trưng 2D, 2-State HMM, và Ngưỡng Động) được đối đầu trực tiếp trên cùng tập dữ liệu kiểm thử:
 
 #### A. Thuật toán ACF (Autocorrelation)
-| Chiến lược phân ngưỡng | $\Delta F_0$ (Hz) | $	ext{MAPE } F_0$ (%) | $\Delta	ext{Std}$ (Hz) | $	ext{MAPE Std}$ (%) | $\Delta	ext{Num}$ (Khung) | $	ext{MAPE Num}$ (%) | FINAL SCORE (%) | Xếp hạng |
+| Chiến lược phân ngưỡng | $\Delta F_0$ (Hz) | $\text{MAPE } F_0$ (%) | $\Delta\text{Std}$ (Hz) | $\text{MAPE Std}$ (%) | $\Delta\text{Num}$ (Khung) | $\text{MAPE Num}$ (%) | FINAL SCORE (%) | Xếp hạng |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **1. GMM-EM 1D (50/50 Liên tục)** | **1.79** | **1.18** | **1.22** | **3.96** | **14.2** | **8.32** | **4.49%** | 🥇 **Vô địch** |
 | **2. Đa đặc trưng 2D (Periodicity+ZCR)** | 1.47 | 0.96 | 1.24 | 2.92 | 18.5 | 10.43 | **4.77%** | 🥈 **Á quân** |
@@ -331,7 +332,7 @@ Toàn bộ 7 chiến lược (Supervised Bayes, Median 50%, Otsu, GMM-EM 1D, Đa
 ---
 
 #### B. Thuật toán AMDF (Average Magnitude Difference)
-| Chiến lược phân ngưỡng | $\Delta F_0$ (Hz) | $	ext{MAPE } F_0$ (%) | $\Delta	ext{Std}$ (Hz) | $	ext{MAPE Std}$ (%) | $\Delta	ext{Num}$ (Khung) | $	ext{MAPE Num}$ (%) | FINAL SCORE (%) | Xếp hạng |
+| Chiến lược phân ngưỡng | $\Delta F_0$ (Hz) | $\text{MAPE } F_0$ (%) | $\Delta\text{Std}$ (Hz) | $\text{MAPE Std}$ (%) | $\Delta\text{Num}$ (Khung) | $\text{MAPE Num}$ (%) | FINAL SCORE (%) | Xếp hạng |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | *Supervised (Bayes Lab)* | 0.68 | 0.41 | 1.28 | 3.50 | 14.2 | 8.15 | *4.02%* | Chuẩn đối chứng |
 | **1. GMM-EM 1D (50/50 Liên tục)** | **0.50** | **0.29** | **1.27** | **3.46** | **15.0** | **8.77** | **4.17%** | 🥇 **Tốt nhất Không Giám Sát** |
@@ -343,12 +344,12 @@ Toàn bộ 7 chiến lược (Supervised Bayes, Median 50%, Otsu, GMM-EM 1D, Đa
 
 > [!NOTE]
 > **Điểm nhấn trên AMDF:**
-> Thuật toán **GMM-EM 1D ($T = 0.4322$)** đạt Final Score **4.17%**, tiệm cận sát sao đến mức kinh ngạc với phương pháp có giám sát chuẩn ($4.02\%$), khoảng cách chỉ vỏn vẹn **0.15%**! Đặc biệt sai số $\Delta F_0$ chỉ là **$0.50	ext{ Hz}$ ($0.29\%$)**, chính xác hơn cả Supervised Bayes ($0.68	ext{ Hz}$).
+> Thuật toán **GMM-EM 1D ($T = 0.4322$)** đạt Final Score **4.17%**, tiệm cận sát sao đến mức kinh ngạc với phương pháp có giám sát chuẩn ($4.02\%$), khoảng cách chỉ vỏn vẹn **0.15%**! Đặc biệt sai số $\Delta F_0$ chỉ là **$0.50\text{ Hz}$ ($0.29\%$)**, chính xác hơn cả Supervised Bayes ($0.68\text{ Hz}$).
 
 ---
 
 #### C. Thuật toán Cepstrum
-| Chiến lược phân ngưỡng | $\Delta F_0$ (Hz) | $	ext{MAPE } F_0$ (%) | $\Delta	ext{Std}$ (Hz) | $	ext{MAPE Std}$ (%) | $\Delta	ext{Num}$ (Khung) | $	ext{MAPE Num}$ (%) | FINAL SCORE (%) | Xếp hạng |
+| Chiến lược phân ngưỡng | $\Delta F_0$ (Hz) | $\text{MAPE } F_0$ (%) | $\Delta\text{Std}$ (Hz) | $\text{MAPE Std}$ (%) | $\Delta\text{Num}$ (Khung) | $\text{MAPE Num}$ (%) | FINAL SCORE (%) | Xếp hạng |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **2. Đa đặc trưng 2D (Periodicity+ZCR)** | **12.62** | **7.96** | **6.13** | **22.93** | **99.5** | **69.27** | **33.38%** | 🥇 **Vô địch** |
 | **1. GMM-EM 1D (50/50 Liên tục)** | 13.12 | 8.93 | 10.05 | 53.26 | 53.8 | 39.07 | **33.75%** | 🥈 **Á quân** |
@@ -367,17 +368,46 @@ Toàn bộ 7 chiến lược (Supervised Bayes, Median 50%, Otsu, GMM-EM 1D, Đa
 
 ### 3. Trực Quan Hóa Đồ Thị Thực Nghiệm 300 DPI
 
-````carousel
-![Mật độ xác suất liên tục GMM-EM 1D](file:///C:/Users/ADMIN/.gemini/antigravity/brain/3d7de891-f834-4498-af50-7aa5c9746317/16_advanced_gmm_em_distributions.png)
-<!-- slide -->
-![Biểu đồ phân tán Đa đặc trưng 2D](file:///C:/Users/ADMIN/.gemini/antigravity/brain/3d7de891-f834-4498-af50-7aa5c9746317/16_advanced_multifeature_2d_scatter.png)
-<!-- slide -->
-![Khử rung giật bằng 2-State HMM](file:///C:/Users/ADMIN/.gemini/antigravity/brain/3d7de891-f834-4498-af50-7aa5c9746317/16_advanced_hmm_temporal_tracking.png)
-<!-- slide -->
-![Xếp hạng Final Score tổng hợp](file:///C:/Users/ADMIN/.gemini/antigravity/brain/3d7de891-f834-4498-af50-7aa5c9746317/16_advanced_final_ranking_barchart.png)
-````
+![Mật độ xác suất liên tục GMM-EM 1D](../outputs/figures/16_advanced_gmm_em_distributions.png)
+![Biểu đồ phân tán Đa đặc trưng 2D](../outputs/figures/16_advanced_multifeature_2d_scatter.png)
+![Khử rung giật bằng 2-State HMM](../outputs/figures/16_advanced_hmm_temporal_tracking.png)
+![Xếp hạng Final Score tổng hợp](../outputs/figures/16_advanced_final_ranking_barchart.png)
 
 * **Hình 1 (GMM-EM Continuous):** Đường cong mật độ xác suất liên tục $p(x)$ phân rã sắc nét thành 2 thành phần Voiced và Unvoiced cân bằng 50/50, cho giao điểm Bayes $T^*$ mượt mà không bị răng cưa binning.
-* **Hình 2 (Multi-Feature 2D):** Không gian $(	ext{Periodicity}, 	ext{ZCR})$ tách biệt 2 cụm V và UV thành hai hòn đảo rõ ràng; việc đưa thêm trục ZCR giúp phân định triệt để các phụ âm xát vô thanh có năng lượng lớn.
+* **Hình 2 (Multi-Feature 2D):** Không gian $(\text{Periodicity}, \text{ZCR})$ tách biệt 2 cụm V và UV thành hai hòn đảo rõ ràng; việc đưa thêm trục ZCR giúp phân định triệt để các phụ âm xát vô thanh có năng lượng lớn.
 * **Hình 3 (2-State HMM Viterbi):** Đồ thị sóng âm chứng minh thuật toán Viterbi khử sạch 100% các xung gai rung giật trạng thái đơn lẻ vốn thường xuất hiện ở ngưỡng tĩnh 1D.
 * **Hình 4 (Xếp hạng Final Score):** Biểu đồ cột tổng quan minh họa vị thế dẫn đầu vượt bậc của GMM-EM 1D và Đa đặc trưng 2D trên cả 3 thuật toán Bài Tập 2.
+
+<!-- STAGE4_CURRENT_START -->
+## Kết quả kiểm chứng hiện hành — 30/10/2026
+
+Nguồn: cấu hình đóng băng và `outputs/stage4_validation/evaluation.json`. Final Score là sai số thống kê toàn file; thấp hơn tốt hơn. Accuracy/F1 từng khung không xác định vì thiếu nhãn thời gian.
+
+Giao thức `train_all` gồm silence, `train_active` chỉ active train, `input_active` fit riêng từng file đầu vào. Tất cả dùng cùng frame/hop 25/10 ms, silence gate và median theo đoạn.
+
+| Giao thức | ACF test (%) | AMDF test (%) | Cepstrum test (%) |
+|---|---:|---:|---:|
+| historical_static | 5.822 | 6.357 | 48.185 |
+| median_train_all | 5.170 | 7.425 | 40.370 |
+| otsu_train_all | 6.350 | 7.255 | 53.017 |
+| valley_train_all | 18.090 | 6.790 | 71.160 |
+| kmeans_train_all | 6.453 | 7.152 | 57.000 |
+| gmm_train_all | 5.170 | 6.665 | 33.108 |
+| dynamic_train_all | 5.925 | 7.635 | 33.770 |
+| median_train_active | 14.575 | 17.335 | 34.733 |
+| otsu_train_active | 8.832 | 6.955 | 58.255 |
+| valley_train_active | 46.245 | 18.640 | 71.160 |
+| kmeans_train_active | 9.525 | 6.955 | 58.343 |
+| gmm_train_active | 11.560 | 13.673 | 47.920 |
+| dynamic_train_active | 11.730 | 12.450 | 44.578 |
+| kmeans2d_train_active | 5.958 | 7.558 | 57.987 |
+| hmm_train_active | 12.608 | 12.188 | 44.380 |
+| kmeans2d_input_active | 7.635 | 8.165 | 31.635 |
+| hmm_input_active | 16.240 | 17.825 | 30.843 |
+
+Các thứ hạng test là mô tả; không được dùng để chọn lại tham số.
+
+![Giao thức hiện hành](../outputs/stage4_validation/figures/protocols_test.png)
+
+[Chi tiết và giới hạn kiểm chứng](STAGE4_RESULTS.md).
+<!-- STAGE4_CURRENT_END -->

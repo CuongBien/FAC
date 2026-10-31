@@ -19,6 +19,7 @@ if sys.platform.startswith("win"):
 # Ensure src package is importable
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from src import config
 from src.core.audio import load_wav, frame_signal, compute_ste
 from src.core.lab_parser import parse_lab_file, get_frame_labels
 from src.core.acf import compute_acf, find_f0_acf
@@ -123,7 +124,7 @@ def run_demo(
             sample_rate=sr,
             f0_min=f0_min,
             f0_max=f0_max,
-            threshold=0.35,
+            threshold=config.baseline_threshold(method),
             save_path=output_fig,
             title=f"Phân tích AMDF Khung Hữu Thanh vs Vô Thanh ({os.path.basename(wav_path)})",
         )
@@ -153,7 +154,7 @@ def run_demo(
             sample_rate=sr,
             f0_min=f0_min,
             f0_max=f0_max,
-            threshold=0.15,
+            threshold=config.baseline_threshold(method),
             save_path=output_fig,
             title=f"Phân tích Cepstrum Khung Hữu Thanh vs Vô Thanh ({os.path.basename(wav_path)})",
         )

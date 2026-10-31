@@ -1,0 +1,13 @@
+File,Method,Ref_F0mean,Pred_F0mean,Abs_Err_F0mean,MAPE_F0mean_pct,Ref_F0std,Pred_F0std,Abs_Err_F0std,MAPE_F0std_pct,Ref_F0num,Pred_F0num,Abs_Err_F0num,MAPE_F0num_pct,Composite_Score_pct,Voiced_Ratio_pct,V_UV_Accuracy,Voiced_F1
+phone_F2.wav,ACF Champion,150.2,152.38,2.18,1.45,30.7,29.55,1.15,3.76,219,197,22,10.05,5.09,41.21,,
+phone_F2.wav,AMDF Champion,150.2,148.88,1.32,0.88,30.7,31.73,1.03,3.34,219,195,24,10.96,5.06,40.79,,
+phone_F2.wav,Cepstrum Champion,150.2,152.65,2.45,1.63,30.7,29.12,1.58,5.14,219,232,13,5.94,4.23,48.54,,
+phone_M2.wav,ACF Champion,130.2,132.99,2.79,2.14,15.4,13.99,1.41,9.12,123,116,7,5.69,5.65,41.73,,
+phone_M2.wav,AMDF Champion,130.2,129.2,1.0,0.77,15.4,16.91,1.51,9.82,123,128,5,4.07,4.88,46.04,,
+phone_M2.wav,Cepstrum Champion,130.2,136.7,6.5,4.99,15.4,29.71,14.31,92.91,123,159,36,29.27,42.39,57.19,,
+studio_F2.wav,ACF Champion,198.6,199.82,1.22,0.61,47.8,43.86,3.94,8.24,139,132,7,5.04,4.63,42.17,,
+studio_F2.wav,AMDF Champion,198.6,199.35,0.75,0.38,47.8,44.19,3.61,7.56,139,132,7,5.04,4.32,42.17,,
+studio_F2.wav,Cepstrum Champion,198.6,201.35,2.75,1.38,47.8,45.47,2.33,4.88,139,138,1,0.72,2.33,44.09,,
+studio_M2.wav,ACF Champion,154.7,155.14,0.44,0.29,30.3,30.06,0.24,0.8,116,112,4,3.45,1.51,47.46,,
+studio_M2.wav,AMDF Champion,154.7,156.39,1.69,1.1,30.3,30.73,0.43,1.43,116,116,0,0.0,0.84,49.15,,
+studio_M2.wav,Cepstrum Champion,154.7,155.45,0.75,0.48,30.3,30.4,0.1,0.34,116,129,13,11.21,4.01,54.66,,

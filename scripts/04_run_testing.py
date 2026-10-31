@@ -21,8 +21,11 @@ if sys.platform.startswith("win"):
 # Ensure src package is importable
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from src import config
 from src.core.pitch_detector import PitchDetector
-from src.analysis.evaluation import evaluate_against_ground_truth
+from src.analysis.evaluation import (
+    evaluate_against_ground_truth, round_metric, mean_metric, format_metric, csv_value,
+)
 from src.visualization.plotter import plot_signal_and_f0_contour
 from src.plugins import (
     PluginPitchDetector,
@@ -47,7 +50,7 @@ def build_detector_with_plugins(
 
     # Bandpass filter plugin
     if "all" in parts or any(p in ("bandpass", "filter", "bp") for p in parts):
-        bp = BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0)
+        bp = BandpassFilterPlugin(low_cutoff=config.BANDPASS_LOW, high_cutoff=config.BANDPASS_HIGH)
         plugin_instances.append(bp)
         applied_names.append(bp.name)
 
@@ -65,7 +68,7 @@ def build_detector_with_plugins(
 
     # Energy extension plugin
     if "all" in parts or any(p in ("energy", "ste", "energy_ext", "ext") for p in parts):
-        ste_ext = EnergyExtensionPlugin(threshold_discount=0.20)
+        ste_ext = EnergyExtensionPlugin(threshold_discount=config.ENERGY_THRESHOLD_DISCOUNT)
         plugin_instances.append(ste_ext)
         applied_names.append(ste_ext.name)
 
@@ -95,38 +98,25 @@ def run_testing(
     parts = [p.strip() for p in p_lower.split(",")]
     has_bandpass = (p_lower == "all") or any(p in ("bandpass", "filter", "bp") for p in parts)
 
-    # 1. Tự động chọn file ngưỡng tương ứng
+    # Saved JSON is an explicit historical source, with a shared fallback.
+    fallback_t = config.threshold_for_plugins(method, ("BP",) if has_bandpass else ())
     if threshold_file is None:
-        if method == "amdf":
-            if has_bandpass:
-                threshold_file = "outputs/reports/threshold_amdf_bandpassprefilter.json"
-                fallback_t = 0.3734
-            else:
-                threshold_file = "outputs/reports/threshold_amdf.json"
-                fallback_t = 0.4380
-        else:
-            if has_bandpass:
-                threshold_file = "outputs/reports/threshold_acf_bandpassprefilter.json"
-                fallback_t = 0.4892
-            else:
-                threshold_file = "outputs/reports/threshold_acf.json"
-                fallback_t = 0.4408
-    else:
-        if method == "amdf":
-            fallback_t = 0.3734 if has_bandpass else 0.4380
-        else:
-            fallback_t = 0.4892 if has_bandpass else 0.4408
+        suffix = "_bandpassprefilter" if has_bandpass else ""
+        threshold_file = f"outputs/reports/threshold_{method}{suffix}.json"
 
     if default_threshold is not None:
         threshold = default_threshold
     else:
         threshold = fallback_t
+    threshold_source = "explicit_fallback" if default_threshold is not None else config.THRESHOLD_SOURCE
 
     if os.path.exists(threshold_file):
         try:
             with open(threshold_file, "r", encoding="utf-8") as f:
                 t_data = json.load(f)
-                threshold = float(t_data.get("threshold_T", threshold))
+                if "threshold_T" in t_data:
+                    threshold = float(t_data["threshold_T"])
+                    threshold_source = f"json:{threshold_file}"
         except Exception:
             pass
 
@@ -165,7 +155,7 @@ def run_testing(
 
     print("=" * 160)
     print(f"KIỂM THỬ THUẬT TOÁN {method.upper()} TRÊN TẬP TÍN HIỆU KIỂM THỬ ({test_dir})")
-    print(f"Tham số: Method={method.upper()}, FrameLen={frame_duration_ms}ms, HopLen={hop_duration_ms}ms, Range=[{f0_min:.0f}, {f0_max:.0f}]Hz, Threshold T={threshold:.4f}{plugin_desc}")
+    print(f"Tham số: Method={method.upper()}, FrameLen={frame_duration_ms}ms, HopLen={hop_duration_ms}ms, Range=[{format_metric(f0_min, '.0f')}, {format_metric(f0_max, '.0f')}]Hz, Threshold T={format_metric(threshold, '.4f')}{plugin_desc}")
     print("=" * 160)
     header = f"{'Tên file':<14} | {'Ref F0':<8} | {'Pred F0':<8} | {'ΔF0':<6} | {'MAPE F0':<8} | {'Ref Std':<8} | {'Pred Std':<8} | {'ΔStd':<6} | {'MAPE Std':<9} | {'Ref Num':<8} | {'Pred Num':<8} | {'ΔNum':<5} | {'MAPE Num':<9} | {'SCORE':<7} | {'V/UV Acc':<8} | {'F1':<6}"
     print(header)
@@ -187,24 +177,24 @@ def run_testing(
         abs_err_num = eval_res.get("abs_error_num", 0)
         mape_num = eval_res.get("mape_num", 0.0)
         score = eval_res.get("final_score", eval_res.get("composite_score", 0.0))
-        acc_str = f"{eval_res['classification_accuracy']:5.2f}%" if eval_res['classification_accuracy'] is not None else " N/A"
-        f1_str = f"{eval_res['voiced_f1']:5.2f}%" if eval_res['voiced_f1'] is not None else " N/A"
+        acc_str = f"{format_metric(eval_res['classification_accuracy'], '5.2f')}%" if eval_res['classification_accuracy'] is not None else " N/A"
+        f1_str = f"{format_metric(eval_res['voiced_f1'], '5.2f')}%" if eval_res['voiced_f1'] is not None else " N/A"
 
         row = (
             f"{base_name:<14} | "
-            f"{eval_res['ref_f0_mean']:<8.2f} | "
-            f"{eval_res['pred_f0_mean']:<8.2f} | "
-            f"{eval_res['abs_error_mean']:<6.2f} | "
-            f"{eval_res['mape_f0']:<7.2f}% | "
-            f"{eval_res['ref_f0_std']:<8.2f} | "
-            f"{eval_res['pred_f0_std']:<8.2f} | "
-            f"{eval_res['abs_error_std']:<6.2f} | "
-            f"{eval_res['mape_std']:<8.2f}% | "
-            f"{ref_num:<8} | "
-            f"{pred_num:<8} | "
-            f"{abs_err_num:<5} | "
-            f"{mape_num:<8.2f}% | "
-            f"{score:<6.2f}% | "
+            f"{format_metric(eval_res['ref_f0_mean'], '<8.2f')} | "
+            f"{format_metric(eval_res['pred_f0_mean'], '<8.2f')} | "
+            f"{format_metric(eval_res['abs_error_mean'], '<6.2f')} | "
+            f"{format_metric(eval_res['mape_f0'], '<7.2f')}% | "
+            f"{format_metric(eval_res['ref_f0_std'], '<8.2f')} | "
+            f"{format_metric(eval_res['pred_f0_std'], '<8.2f')} | "
+            f"{format_metric(eval_res['abs_error_std'], '<6.2f')} | "
+            f"{format_metric(eval_res['mape_std'], '<8.2f')}% | "
+            f"{format_metric(ref_num, '<8.0f')} | "
+            f"{format_metric(pred_num, '<8.0f')} | "
+            f"{format_metric(abs_err_num, '<5.0f')} | "
+            f"{format_metric(mape_num, '<8.2f')}% | "
+            f"{format_metric(score, '<6.2f')}% | "
             f"{acc_str:<8} | "
             f"{f1_str:<6}"
         )
@@ -236,7 +226,7 @@ def run_testing(
         results_all.append({
             "file": base_name,
             "sample_rate": res["sample_rate"],
-            "duration": round(res["duration"], 3),
+            "duration": round_metric(res["duration"], 3),
             "ref_f0_mean": eval_res["ref_f0_mean"],
             "pred_f0_mean": eval_res["pred_f0_mean"],
             "abs_error_mean": eval_res["abs_error_mean"],
@@ -259,25 +249,25 @@ def run_testing(
         })
 
     # 6. Tính trung bình sai số toàn tập kiểm thử
-    avg_abs_err_mean = np.mean([r["abs_error_mean"] for r in results_all])
-    avg_mape_f0 = np.mean([r["mape_f0"] for r in results_all])
-    avg_abs_err_std = np.mean([r["abs_error_std"] for r in results_all])
-    avg_mape_std = np.mean([r["mape_std"] for r in results_all])
-    avg_abs_err_num = np.mean([r["abs_error_num"] for r in results_all])
-    avg_mape_num = np.mean([r["mape_num"] for r in results_all])
-    avg_score = np.mean([r["final_score"] for r in results_all])
+    avg_abs_err_mean = mean_metric([r["abs_error_mean"] for r in results_all])
+    avg_mape_f0 = mean_metric([r["mape_f0"] for r in results_all])
+    avg_abs_err_std = mean_metric([r["abs_error_std"] for r in results_all])
+    avg_mape_std = mean_metric([r["mape_std"] for r in results_all])
+    avg_abs_err_num = mean_metric([r["abs_error_num"] for r in results_all])
+    avg_mape_num = mean_metric([r["mape_num"] for r in results_all])
+    avg_score = mean_metric([r["final_score"] for r in results_all])
 
     acc_valid = [r["accuracy"] for r in results_all if r["accuracy"] is not None]
     f1_valid = [r["voiced_f1"] for r in results_all if r["voiced_f1"] is not None]
-    avg_acc = np.mean(acc_valid) if acc_valid else 0.0
-    avg_f1 = np.mean(f1_valid) if f1_valid else 0.0
+    avg_acc = mean_metric(acc_valid)
+    avg_f1 = mean_metric(f1_valid)
 
     print("-" * 160)
     print(
-        f"{'TRUNG BÌNH TOÀN TẬP':<14} | {'-':<8} | {'-':<8} | {avg_abs_err_mean:<6.2f} | {avg_mape_f0:<7.2f}% | "
-        f"{'-':<8} | {'-':<8} | {avg_abs_err_std:<6.2f} | {avg_mape_std:<8.2f}% | "
-        f"{'-':<8} | {'-':<8} | {avg_abs_err_num:<5.1f} | {avg_mape_num:<8.2f}% | "
-        f"{avg_score:<6.2f}% | {avg_acc:<7.2f}% | {avg_f1:<6.2f}%"
+        f"{'TRUNG BÌNH TOÀN TẬP':<14} | {'-':<8} | {'-':<8} | {format_metric(avg_abs_err_mean, '<6.2f')} | {format_metric(avg_mape_f0, '<7.2f')}% | "
+        f"{'-':<8} | {'-':<8} | {format_metric(avg_abs_err_std, '<6.2f')} | {format_metric(avg_mape_std, '<8.2f')}% | "
+        f"{'-':<8} | {'-':<8} | {format_metric(avg_abs_err_num, '<5.1f')} | {format_metric(avg_mape_num, '<8.2f')}% | "
+        f"{format_metric(avg_score, '<6.2f')}% | {format_metric(avg_acc, '<7.2f')}% | {format_metric(avg_f1, '<6.2f')}%"
     )
     print("=" * 160)
 
@@ -288,19 +278,20 @@ def run_testing(
             "frame_duration_ms": frame_duration_ms,
             "hop_duration_ms": hop_duration_ms,
             "threshold_T": threshold,
+            "threshold_source": threshold_source,
             "f0_min": f0_min,
             "f0_max": f0_max,
         },
         "average_metrics": {
-            "mean_abs_error_f0": round(float(avg_abs_err_mean), 2),
-            "mean_mape_f0_pct": round(float(avg_mape_f0), 2),
-            "mean_abs_error_std": round(float(avg_abs_err_std), 2),
-            "mean_mape_std_pct": round(float(avg_mape_std), 2),
-            "mean_abs_error_num": round(float(avg_abs_err_num), 2),
-            "mean_mape_num_pct": round(float(avg_mape_num), 2),
-            "final_composite_score_pct": round(float(avg_score), 2),
-            "mean_v_uv_accuracy": round(float(avg_acc), 2) if acc_valid else None,
-            "mean_voiced_f1": round(float(avg_f1), 2) if f1_valid else None,
+            "mean_abs_error_f0": round_metric(avg_abs_err_mean, 2),
+            "mean_mape_f0_pct": round_metric(avg_mape_f0, 2),
+            "mean_abs_error_std": round_metric(avg_abs_err_std, 2),
+            "mean_mape_std_pct": round_metric(avg_mape_std, 2),
+            "mean_abs_error_num": round_metric(avg_abs_err_num, 2),
+            "mean_mape_num_pct": round_metric(avg_mape_num, 2),
+            "final_composite_score_pct": round_metric(avg_score, 2),
+            "mean_v_uv_accuracy": round_metric(avg_acc, 2) if acc_valid else None,
+            "mean_voiced_f1": round_metric(avg_f1, 2) if f1_valid else None,
         },
         "files": results_all,
     }
@@ -313,7 +304,7 @@ def run_testing(
     with open(output_csv, "w", encoding="utf-8") as f:
         f.write("File,Fs_Hz,Ref_F0mean,Pred_F0mean,AbsErr_F0mean,MAPE_F0_Pct,Ref_F0std,Pred_F0std,AbsErr_F0std,MAPE_Std_Pct,Ref_F0num,Pred_F0num,AbsErr_F0num,MAPE_Num_Pct,Final_Score_Pct,Accuracy_Pct,F1_Pct\n")
         for r in results_all:
-            f.write(f"{r['file']},{r['sample_rate']},{r['ref_f0_mean']},{r['pred_f0_mean']},{r['abs_error_mean']},{r['mape_f0']},{r['ref_f0_std']},{r['pred_f0_std']},{r['abs_error_std']},{r['mape_std']},{r['ref_f0_num']},{r['pred_f0_num']},{r['abs_error_num']},{r['mape_num']},{r['final_score']},{r['accuracy']},{r['voiced_f1']}\n")
+            f.write(f"{csv_value(r['file'])},{csv_value(r['sample_rate'])},{csv_value(r['ref_f0_mean'])},{csv_value(r['pred_f0_mean'])},{csv_value(r['abs_error_mean'])},{csv_value(r['mape_f0'])},{csv_value(r['ref_f0_std'])},{csv_value(r['pred_f0_std'])},{csv_value(r['abs_error_std'])},{csv_value(r['mape_std'])},{csv_value(r['ref_f0_num'])},{csv_value(r['pred_f0_num'])},{csv_value(r['abs_error_num'])},{csv_value(r['mape_num'])},{csv_value(r['final_score'])},{csv_value(r['accuracy'])},{csv_value(r['voiced_f1'])}\n")
     print(f"Saved summary CSV: {output_csv}")
     print(f"Generated 4 figures in: {output_dir_fig}/")
 

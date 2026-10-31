@@ -33,5 +33,11 @@ class BandpassFilterPlugin(PreProcessingPlugin):
         high = min(nyquist - 10.0, self.high_cutoff) / nyquist
 
         b, a = butter(self.order, [low, high], btype="band")
+        padlen = 3 * max(len(a), len(b))
+        if len(signal) <= padlen:
+            raise ValueError(
+                f"Audio too short for bandpass filter: need at least {padlen + 1} "
+                f"samples; got {len(signal)}"
+            )
         filtered_signal = filtfilt(b, a, signal)
         return filtered_signal.astype(np.float64)

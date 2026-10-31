@@ -1,0 +1,239 @@
+{
+  "acf": {
+    "thresholds": {
+      "t_median": 0.4293,
+      "t_otsu": 0.4559,
+      "t_gmm": 0.411,
+      "t_supervised": 0.4408
+    },
+    "gmm_model": {
+      "mu0": 0.2598,
+      "std0": 0.0985,
+      "mu1": 0.6301,
+      "std1": 0.1288
+    },
+    "pipeline_eval": {
+      "Supervised (Bayes Lab)": {
+        "diff_f0": 1.79,
+        "mape_f0": 1.21,
+        "diff_std": 2.1,
+        "mape_std": 5.79,
+        "diff_num": 17.2,
+        "mape_num": 10.47,
+        "final_score": 5.82
+      },
+      "Median 50% (Histogram)": {
+        "diff_f0": 2.17,
+        "mape_f0": 1.42,
+        "diff_std": 1.68,
+        "mape_std": 4.73,
+        "diff_num": 15.8,
+        "mape_num": 9.36,
+        "final_score": 5.17
+      },
+      "Otsu (Histogram)": {
+        "diff_f0": 1.91,
+        "mape_f0": 1.29,
+        "diff_std": 2.15,
+        "mape_std": 6.31,
+        "diff_num": 19.0,
+        "mape_num": 11.45,
+        "final_score": 6.35
+      },
+      "1. GMM-EM 1D (50/50 Liên tục)": {
+        "diff_f0": 2.42,
+        "mape_f0": 1.58,
+        "diff_std": 2.01,
+        "mape_std": 5.79,
+        "diff_num": 13.5,
+        "mape_num": 7.89,
+        "final_score": 5.09
+      },
+      "2. Đa đặc trưng 2D (Periodicity+ZCR)": {
+        "diff_f0": 1.92,
+        "mape_f0": 1.29,
+        "diff_std": 2.96,
+        "mape_std": 11.54,
+        "diff_num": 18.0,
+        "mape_num": 10.07,
+        "final_score": 7.63
+      },
+      "3. 2-State HMM (Viterbi Decoding)": {
+        "diff_f0": 4.01,
+        "mape_f0": 2.6,
+        "diff_std": 5.27,
+        "mape_std": 15.74,
+        "diff_num": 47.8,
+        "mape_num": 31.33,
+        "final_score": 16.55
+      },
+      "4. Ngưỡng Động Thích Nghi Ngữ Cảnh": {
+        "diff_f0": 2.12,
+        "mape_f0": 1.43,
+        "diff_std": 2.46,
+        "mape_std": 6.96,
+        "diff_num": 15.5,
+        "mape_num": 9.42,
+        "final_score": 5.94
+      }
+    }
+  },
+  "amdf": {
+    "thresholds": {
+      "t_median": 0.4565,
+      "t_otsu": 0.395,
+      "t_gmm": 0.4332,
+      "t_supervised": 0.438
+    },
+    "gmm_model": {
+      "mu0": 0.2155,
+      "std0": 0.1103,
+      "mu1": 0.6066,
+      "std1": 0.0922
+    },
+    "pipeline_eval": {
+      "Supervised (Bayes Lab)": {
+        "diff_f0": 0.89,
+        "mape_f0": 0.54,
+        "diff_std": 3.11,
+        "mape_std": 10.39,
+        "diff_num": 14.2,
+        "mape_num": 8.15,
+        "final_score": 6.36
+      },
+      "Median 50% (Histogram)": {
+        "diff_f0": 1.38,
+        "mape_f0": 0.86,
+        "diff_std": 4.25,
+        "mape_std": 14.15,
+        "diff_num": 12.8,
+        "mape_num": 7.26,
+        "final_score": 7.43
+      },
+      "Otsu (Histogram)": {
+        "diff_f0": 0.25,
+        "mape_f0": 0.17,
+        "diff_std": 3.19,
+        "mape_std": 9.31,
+        "diff_num": 20.0,
+        "mape_num": 12.29,
+        "final_score": 7.25
+      },
+      "1. GMM-EM 1D (50/50 Liên tục)": {
+        "diff_f0": 0.73,
+        "mape_f0": 0.43,
+        "diff_std": 3.04,
+        "mape_std": 9.9,
+        "diff_num": 14.8,
+        "mape_num": 8.57,
+        "final_score": 6.3
+      },
+      "2. Đa đặc trưng 2D (Periodicity+ZCR)": {
+        "diff_f0": 1.37,
+        "mape_f0": 0.86,
+        "diff_std": 4.73,
+        "mape_std": 15.35,
+        "diff_num": 14.5,
+        "mape_num": 8.27,
+        "final_score": 8.16
+      },
+      "3. 2-State HMM (Viterbi Decoding)": {
+        "diff_f0": 5.55,
+        "mape_f0": 3.73,
+        "diff_std": 3.34,
+        "mape_std": 13.29,
+        "diff_num": 64.2,
+        "mape_num": 44.57,
+        "final_score": 20.53
+      },
+      "4. Ngưỡng Động Thích Nghi Ngữ Cảnh": {
+        "diff_f0": 0.28,
+        "mape_f0": 0.18,
+        "diff_std": 3.51,
+        "mape_std": 11.47,
+        "diff_num": 17.2,
+        "mape_num": 10.3,
+        "final_score": 7.32
+      }
+    }
+  },
+  "cepstrum": {
+    "thresholds": {
+      "t_median": 0.0779,
+      "t_otsu": 0.1903,
+      "t_gmm": 0.0822,
+      "t_supervised": 0.06
+    },
+    "gmm_model": {
+      "mu0": 0.0706,
+      "std0": 0.016,
+      "mu1": 0.1569,
+      "std1": 0.1025
+    },
+    "pipeline_eval": {
+      "Supervised (Bayes Lab)": {
+        "diff_f0": 18.62,
+        "mape_f0": 12.96,
+        "diff_std": 22.7,
+        "mape_std": 113.57,
+        "diff_num": 23.0,
+        "mape_num": 18.04,
+        "final_score": 48.18
+      },
+      "Median 50% (Histogram)": {
+        "diff_f0": 15.04,
+        "mape_f0": 10.36,
+        "diff_std": 14.18,
+        "mape_std": 76.84,
+        "diff_num": 46.2,
+        "mape_num": 33.91,
+        "final_score": 40.37
+      },
+      "Otsu (Histogram)": {
+        "diff_f0": 44.47,
+        "mape_f0": 25.66,
+        "diff_std": 13.75,
+        "mape_std": 45.49,
+        "diff_num": 128.5,
+        "mape_num": 87.9,
+        "final_score": 53.02
+      },
+      "1. GMM-EM 1D (50/50 Liên tục)": {
+        "diff_f0": 15.17,
+        "mape_f0": 10.37,
+        "diff_std": 13.79,
+        "mape_std": 72.23,
+        "diff_num": 53.8,
+        "mape_num": 39.07,
+        "final_score": 40.55
+      },
+      "2. Đa đặc trưng 2D (Periodicity+ZCR)": {
+        "diff_f0": 12.57,
+        "mape_f0": 7.85,
+        "diff_std": 5.45,
+        "mape_std": 17.66,
+        "diff_num": 99.8,
+        "mape_num": 69.38,
+        "final_score": 31.63
+      },
+      "3. 2-State HMM (Viterbi Decoding)": {
+        "diff_f0": 17.13,
+        "mape_f0": 11.24,
+        "diff_std": 9.96,
+        "mape_std": 47.51,
+        "diff_num": 81.8,
+        "mape_num": 58.67,
+        "final_score": 39.14
+      },
+      "4. Ngưỡng Động Thích Nghi Ngữ Cảnh": {
+        "diff_f0": 14.6,
+        "mape_f0": 10.07,
+        "diff_std": 14.21,
+        "mape_std": 75.43,
+        "diff_num": 54.0,
+        "mape_num": 38.87,
+        "final_score": 41.45
+      }
+    }
+  }
+}

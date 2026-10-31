@@ -3,8 +3,9 @@
 Based on Noll (1967) and Oppenheim & Schafer (1968).
 Deconvolves speech into vocal tract envelope (low quefrency) and pitch impulses (high quefrency).
 """
-from typing import Optional, Tuple
+from typing import Tuple
 import numpy as np
+from src.core.processing import center_frame
 
 
 def compute_real_cepstrum(
@@ -28,8 +29,9 @@ def compute_real_cepstrum(
             - cepstrum: 1D numpy array of real cepstrum coefficients c[m].
             - quefrencies_sec: Quefrency axis in seconds (m / sample_rate).
     """
+    frame = center_frame(frame)
     n = len(frame)
-    if n == 0 or np.all(frame == 0):
+    if n == 0 or np.mean(frame ** 2) <= 1e-12:
         c_zero = np.zeros(n_fft, dtype=np.float64)
         q_zero = np.arange(n_fft, dtype=np.float64) / sample_rate
         return c_zero, q_zero
@@ -92,8 +94,9 @@ def find_f0_cepstrum(
         tuple: (f0_hz: float, peak_metric: float, best_lag: int)
             If no valid peak is found, f0_hz = 0.0.
     """
+    frame = center_frame(frame)
     n = len(frame)
-    if n == 0 or np.all(frame == 0):
+    if n == 0 or np.mean(frame ** 2) <= 1e-12:
         return 0.0, 0.0, 0
 
     cepstrum, _ = compute_real_cepstrum(frame, sample_rate, window=window, n_fft=n_fft)

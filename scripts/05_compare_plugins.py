@@ -12,6 +12,7 @@ Nhiệm vụ:
 4. Lưu tệp CSV/JSON và vẽ biểu đồ 4 panel trực quan gọn gàng.
 """
 import argparse
+import csv
 import glob
 import itertools
 import json
@@ -32,138 +33,62 @@ if sys.platform.startswith("win"):
 # Ensure src package is importable
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from src import config
 from src.core.pitch_detector import PitchDetector
 from src.plugins import (
     PluginPitchDetector,
     BandpassFilterPlugin,
     CenterClippingPlugin,
-    HysteresisPlugin,
     EnergyExtensionPlugin,
     ViterbiTrackingPlugin,
 )
-from src.analysis.evaluation import evaluate_against_ground_truth
+from src.analysis.evaluation import (
+    evaluate_against_ground_truth, mean_metric, format_metric, csv_value, rank_metric,
+)
+from src.analysis.validation import write_json, source_manifest
 
 
 def get_threshold(method: str, combo: Tuple[str, ...]) -> float:
-    """Trả về ngưỡng tối ưu Gauss/thực nghiệm cho từng thuật toán và tổ hợp plugin."""
-    m = method.lower()
-    has_bp = "BP" in combo
-    has_clip = "Clip" in combo
-
-    if m == "acf":
-        if has_bp and has_clip:
-            return 0.3953
-        elif has_bp:
-            return 0.4892
-        elif has_clip:
-            return 0.3352
-        else:
-            return 0.4408
-    elif m == "amdf":
-        if has_bp and has_clip:
-            return 0.5628
-        elif has_clip:
-            return 0.6488
-        elif has_bp:
-            return 0.3734
-        else:
-            return 0.4380
-    elif m == "cepstrum":
-        if has_bp:
-            return 0.0500
-        else:
-            return 0.0600
-    return 0.40
+    """Use the shared historical threshold for the preprocessing combination."""
+    return config.threshold_for_plugins(method, combo)
 
 
 def plot_clean_ranking(summary_records: List[Dict], save_path: str, title: str):
-    """Vẽ biểu đồ đối sánh 4 panel: ΔF0, ΔStd, ΔNum, và Final Score."""
-    # Lấy các cấu hình độc nhất để vẽ biểu đồ không bị trùng lặp
-    seen = set()
-    unique_records = []
-    for r in summary_records:
-        if r["config_name"] not in seen:
-            seen.add(r["config_name"])
-            unique_records.append(r)
-
-    names = [r["config_name"] for r in unique_records]
-    scores = [r["final_composite_score_pct"] for r in unique_records]
-    maes = [r["average_error_hz"] for r in unique_records]
-    stds = [r["average_std_error"] for r in unique_records]
-    nums = [r["average_num_error"] for r in unique_records]
-
-    n_items = len(names)
-    fig, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(22, max(5, n_items * 0.45)))
-    fig.suptitle(title, fontsize=14, fontweight="bold", y=0.98)
-
-    y_pos = np.arange(n_items)
-
-    # Panel 1: ΔF0 (MAE F0)
-    min_mae = min(maes)
-    colors1 = ["#2ca02c" if m == min_mae else "#1f77b4" for m in maes]
-    bars1 = ax1.barh(y_pos, maes, color=colors1, alpha=0.85, edgecolor="gray")
-    ax1.set_yticks(y_pos)
-    ax1.set_yticklabels(names, fontsize=9, fontweight="bold")
-    ax1.invert_yaxis()
-    ax1.set_xlabel("ΔF0 (Hz) [Càng nhỏ càng tốt]", fontsize=10, fontweight="bold")
-    ax1.set_title("1. Sai số F0 (ΔF0 Hz)", fontsize=11, fontweight="bold")
-    ax1.grid(True, axis="x", linestyle="--", alpha=0.5)
-    for b in bars1:
-        w = b.get_width()
-        ax1.annotate(f" {w:.2f} Hz", xy=(w, b.get_y() + b.get_height() / 2),
-                     va="center", fontsize=8, fontweight="bold")
-
-    # Panel 2: ΔStd (MAE Std)
-    min_std = min(stds)
-    colors2 = ["#2ca02c" if s == min_std else "#9467bd" for s in stds]
-    bars2 = ax2.barh(y_pos, stds, color=colors2, alpha=0.85, edgecolor="gray")
-    ax2.set_yticks(y_pos)
-    ax2.set_yticklabels([])
-    ax2.invert_yaxis()
-    ax2.set_xlabel("ΔStd (Hz) [Càng nhỏ càng tốt]", fontsize=10, fontweight="bold")
-    ax2.set_title("2. Sai số Độ lệch chuẩn (ΔStd)", fontsize=11, fontweight="bold")
-    ax2.grid(True, axis="x", linestyle="--", alpha=0.5)
-    for b in bars2:
-        w = b.get_width()
-        ax2.annotate(f" {w:.2f}", xy=(w, b.get_y() + b.get_height() / 2),
-                     va="center", fontsize=8, fontweight="bold")
-
-    # Panel 3: ΔNum (Lệch số khung)
-    min_num = min(nums)
-    colors3 = ["#2ca02c" if n == min_num else "#ff7f0e" for n in nums]
-    bars3 = ax3.barh(y_pos, nums, color=colors3, alpha=0.85, edgecolor="gray")
-    ax3.set_yticks(y_pos)
-    ax3.set_yticklabels([])
-    ax3.invert_yaxis()
-    ax3.set_xlabel("ΔNum (Khung) [Càng nhỏ càng tốt]", fontsize=10, fontweight="bold")
-    ax3.set_title("3. Lệch số khung (ΔNum)", fontsize=11, fontweight="bold")
-    ax3.grid(True, axis="x", linestyle="--", alpha=0.5)
-    for b in bars3:
-        w = b.get_width()
-        ax3.annotate(f" {w:.1f}", xy=(w, b.get_y() + b.get_height() / 2),
-                     va="center", fontsize=8, fontweight="bold")
-
-    # Panel 4: Final Score (%)
-    min_score = min(scores)
-    colors4 = ["#2ca02c" if s == min_score else "#d62728" for s in scores]
-    bars4 = ax4.barh(y_pos, scores, color=colors4, alpha=0.85, edgecolor="gray")
-    ax4.set_yticks(y_pos)
-    ax4.set_yticklabels([])
-    ax4.invert_yaxis()
-    ax4.set_xlabel("Final Score (%) [Càng nhỏ càng tốt]", fontsize=10, fontweight="bold")
-    ax4.set_title("4. Điểm tổng hợp Final Score (%)", fontsize=11, fontweight="bold")
-    ax4.grid(True, axis="x", linestyle="--", alpha=0.5)
-    for b in bars4:
-        w = b.get_width()
-        ax4.annotate(f" {w:.2f}%", xy=(w, b.get_y() + b.get_height() / 2),
-                     va="center", fontsize=8, fontweight="bold")
-
-    plt.tight_layout()
-    if save_path:
-        os.makedirs(os.path.dirname(os.path.abspath(save_path)), exist_ok=True)
-        plt.savefig(save_path, dpi=300, bbox_inches="tight")
-        print(f"[+] Đã lưu biểu đồ: {save_path}")
-    plt.close()
+    """Plot measured metrics only; missing values cannot win or become zero bars."""
+    unique = {}
+    for record in summary_records:
+        unique.setdefault(record["config_name"], record)
+    records = list(unique.values())
+    names = [record["config_name"] for record in records]
+    fields = [
+        ("average_error_hz", "Sai số F0 (Hz)", ".2f"),
+        ("average_std_error", "Sai số độ lệch chuẩn (Hz)", ".2f"),
+        ("average_num_error", "Lệch số khung voiced", ".1f"),
+        ("final_composite_score_pct", "Final Score (%)", ".2f"),
+    ]
+    fig, axes = plt.subplots(1, 4, figsize=(22, max(5, len(names)*.45)))
+    fig.suptitle(title, fontsize=14, fontweight="bold", y=.98)
+    for ax, (key, label, spec) in zip(axes, fields):
+        values = np.asarray([record[key] for record in records], dtype=float)
+        finite = values[np.isfinite(values)]
+        best = float(np.min(finite)) if len(finite) else None
+        colors = ["#2ca02c" if best is not None and value == best else "#1f77b4" for value in values]
+        bars = ax.barh(np.arange(len(names)), values, color=colors, alpha=.85, edgecolor="gray")
+        ax.set_yticks(np.arange(len(names)))
+        ax.set_yticklabels(names if ax is axes[0] else [], fontsize=9)
+        ax.invert_yaxis()
+        ax.set_title(label)
+        ax.set_xlabel("Càng thấp càng tốt")
+        ax.grid(True, axis="x", linestyle="--", alpha=.5)
+        for bar, value in zip(bars, values):
+            x = float(value) if np.isfinite(value) else 0.0
+            ax.annotate(" " + format_metric(value, spec),
+                        xy=(x, bar.get_y()+bar.get_height()/2), va="center", fontsize=8)
+    plt.tight_layout(rect=[0, 0, 1, .95])
+    os.makedirs(os.path.dirname(os.path.abspath(save_path)), exist_ok=True)
+    plt.savefig(save_path, dpi=300, bbox_inches="tight")
+    plt.close(fig)
+    print(f"Saved ranking: {save_path}")
 
 
 def run_evaluation(
@@ -190,10 +115,10 @@ def run_evaluation(
 
     plugin_keys = ["BP", "Clip", "Energy", "Viterbi"]
     plugin_factories = {
-        "BP": lambda: BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
-        "Clip": lambda: CenterClippingPlugin(clipping_ratio=0.40),
-        "Energy": lambda: EnergyExtensionPlugin(threshold_discount=0.20),
-        "Viterbi": lambda: ViterbiTrackingPlugin(),
+        "BP": lambda: BandpassFilterPlugin(low_cutoff=config.BANDPASS_LOW, high_cutoff=config.BANDPASS_HIGH),
+        "Clip": lambda: CenterClippingPlugin(clipping_ratio=config.CLIPPING_RATIO),
+        "Energy": lambda: EnergyExtensionPlugin(threshold_discount=config.ENERGY_THRESHOLD_DISCOUNT),
+        "Viterbi": lambda: ViterbiTrackingPlugin(w_freq=config.VITERBI_W_FREQ, w_octave=config.VITERBI_W_OCTAVE),
     }
 
     all_combos = []
@@ -214,6 +139,7 @@ def run_evaluation(
         errs, mape_f0s = [], []
         std_errs, mape_stds = [], []
         num_errs, mape_nums, scores = [], [], []
+        per_file = {}
 
         for f_id in files:
             wav_path = os.path.join(test_dir, f"{f_id}.wav")
@@ -221,43 +147,59 @@ def run_evaluation(
 
             res = detector.process_file(wav_path)
             ev = evaluate_against_ground_truth(res, lab_path)
+            per_file[f_id] = ev
 
             errs.append(ev["abs_error_mean"])
             mape_f0s.append(ev["mape_f0"])
-            std_errs.append(ev.get("abs_error_std", 0.0))
-            mape_stds.append(ev.get("mape_std", 0.0))
-            num_errs.append(ev.get("abs_error_num", 0))
-            mape_nums.append(ev.get("mape_num", 0.0))
-            scores.append(ev.get("final_score", ev.get("composite_score", 0.0)))
+            std_errs.append(ev.get("abs_error_std"))
+            mape_stds.append(ev.get("mape_std"))
+            num_errs.append(ev.get("abs_error_num"))
+            mape_nums.append(ev.get("mape_num"))
+            scores.append(ev.get("final_score"))
 
         name = "Baseline" if not combo else " + ".join(combo)
         all_results.append({
             "config_name": name,
             "combo": list(combo),
             "threshold": round(float(thresh), 4),
-            "average_error_hz": round(float(np.mean(errs)), 2),
-            "average_mape_f0_pct": round(float(np.mean(mape_f0s)), 2),
-            "average_std_error": round(float(np.mean(std_errs)), 2),
-            "average_mape_std_pct": round(float(np.mean(mape_stds)), 2),
-            "average_num_error": round(float(np.mean(num_errs)), 2),
-            "average_mape_num_pct": round(float(np.mean(mape_nums)), 2),
-            "final_composite_score_pct": round(float(np.mean(scores)), 2),
+            "average_error_hz": mean_metric(errs, 2),
+            "average_mape_f0_pct": mean_metric(mape_f0s, 2),
+            "average_std_error": mean_metric(std_errs, 2),
+            "average_mape_std_pct": mean_metric(mape_stds, 2),
+            "average_num_error": mean_metric(num_errs, 2),
+            "average_mape_num_pct": mean_metric(mape_nums, 2),
+            "final_composite_score_pct": mean_metric(scores, 2),
+            "files": per_file,
         })
 
     # 1. Baseline
+    raw_path = os.path.splitext(output_json)[0] + '_raw.json'
+    write_json(raw_path, {'method': method, 'dataset': test_dir,
+                          'provenance': source_manifest(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+                          'all_configurations': all_results})
+    raw_csv = os.path.splitext(output_csv)[0] + '_per_file.csv'
+    os.makedirs(os.path.dirname(os.path.abspath(raw_csv)), exist_ok=True)
+    with open(raw_csv, 'w', encoding='utf-8', newline='') as stream:
+        writer = csv.writer(stream)
+        writer.writerow(['config', 'threshold', 'file', 'pred_mean', 'pred_std', 'pred_num', 'mape_mean', 'mape_std', 'mape_num', 'final_score'])
+        for item in all_results:
+            for file, metrics in item['files'].items():
+                writer.writerow([item['config_name'], item['threshold'], file] + [metrics.get(key) for key in
+                                  ('pred_f0_mean', 'pred_f0_std', 'pred_f0_num', 'mape_f0', 'mape_std', 'mape_num', 'final_score')])
+
     baseline = next(r for r in all_results if len(r["combo"]) == 0)
 
     # 2. Nhóm 1: Top 3 Tối ưu MAPE F0
-    top3_f0 = sorted(all_results, key=lambda x: (x["average_mape_f0_pct"], x["average_error_hz"]))[:3]
+    top3_f0 = sorted((r for r in all_results if r["average_mape_f0_pct"] is not None), key=lambda x: (rank_metric(x["average_mape_f0_pct"]), rank_metric(x["average_error_hz"])))[:3]
 
     # 3. Nhóm 2: Top 3 Tối ưu MAPE Std
-    top3_std = sorted(all_results, key=lambda x: (x["average_mape_std_pct"], x["average_std_error"]))[:3]
+    top3_std = sorted((r for r in all_results if r["average_mape_std_pct"] is not None), key=lambda x: (rank_metric(x["average_mape_std_pct"]), rank_metric(x["average_std_error"])))[:3]
 
     # 4. Nhóm 3: Top 3 Tối ưu MAPE Num
-    top3_num = sorted(all_results, key=lambda x: (x["average_mape_num_pct"], x["average_num_error"]))[:3]
+    top3_num = sorted((r for r in all_results if r["average_mape_num_pct"] is not None), key=lambda x: (rank_metric(x["average_mape_num_pct"]), rank_metric(x["average_num_error"])))[:3]
 
     # 5. Nhóm 4: Top 3 Toàn diện nhất (Best Final Composite Score)
-    top3_overall = sorted(all_results, key=lambda x: x["final_composite_score_pct"])[:3]
+    top3_overall = sorted((r for r in all_results if r["final_composite_score_pct"] is not None), key=lambda x: rank_metric(x["final_composite_score_pct"]))[:3]
 
     # Tập hợp các dòng báo cáo chuẩn
     reported_records = []
@@ -308,13 +250,13 @@ def run_evaluation(
         print(
             f"{r['group_label']:<24} | "
             f"{r['config_name']:<30} | "
-            f"{r['average_error_hz']:5.2f} Hz  | "
-            f"{r['average_mape_f0_pct']:5.2f}%   | "
-            f"{r['average_std_error']:5.2f} Hz  | "
-            f"{r['average_mape_std_pct']:5.2f}%   | "
-            f"{r['average_num_error']:5.1f} khung  | "
-            f"{r['average_mape_num_pct']:5.2f}%   | "
-            f"{r['final_composite_score_pct']:5.2f}%"
+            f"{format_metric(r['average_error_hz'], '5.2f')} Hz  | "
+            f"{format_metric(r['average_mape_f0_pct'], '5.2f')}%   | "
+            f"{format_metric(r['average_std_error'], '5.2f')} Hz  | "
+            f"{format_metric(r['average_mape_std_pct'], '5.2f')}%   | "
+            f"{format_metric(r['average_num_error'], '5.1f')} khung  | "
+            f"{format_metric(r['average_mape_num_pct'], '5.2f')}%   | "
+            f"{format_metric(r['final_composite_score_pct'], '5.2f')}%"
         )
 
     print("=" * 135)
@@ -327,7 +269,7 @@ def run_evaluation(
     with open(output_csv, "w", encoding="utf-8") as f:
         f.write("Group,Config,Threshold,MAE_F0_Hz,MAPE_F0_Pct,MAE_Std_Hz,MAPE_Std_Pct,Delta_Num_Frames,MAPE_Num_Pct,Final_Score_Pct\n")
         for r in reported_records:
-            f.write(f"\"{r['group_label']}\",\"{r['config_name']}\",{r['threshold']},{r['average_error_hz']},{r['average_mape_f0_pct']},{r['average_std_error']},{r['average_mape_std_pct']},{r['average_num_error']},{r['average_mape_num_pct']},{r['final_composite_score_pct']}\n")
+            f.write(f"\"{csv_value(r['group_label'])}\",\"{csv_value(r['config_name'])}\",{csv_value(r['threshold'])},{csv_value(r['average_error_hz'])},{csv_value(r['average_mape_f0_pct'])},{csv_value(r['average_std_error'])},{csv_value(r['average_mape_std_pct'])},{csv_value(r['average_num_error'])},{csv_value(r['average_mape_num_pct'])},{csv_value(r['final_composite_score_pct'])}\n")
 
     plot_clean_ranking(reported_records, save_path=output_ranking_fig, title=f"Đối sánh cấu hình {method.upper()} trên {dataset_name} (Baseline & Top Groups)")
     print(f"[+] Báo cáo CSV: {output_csv}")

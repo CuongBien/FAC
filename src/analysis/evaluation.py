@@ -1,8 +1,41 @@
 """Evaluation module to compare algorithm predictions with ground truth from *.lab files."""
+import re
 from typing import Dict, Optional
 import numpy as np
 
 from src.core.lab_parser import parse_lab_file, get_frame_labels
+
+
+def round_metric(value, digits=2):
+    """JSON-compatible number or None for a missing/non-finite metric."""
+    if value is None or not np.isfinite(value):
+        return None
+    return float(value) if digits is None else round(float(value), digits)
+
+
+def mean_metric(values, digits=2):
+    """Mean over the complete population; missing files never disappear silently."""
+    values = list(values)
+    if not values or any(v is None or not np.isfinite(v) for v in values):
+        return None
+    return round_metric(np.mean(values), digits)
+
+
+def format_metric(value, spec=".2f"):
+    """Format numbers normally and preserve the width of N/A table entries."""
+    if value is not None and np.isfinite(value):
+        return format(value, spec)
+    width = re.match(r"([<>^]?)(\d+)", spec)
+    return format("N/A", (width[1] or ">") + width[2]) if width else "N/A"
+
+
+def csv_value(value):
+    return "" if value is None else str(value)
+
+
+def rank_metric(value):
+    """Undefined scores cannot win a ranking."""
+    return float(value) if value is not None and np.isfinite(value) else float("inf")
 
 
 def compute_error_metrics(
@@ -13,55 +46,37 @@ def compute_error_metrics(
     pred_num: Optional[float] = None,
     ref_num: Optional[float] = None,
 ) -> Dict:
-    """Compute absolute and relative errors (MAPE) between predicted F0 statistics and reference *.lab statistics."""
-    diff_mean = pred_mean - ref_mean
-    abs_diff_mean = abs(diff_mean)
-    mape_f0 = (abs_diff_mean / ref_mean * 100.0) if ref_mean > 0 else 0.0
-    rel_diff_mean_pct = mape_f0
+    """Preserve absolute error at zero references; undefined MAPE is None.
 
-    diff_std = pred_std - ref_std
-    abs_diff_std = abs(diff_std)
-    mape_std = (abs_diff_std / ref_std * 100.0) if ref_std > 0 else 0.0
-    rel_diff_std_pct = mape_std
+    Final Score always averages THREE valid components. Missing/zero references
+    never produce zero error or a two-component score.
+    """
+    def errors(prediction, reference):
+        if prediction is None or reference is None:
+            return None, None
+        if not np.isfinite(prediction) or not np.isfinite(reference):
+            return None, None
+        absolute = abs(prediction - reference)
+        return round_metric(absolute), (absolute / reference * 100.0 if reference > 0 else None)
 
-    metrics = {
-        "pred_f0_mean": round(pred_mean, 2),
-        "ref_f0_mean": round(ref_mean, 2),
-        "abs_error_mean": round(abs_diff_mean, 2),
-        "rel_error_mean_pct": round(rel_diff_mean_pct, 2),
-        "mape_f0": round(mape_f0, 2),
-        "mape_f0_mean": round(mape_f0, 2),
-        "mape_mean": round(mape_f0, 2),
-        "pred_f0_std": round(pred_std, 2),
-        "ref_f0_std": round(ref_std, 2),
-        "abs_error_std": round(abs_diff_std, 2),
-        "rel_error_std_pct": round(rel_diff_std_pct, 2),
-        "mape_f0_std": round(mape_std, 2),
-        "mape_std": round(mape_std, 2),
+    abs_mean, mape_mean = errors(pred_mean, ref_mean)
+    abs_std, mape_std = errors(pred_std, ref_std)
+    abs_num, mape_num = errors(pred_num, ref_num)
+    score = mean_metric([mape_mean, mape_std, mape_num])
+    return {
+        "pred_f0_mean": round_metric(pred_mean), "ref_f0_mean": round_metric(ref_mean),
+        "abs_error_mean": abs_mean, "rel_error_mean_pct": round_metric(mape_mean),
+        "mape_f0": round_metric(mape_mean), "mape_f0_mean": round_metric(mape_mean),
+        "mape_mean": round_metric(mape_mean),
+        "pred_f0_std": round_metric(pred_std), "ref_f0_std": round_metric(ref_std),
+        "abs_error_std": abs_std, "rel_error_std_pct": round_metric(mape_std),
+        "mape_f0_std": round_metric(mape_std), "mape_std": round_metric(mape_std),
+        "pred_f0_num": int(round(pred_num)) if round_metric(pred_num) is not None else None,
+        "ref_f0_num": int(round(ref_num)) if round_metric(ref_num) is not None else None,
+        "abs_error_num": int(round(abs_num)) if abs_num is not None else None,
+        "mape_f0_num": round_metric(mape_num), "mape_num": round_metric(mape_num),
+        "composite_score": score, "final_score": score,
     }
-
-    if ref_num is not None and pred_num is not None:
-        diff_num = float(pred_num - ref_num)
-        abs_diff_num = abs(diff_num)
-        mape_num = (abs_diff_num / ref_num * 100.0) if ref_num > 0 else 0.0
-        composite_score = (mape_f0 + mape_std + mape_num) / 3.0
-        metrics.update({
-            "pred_f0_num": int(round(pred_num)),
-            "ref_f0_num": int(round(ref_num)),
-            "abs_error_num": int(round(abs_diff_num)),
-            "mape_f0_num": round(mape_num, 2),
-            "mape_num": round(mape_num, 2),
-            "composite_score": round(composite_score, 2),
-            "final_score": round(composite_score, 2),
-        })
-    else:
-        composite_score = (mape_f0 + mape_std) / 2.0
-        metrics.update({
-            "composite_score": round(composite_score, 2),
-            "final_score": round(composite_score, 2),
-        })
-
-    return metrics
 
 
 def evaluate_against_ground_truth(test_results: Dict, lab_path: str) -> Dict:
@@ -124,92 +139,3 @@ def evaluate_against_ground_truth(test_results: Dict, lab_path: str) -> Dict:
         "voiced_f1": round(f1_score * 100.0, 2) if f1_score is not None else None,
         "gt_segments": gt_segments,
     }
-
-
-def compute_pitch_contour_metrics(
-    pred_f0: np.ndarray,
-    pred_voicing: np.ndarray,
-    gt_f0: np.ndarray,
-    gt_voicing: np.ndarray,
-    tolerance: float = 0.20,
-) -> Dict:
-    """Compute standard pitch tracking benchmark metrics: VDE, GPE, FFE, FPE.
-
-    Definitions:
-        - VDE (Voicing Decision Error, %): Percentage of frames where predicted voicing != ground-truth voicing.
-        - GPE (Gross Pitch Error, %): Percentage of shared voiced frames where |pred - gt| / gt > tolerance (default 20%).
-        - FFE (F0 Frame Error, %): Percentage of total frames having either a voicing error OR gross pitch error.
-        - FPE_MAE (Fine Pitch Error MAE, Hz): Mean absolute error on voiced frames within tolerance.
-        - FPE_STD (Fine Pitch Error STD, Hz): Standard deviation of error on voiced frames within tolerance.
-
-    Args:
-        pred_f0: 1D array of predicted F0 values.
-        pred_voicing: 1D boolean array of predicted voicing flags.
-        gt_f0: 1D array of ground-truth F0 values.
-        gt_voicing: 1D boolean array of ground-truth voicing flags.
-        tolerance: Relative tolerance threshold for Gross Pitch Error (default 0.20 = 20%).
-
-    Returns:
-        Dict containing vde, gpe, ffe, fpe_mae, fpe_std, and frame counts.
-    """
-    total_frames = len(gt_voicing)
-    if total_frames == 0:
-        return {
-            "vde": 0.0,
-            "gpe": 0.0,
-            "ffe": 0.0,
-            "fpe_mae": 0.0,
-            "fpe_std": 0.0,
-            "total_frames": 0,
-            "gt_voiced_frames": 0,
-            "pred_voiced_frames": 0,
-            "shared_voiced_frames": 0,
-        }
-
-    # 1. Voicing Decision Error
-    voicing_diff = pred_voicing != gt_voicing
-    num_voicing_errors = int(np.sum(voicing_diff))
-    vde = (num_voicing_errors / total_frames) * 100.0
-
-    # 2. Gross Pitch Error & Fine Pitch Error
-    shared_voiced = pred_voicing & gt_voicing
-    num_shared_voiced = int(np.sum(shared_voiced))
-
-    if num_shared_voiced > 0:
-        rel_errors = np.abs(pred_f0[shared_voiced] - gt_f0[shared_voiced]) / np.maximum(gt_f0[shared_voiced], 1e-6)
-        is_gross = rel_errors > tolerance
-        num_gross_errors = int(np.sum(is_gross))
-        gpe = (num_gross_errors / num_shared_voiced) * 100.0
-
-        fine_errors = np.abs(pred_f0[shared_voiced][~is_gross] - gt_f0[shared_voiced][~is_gross])
-        mape_f0_contour = float(np.mean(rel_errors * 100.0))
-        if len(fine_errors) > 0:
-            fpe_mae = float(np.mean(fine_errors))
-            fpe_std = float(np.std(fine_errors))
-        else:
-            fpe_mae = 0.0
-            fpe_std = 0.0
-    else:
-        num_gross_errors = 0
-        gpe = 0.0
-        fpe_mae = 0.0
-        fpe_std = 0.0
-        mape_f0_contour = 0.0
-
-    # 3. F0 Frame Error (FFE): frames with either voicing decision error or gross pitch error
-    total_error_frames = num_voicing_errors + num_gross_errors
-    ffe = (total_error_frames / total_frames) * 100.0
-
-    return {
-        "vde": round(vde, 2),
-        "gpe": round(gpe, 2),
-        "ffe": round(ffe, 2),
-        "fpe_mae": round(fpe_mae, 2),
-        "fpe_std": round(fpe_std, 2),
-        "mape_f0_contour": round(mape_f0_contour, 2),
-        "total_frames": total_frames,
-        "gt_voiced_frames": int(np.sum(gt_voicing)),
-        "pred_voiced_frames": int(np.sum(pred_voicing)),
-        "shared_voiced_frames": num_shared_voiced,
-    }
-

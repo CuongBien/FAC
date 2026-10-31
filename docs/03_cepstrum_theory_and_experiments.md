@@ -1,5 +1,10 @@
 # CHƯƠNG III: THUẬT TOÁN ĐỒNG CẤU CEPSTRUM (QUEFRENCY / HOMOMORPHIC DECONVOLUTION)
 
+> **Cập nhật 30/10/2026:** Bảng/hình gốc trong chương là kết quả lịch sử. Phần bổ sung cuối chương và [báo cáo đợt 4](STAGE4_RESULTS.md) ghi kết quả hiện hành, giao thức chọn cấu hình trên train và nguyên nhân chênh lệch Cepstrum.
+
+
+> **Trạng thái sau rà soát 28/10/2026:** Các bảng Cepstrum Champion và hình benchmark trong chương là số liệu đã công bố, chưa khớp code hiện tại: chạy lại train 6,84% và test 13,24%, so với 4,43%/7,62% trong JSON cũ. Chưa thay thế các số liệu này trong đợt dọn dẹp. Xem [các vấn đề cần xử lý](KNOWN_ISSUES.md).
+
 > **Dẫn hướng tài liệu:** [Trang chủ README](../README.md) > **Chương III: Thuật toán Cepstrum**
 
 ---
@@ -98,7 +103,7 @@ Thực nghiệm minh họa trên file âm thanh `TinHieuHuanLuyen/phone_F1.wav` 
 | **Đặc tính dạng sóng** | Dao động tuần hoàn rõ rệt, biên độ xung thanh môn lớn | Dao động ngẫu nhiên, tựa nhiễu trắng, biên độ thấp |
 | **Vị trí quefrency cực đại $q_0$** | $q_0 = 73.10\text{ mẫu} \approx 4.57\text{ ms}$ | Không có đỉnh quefrency định kỳ ($q = 127\text{ mẫu}$) |
 | **Biên độ cực đại Cepstrum $c[q_0]$** | **$0.1256$** (Vượt ngưỡng quyết định $T = 0.05$) | **$0.0214$** (Rất nhỏ, nằm dưới ngưỡng $T = 0.05$) |
-| **Tần số cơ bản $F_0$ ước lượng** | **$F_0 = 218.88\text{ Hz}$** (Rất sát Ground Truth $217\text{ Hz}$) | **$F_0 = \text{Undefined}$** (Phán đoán chính xác vô thanh) |
+| **Tần số cơ bản $F_0$ ước lượng** | **$F_0 = 218.88\text{ Hz}$** (minh họa khung; không có F0 tham chiếu từng khung) | **$F_0 = \text{Undefined}$** (Phán đoán chính xác vô thanh) |
 | **Hình thái đồ thị Quefrency** | Xuất hiện đỉnh nhọn cô lập sắc nét tại $q_0$; vùng quefrency thấp $q < 30$ chứa formant | Đồ thị suy giảm đều và dao động phẳng li ti, không có đỉnh nổi trội |
 
 ---
@@ -226,3 +231,28 @@ uv run python predict.py --input TinHieuHuanLuyen/phone_F1.wav --method cepstrum
 ---
 
 **Dẫn hướng:** [← Chương II: Thuật toán AMDF](02_amdf_theory_and_experiments.md) | [Trang chủ README](../README.md) | [Chương IV: Đánh Giá & Đối Sánh Trên Tập Kiểm Thử →](04_test_set_benchmark_and_analysis.md)
+
+<!-- STAGE4_CURRENT_START -->
+## Kết quả kiểm chứng hiện hành — 30/10/2026
+
+Nguồn: cấu hình đóng băng và `outputs/stage4_validation/evaluation.json`. Final Score là sai số thống kê toàn file; thấp hơn tốt hơn. Accuracy/F1 từng khung không xác định vì thiếu nhãn thời gian.
+
+Preset: BP + Clip + Energy + Viterbi, frame/hop 30/10 ms, T=0.1.
+
+| Cấu hình | Train (%) | Test (%) |
+|---|---:|---:|
+| baseline | 44.540 | 48.185 |
+| historical_champion | 15.160 | 21.203 |
+| selected_champion | 11.390 | 22.942 |
+
+| File test | Mean dự đoán (Hz) | Std dự đoán (Hz) | Khung voiced | Final Score (%) |
+|---|---:|---:|---:|---:|
+| phone_F2.wav | 156.19 | 35.54 | 198 | 9.78 |
+| phone_M2.wav | 139.64 | 41.04 | 125 | 58.46 |
+| studio_F2.wav | 202.62 | 49.58 | 113 | 8.15 |
+| studio_M2.wav | 159.73 | 36.50 | 90 | 15.38 |
+
+**Đính chính:** mốc 4,43%/7,62% lịch sử được tạo khi detector rơi vào ACF nhưng Viterbi dùng Cepstrum. Replay đúng commit và chỉ thay nhánh Cepstrum đã xác nhận nguyên nhân. Preset hiện hành giảm lỗi train nhưng tăng lỗi test so với trước hiệu chỉnh; không gọi đây là cải thiện tổng quát.
+
+[Chi tiết và giới hạn kiểm chứng](STAGE4_RESULTS.md).
+<!-- STAGE4_CURRENT_END -->

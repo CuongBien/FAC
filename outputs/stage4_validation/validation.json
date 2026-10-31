@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-30",
+  "branch": "codex/fix-stage1-pipeline",
+  "total_regression_tests": 90,
+  "stage4_regression_tests": 11,
+  "train_trials": 222,
+  "calibration_file_pairs": 888,
+  "evaluation_file_pairs": 480,
+  "protocols_per_method": 17,
+  "cli_summary_rows": 48,
+  "cli_frame_rows_checked": 15573,
+  "freeze_and_export_match": true,
+  "training_source_snapshot_verified": true,
+  "legacy_replay_matches_each_file": true,
+  "causal_detector_patch_verified": true,
+  "archive_files_verified": 56,
+  "historical_reports_unchanged": 19,
+  "python_39_source_count": 50,
+  "source_data_unchanged": true
+}

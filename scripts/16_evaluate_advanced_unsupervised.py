@@ -1,20 +1,20 @@
 """Script 16: Benchmark 4 giải pháp học không giám sát nâng cao vượt giới hạn Histogram:
 1. 1D GMM-EM với ràng buộc tiên nghiệm 50/50 (Liên tục, không chia bin)
 2. Đa đặc trưng không gian 2D (Periodicity + Zero Crossing Rate ZCR)
-3. Mô hình Markov ẩn 2 trạng thái (2-State HMM: Baum-Welch + Viterbi)
+3. HMM hai trạng thái: học Gaussian emission, A/pi cố định, reset qua silence
 4. Ngưỡng động thích nghi theo ngữ cảnh cửa sổ trượt (Context-Adaptive Dynamic Thresholding)
 
 Đánh giá toàn diện trên cả 3 thuật toán Bài Tập 2: ACF, AMDF, Cepstrum.
 Xuất bảng chuẩn 8 cột, báo cáo JSON/CSV và 4 hình vẽ trực quan hóa 300 DPI.
 """
+import argparse
 import glob
 import json
 import os
 import sys
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.ndimage import median_filter
 from scipy.stats import norm
 
 # Ensure UTF-8 output on Windows console
@@ -28,12 +28,12 @@ if sys.platform.startswith("win"):
 # Ensure src package is importable
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from src import config
 from src.core.audio import load_wav, frame_signal, compute_ste
+from src.core.processing import center_frame, silence_energy_threshold, smooth_voiced_segments
 from src.core.acf import find_f0_acf
 from src.core.amdf import find_f0_amdf
 from src.core.cepstrum import find_f0_cepstrum
-from src.core.lab_parser import parse_lab_file
-from src.core.pitch_detector import PitchDetector
 from src.analysis.unsupervised_threshold import compute_median_threshold, compute_otsu_threshold
 from src.analysis.advanced_unsupervised import (
     compute_gmm_em_1d,
@@ -42,7 +42,9 @@ from src.analysis.advanced_unsupervised import (
     train_and_decode_2state_hmm,
     compute_sliding_window_adaptive_threshold,
 )
-from src.analysis.evaluation import evaluate_against_ground_truth
+from src.analysis.evaluation import (
+    evaluate_against_ground_truth, round_metric, mean_metric, format_metric, csv_value,
+)
 
 
 def extract_features_for_file(
@@ -70,7 +72,7 @@ def extract_features_for_file(
         hop_duration_ms=hop_duration_ms,
     )
 
-    ste_thresh = ste_silence_ratio * np.max(ste) if len(ste) > 0 else 0.0
+    ste_thresh = silence_energy_threshold(ste, ste_silence_ratio)
     num_frames = len(frames)
 
     candidate_f0 = np.zeros(num_frames, dtype=np.float64)
@@ -79,7 +81,7 @@ def extract_features_for_file(
     is_active = np.zeros(num_frames, dtype=bool)
 
     for i in range(num_frames):
-        frame = frames[i]
+        frame = center_frame(frames[i])
         zcr_vals[i] = compute_zcr(frame)
 
         if ste[i] >= ste_thresh:
@@ -129,10 +131,7 @@ def evaluate_custom_prediction(
         else:
             f0_raw[i] = 0.0
 
-    f0_contour = np.copy(f0_raw)
-    voiced_idx = np.where(f0_contour > 0)[0]
-    if len(voiced_idx) >= median_size:
-        f0_contour[voiced_idx] = median_filter(f0_contour[voiced_idx], size=median_size)
+    f0_contour = smooth_voiced_segments(f0_raw, pred_labels, median_size)
 
     voiced_f0 = f0_contour[f0_contour > 0]
     f0_mean = float(np.mean(voiced_f0)) if len(voiced_f0) > 0 else 0.0
@@ -155,17 +154,17 @@ def evaluate_custom_prediction(
 def aggregate_pipeline_metrics(eval_list: List[Dict]) -> Dict[str, float]:
     """Average 8-column metrics across test files."""
     return {
-        "diff_f0": round(float(np.mean([e["abs_error_mean"] for e in eval_list])), 2),
-        "mape_f0": round(float(np.mean([e["mape_f0"] for e in eval_list])), 2),
-        "diff_std": round(float(np.mean([e["abs_error_std"] for e in eval_list])), 2),
-        "mape_std": round(float(np.mean([e["mape_std"] for e in eval_list])), 2),
-        "diff_num": round(float(np.mean([e["abs_error_num"] for e in eval_list])), 1),
-        "mape_num": round(float(np.mean([e["mape_num"] for e in eval_list])), 2),
-        "final_score": round(float(np.mean([e["final_score"] for e in eval_list])), 2),
+        "diff_f0": mean_metric([e["abs_error_mean"] for e in eval_list], 2),
+        "mape_f0": mean_metric([e["mape_f0"] for e in eval_list], 2),
+        "diff_std": mean_metric([e["abs_error_std"] for e in eval_list], 2),
+        "mape_std": mean_metric([e["mape_std"] for e in eval_list], 2),
+        "diff_num": mean_metric([e["abs_error_num"] for e in eval_list], 1),
+        "mape_num": mean_metric([e["mape_num"] for e in eval_list], 2),
+        "final_score": mean_metric([e["final_score"] for e in eval_list], 2),
     }
 
 
-def run_advanced_benchmark():
+def run_advanced_benchmark(output_dir="outputs"):
     train_dir = "TinHieuHuanLuyen"
     test_dir = "TinHieuKiemThu"
 
@@ -179,7 +178,7 @@ def run_advanced_benchmark():
 
     print("=" * 135)
     print("      CHƯƠNG TRÌNH THỰC NGHIỆM 4 GIẢI PHÁP HỌC KHÔNG GIÁM SÁT NÂNG CAO VƯỢT GIỚI HẠN HISTOGRAM")
-    print("      (1. GMM-EM 1D 50/50 | 2. Đa đặc trưng 2D ZCR | 3. 2-State HMM Baum-Welch | 4. Ngưỡng động thích nghi)")
+    print("      (1. GMM-EM 1D 50/50 | 2. Đa đặc trưng 2D ZCR | 3. HMM A/pi cố định | 4. Ngưỡng động median/STE)")
     print("=" * 135)
 
     for method in methods:
@@ -204,18 +203,13 @@ def run_advanced_benchmark():
         t_gmm = gmm_fit["threshold"]
         gmm_models[method] = gmm_fit
 
-        if method == "acf":
-            t_sup = 0.4408
-        elif method == "amdf":
-            t_sup = 0.4380
-        else:
-            t_sup = 0.0600
+        t_sup = config.baseline_threshold(method)
 
         print(f"1. Khảo sát Ngưỡng Toàn Cục:")
-        print(f"   * GMM-EM 1D (50/50 Continuous) : T = {t_gmm:.4f} (mu0={gmm_fit['mu0']:.3f}, mu1={gmm_fit['mu1']:.3f})")
-        print(f"   * Median 50% (Phân vị thứ 50)   : T = {t_median:.4f}")
-        print(f"   * Otsu (Cực đại phương sai)    : T = {t_otsu:.4f}")
-        print(f"   * Chuẩn đối sánh Có Giám sát   : T = {t_sup:.4f}")
+        print(f"   * GMM-EM 1D (50/50 Continuous) : T = {format_metric(t_gmm, '.4f')} (mu0={format_metric(gmm_fit['mu0'], '.3f')}, mu1={format_metric(gmm_fit['mu1'], '.3f')})")
+        print(f"   * Median 50% (Phân vị thứ 50)   : T = {format_metric(t_median, '.4f')}")
+        print(f"   * Otsu (Cực đại phương sai)    : T = {format_metric(t_otsu, '.4f')}")
+        print(f"   * Chuẩn đối sánh Có Giám sát   : T = {format_metric(t_sup, '.4f')}")
 
         # 2. Chuẩn bị đặc trưng cho 4 file tập Kiểm thử
         test_file_data = [extract_features_for_file(tw, method=method) for tw in test_wavs]
@@ -289,34 +283,22 @@ def run_advanced_benchmark():
             n_frames = len(fd["periodicity_vals"])
             active_idx = np.where(fd["is_active"])[0]
             labels = np.full(n_frames, "sil", dtype=object)
-            if len(active_idx) > 5:
+            if len(active_idx):
                 sub_p = fd["periodicity_vals"][active_idx]
                 sub_z = fd["zcr_vals"][active_idx]
                 sub_labels, _ = cluster_multifeature_2d(sub_p, sub_z, method=method)
                 for idx_sub, orig_idx in enumerate(active_idx):
                     labels[orig_idx] = sub_labels[idx_sub]
-            else:
-                for i in range(n_frames):
-                    if fd["is_active"][i]:
-                        labels[i] = "v"
             eval_mf2d.append(evaluate_custom_prediction(fd, labels, fd["candidate_f0"]))
         strategies_eval["2. Đa đặc trưng 2D (Periodicity+ZCR)"] = aggregate_pipeline_metrics(eval_mf2d)
 
-        # --- 3. 2-State HMM (Baum-Welch + Viterbi) ---
+        # --- 3. HMM: shared emissions per file, fixed A/pi, independent active segments ---
         eval_hmm = []
         for fd in test_file_data:
-            n_frames = len(fd["periodicity_vals"])
-            active_idx = np.where(fd["is_active"])[0]
-            labels = np.full(n_frames, "sil", dtype=object)
-            if len(active_idx) > 5:
-                sub_p = fd["periodicity_vals"][active_idx]
-                sub_labels, _ = train_and_decode_2state_hmm(sub_p, method=method, prior=0.5)
-                for idx_sub, orig_idx in enumerate(active_idx):
-                    labels[orig_idx] = sub_labels[idx_sub]
-            else:
-                for i in range(n_frames):
-                    if fd["is_active"][i]:
-                        labels[i] = "v"
+            labels, _ = train_and_decode_2state_hmm(
+                fd["periodicity_vals"], method=method, prior=0.5,
+                active_mask=fd["is_active"],
+            )
             eval_hmm.append(evaluate_custom_prediction(fd, labels, fd["candidate_f0"]))
         strategies_eval["3. 2-State HMM (Viterbi Decoding)"] = aggregate_pipeline_metrics(eval_hmm)
 
@@ -345,27 +327,32 @@ def run_advanced_benchmark():
         for s_name, res in strategies_eval.items():
             print(
                 f"   {s_name:<36} | "
-                f"{res['diff_f0']:<9.2f} | "
-                f"{res['mape_f0']:<12.2f} | "
-                f"{res['diff_std']:<10.2f} | "
-                f"{res['mape_std']:<13.2f} | "
-                f"{res['diff_num']:<7.1f} | "
-                f"{res['mape_num']:<13.2f} | "
-                f"{res['final_score']:<15.2f}"
+                f"{format_metric(res['diff_f0'], '<9.2f')} | "
+                f"{format_metric(res['mape_f0'], '<12.2f')} | "
+                f"{format_metric(res['diff_std'], '<10.2f')} | "
+                f"{format_metric(res['mape_std'], '<13.2f')} | "
+                f"{format_metric(res['diff_num'], '<7.1f')} | "
+                f"{format_metric(res['mape_num'], '<13.2f')} | "
+                f"{format_metric(res['final_score'], '<15.2f')}"
             )
 
         summary_all[method] = {
             "thresholds": {
-                "t_median": round(t_median, 4),
-                "t_otsu": round(t_otsu, 4),
-                "t_gmm": round(t_gmm, 4),
-                "t_supervised": round(t_sup, 4),
+                "t_median": round_metric(t_median, 4),
+                "t_otsu": round_metric(t_otsu, 4),
+                "t_gmm": round_metric(t_gmm, 4),
+                "t_supervised": round_metric(t_sup, 4),
+                "supervised_source": config.THRESHOLD_SOURCE,
             },
-            "gmm_model": {
-                "mu0": round(gmm_fit["mu0"], 4),
-                "std0": round(gmm_fit["std0"], 4),
-                "mu1": round(gmm_fit["mu1"], 4),
-                "std1": round(gmm_fit["std1"], 4),
+            "gmm_model": dict(gmm_fit),
+            "protocol": {
+                "global_threshold_fit": "train_all_frames_including_silence",
+                "clustering_fit": "each_test_file_active_frames",
+                "hmm_fit": "shared_emissions_per_test_file_active_segments",
+                "hmm_A_pi": "fixed; reset pi at every active segment",
+                "dynamic_window_frames": 50,
+                "dynamic_window_offsets": [-25, 24],
+                "dynamic_alpha": 0.30,
             },
             "pipeline_eval": strategies_eval,
         }
@@ -373,8 +360,10 @@ def run_advanced_benchmark():
     # ==============================================================================
     # XUẤT 4 HÌNH VẼ ĐỒ THỊ CHẤT LƯỢNG CAO 300 DPI
     # ==============================================================================
-    os.makedirs("outputs/figures", exist_ok=True)
-    os.makedirs("outputs/reports", exist_ok=True)
+    figures_dir = os.path.join(output_dir, "figures")
+    reports_dir = os.path.join(output_dir, "reports")
+    os.makedirs(figures_dir, exist_ok=True)
+    os.makedirs(reports_dir, exist_ok=True)
     plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
 
     # --- Hình 1: Mật độ xác suất liên tục GMM-EM 1D và Giao điểm Bayes ---
@@ -389,15 +378,16 @@ def run_advanced_benchmark():
         ax.hist(vals, bins=60, density=True, alpha=0.35, color="#7f8c8d", edgecolor="white", label="Empirical Histogram")
 
         # Plot continuous Gaussian components
-        pdf0 = 0.5 * norm.pdf(x_grid, loc=fit["mu0"], scale=fit["std0"])
-        pdf1 = 0.5 * norm.pdf(x_grid, loc=fit["mu1"], scale=fit["std1"])
+        pdf0 = fit["weight0"] * norm.pdf(x_grid, loc=fit["mu0"], scale=fit["std0"])
+        pdf1 = fit["weight1"] * norm.pdf(x_grid, loc=fit["mu1"], scale=fit["std1"])
         total_pdf = pdf0 + pdf1
 
-        ax.plot(x_grid, pdf0, "--", color="#e74c3c", linewidth=2.0, label=f"UV: N({fit['mu0']:.2f}, {fit['std0']:.2f}²)")
-        ax.plot(x_grid, pdf1, "--", color="#2ecc71", linewidth=2.0, label=f"V: N({fit['mu1']:.2f}, {fit['std1']:.2f}²)")
+        low_label, high_label = ("V", "UV") if method == "amdf" else ("UV", "V")
+        ax.plot(x_grid, pdf0, "--", color="#e74c3c", linewidth=2.0, label=f"{low_label}: N({format_metric(fit['mu0'], '.2f')}, {format_metric(fit['std0'], '.2f')}²)")
+        ax.plot(x_grid, pdf1, "--", color="#2ecc71", linewidth=2.0, label=f"{high_label}: N({format_metric(fit['mu1'], '.2f')}, {format_metric(fit['std1'], '.2f')}²)")
         ax.plot(x_grid, total_pdf, "-", color="#2c3e50", linewidth=2.5, label="GMM-EM Hỗn hợp")
 
-        ax.axvline(fit["threshold"], color="#9b59b6", linestyle="-", linewidth=2.5, label=f"GMM T* = {fit['threshold']:.4f}")
+        ax.axvline(fit["threshold"], color="#9b59b6", linestyle="-", linewidth=2.5, label=f"GMM T* = {format_metric(fit['threshold'], '.4f')}")
         ax.set_title(f"GMM-EM 1D (50/50 Prior) - {method.upper()}", fontsize=12, fontweight="bold")
         ax.set_xlabel("Đặc trưng chu kỳ", fontsize=10)
         ax.set_ylabel("Mật độ xác suất liên tục", fontsize=10)
@@ -405,7 +395,7 @@ def run_advanced_benchmark():
         ax.grid(True, linestyle=":", alpha=0.6)
 
     plt.tight_layout()
-    fig1_path = "outputs/figures/16_advanced_gmm_em_distributions.png"
+    fig1_path = os.path.join(figures_dir, "16_advanced_gmm_em_distributions.png")
     plt.savefig(fig1_path, dpi=300)
     plt.close()
     print(f"\nSaved: {fig1_path}")
@@ -427,8 +417,8 @@ def run_advanced_benchmark():
         # Plot centroids
         cv = model_info["centroid_v"]
         cuv = model_info["centroid_uv"]
-        ax.scatter([cuv[0]], [cuv[1]], c="#c0392b", s=140, marker="X", edgecolor="black", label=f"Tâm UV ({cuv[0]:.2f}, {cuv[1]:.2f})")
-        ax.scatter([cv[0]], [cv[1]], c="#27ae60", s=140, marker="P", edgecolor="black", label=f"Tâm V ({cv[0]:.2f}, {cv[1]:.2f})")
+        ax.scatter([cuv[0]], [cuv[1]], c="#c0392b", s=140, marker="X", edgecolor="black", label=f"Tâm UV ({format_metric(cuv[0], '.2f')}, {format_metric(cuv[1], '.2f')})")
+        ax.scatter([cv[0]], [cv[1]], c="#27ae60", s=140, marker="P", edgecolor="black", label=f"Tâm V ({format_metric(cv[0], '.2f')}, {format_metric(cv[1], '.2f')})")
 
         ax.set_title(f"Không gian Đa đặc trưng 2D - {method.upper()}", fontsize=12, fontweight="bold")
         ax.set_xlabel("Đặc trưng chu kỳ (Periodicity Metric)", fontsize=10)
@@ -437,7 +427,7 @@ def run_advanced_benchmark():
         ax.grid(True, linestyle=":", alpha=0.6)
 
     plt.tight_layout()
-    fig2_path = "outputs/figures/16_advanced_multifeature_2d_scatter.png"
+    fig2_path = os.path.join(figures_dir, "16_advanced_multifeature_2d_scatter.png")
     plt.savefig(fig2_path, dpi=300)
     plt.close()
     print(f"Saved: {fig2_path}")
@@ -449,22 +439,22 @@ def run_advanced_benchmark():
     time_sig = np.arange(len(demo_fd["signal"])) / demo_fd["sample_rate"]
 
     ax_sig.plot(time_sig, demo_fd["signal"], color="#34495e", linewidth=0.7)
-    ax_sig.set_title(f"Minh Họa Khử Rung Giật Bằng 2-State HMM Viterbi - {os.path.basename(demo_fd['wav_path'])}", fontsize=12, fontweight="bold")
+    ax_sig.set_title(f"HMM: Học emission, A/pi cố định, reset qua silence - {os.path.basename(demo_fd['wav_path'])}", fontsize=12, fontweight="bold")
     ax_sig.set_ylabel("Biên độ sóng âm", fontsize=10)
     ax_sig.grid(True, linestyle=":", alpha=0.6)
 
     # Static decisions
-    static_labels = np.where(demo_fd["periodicity_vals"] >= summary_all["acf"]["thresholds"]["t_gmm"], 1, 0)
+    static_labels = np.where(
+        demo_fd["is_active"] & (demo_fd["periodicity_vals"] >= gmm_models["acf"]["threshold"]), 1, 0
+    )
     # HMM Viterbi decisions
-    active_idx = np.where(demo_fd["is_active"])[0]
-    hmm_labels = np.zeros(len(demo_fd["frame_times"]), dtype=int)
-    if len(active_idx) > 5:
-        sub_labels, _ = train_and_decode_2state_hmm(demo_fd["periodicity_vals"][active_idx], method="acf", prior=0.5)
-        for idx_sub, orig_idx in enumerate(active_idx):
-            hmm_labels[orig_idx] = 1 if sub_labels[idx_sub] == "v" else 0
+    demo_labels, _ = train_and_decode_2state_hmm(
+        demo_fd["periodicity_vals"], method="acf", prior=0.5, active_mask=demo_fd["is_active"]
+    )
+    hmm_labels = (demo_labels == "v").astype(int)
 
-    ax_dec.step(demo_fd["frame_times"], static_labels + 0.05, where="mid", color="#e74c3c", linewidth=1.5, linestyle="--", label="Ngưỡng Tĩnh 1D (Có rung giật / nhấp nháy)")
-    ax_dec.step(demo_fd["frame_times"], hmm_labels, where="mid", color="#27ae60", linewidth=2.2, label="2-State HMM Viterbi (Mượt mà, liền mạch)")
+    ax_dec.step(demo_fd["frame_times"], static_labels + 0.05, where="mid", color="#e74c3c", linewidth=1.5, linestyle="--", label="Ngưỡng GMM tĩnh (cùng silence gate)")
+    ax_dec.step(demo_fd["frame_times"], hmm_labels, where="mid", color="#27ae60", linewidth=2.2, label="HMM Viterbi (reset tại silence)")
     ax_dec.set_yticks([0, 1])
     ax_dec.set_yticklabels(["Unvoiced / Silence (0)", "Voiced (1)"], fontsize=10)
     ax_dec.set_xlabel("Thời gian (giây)", fontsize=10)
@@ -474,7 +464,7 @@ def run_advanced_benchmark():
     ax_dec.grid(True, linestyle=":", alpha=0.6)
 
     plt.tight_layout()
-    fig3_path = "outputs/figures/16_advanced_hmm_temporal_tracking.png"
+    fig3_path = os.path.join(figures_dir, "16_advanced_hmm_temporal_tracking.png")
     plt.savefig(fig3_path, dpi=300)
     plt.close()
     print(f"Saved: {fig3_path}")
@@ -485,7 +475,7 @@ def run_advanced_benchmark():
         ax = axes[idx]
         eval_dict = summary_all[method]["pipeline_eval"]
         strat_names = list(eval_dict.keys())
-        scores = [eval_dict[k]["final_score"] for k in strat_names]
+        scores = np.asarray([eval_dict[k]["final_score"] for k in strat_names], dtype=float)
 
         # Shorten names for clean display
         short_names = [
@@ -510,36 +500,39 @@ def run_advanced_benchmark():
 
         for bar in bars:
             w = bar.get_width()
-            ax.text(w + 0.3, bar.get_y() + bar.get_height() / 2.0, f"{w:.2f}%", ha="left", va="center", fontsize=9, fontweight="bold")
+            ax.text(w + 0.3 if np.isfinite(w) else 0.3, bar.get_y() + bar.get_height() / 2.0, f"{format_metric(w, '.2f')}%", ha="left", va="center", fontsize=9, fontweight="bold")
 
-        ax.set_xlim(0, max(scores) * 1.25)
+        finite_scores = scores[np.isfinite(scores)]
+        ax.set_xlim(0, max(1.0, float(np.max(finite_scores))*1.25) if len(finite_scores) else 1.0)
         ax.grid(True, linestyle=":", alpha=0.6)
 
     plt.tight_layout()
-    fig4_path = "outputs/figures/16_advanced_final_ranking_barchart.png"
+    fig4_path = os.path.join(figures_dir, "16_advanced_final_ranking_barchart.png")
     plt.savefig(fig4_path, dpi=300)
     plt.close()
     print(f"Saved: {fig4_path}")
 
     # 5. Lưu báo cáo JSON và CSV
-    json_path = "outputs/reports/16_advanced_unsupervised_results.json"
+    json_path = os.path.join(reports_dir, "16_advanced_unsupervised_results.json")
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(summary_all, f, indent=2, ensure_ascii=False)
     print(f"\n[OK] Đã lưu báo cáo JSON: {json_path}")
 
-    csv_path = "outputs/reports/16_advanced_unsupervised_results.csv"
+    csv_path = os.path.join(reports_dir, "16_advanced_unsupervised_results.csv")
     with open(csv_path, "w", encoding="utf-8") as f:
         f.write("Algorithm,Strategy,Diff_F0_Hz,MAPE_F0_Pct,Diff_Std_Hz,MAPE_Std_Pct,Diff_Num_Frames,MAPE_Num_Pct,Final_Score_Pct\n")
         for method, m_data in summary_all.items():
             for s_name, res in m_data["pipeline_eval"].items():
                 f.write(
-                    f"{method.upper()},{s_name},"
-                    f"{res['diff_f0']},{res['mape_f0']},{res['diff_std']},{res['mape_std']},"
-                    f"{res['diff_num']},{res['mape_num']},{res['final_score']}\n"
+                    f"{csv_value(method.upper())},{csv_value(s_name)},"
+                    f"{csv_value(res['diff_f0'])},{csv_value(res['mape_f0'])},{csv_value(res['diff_std'])},{csv_value(res['mape_std'])},"
+                    f"{csv_value(res['diff_num'])},{csv_value(res['mape_num'])},{csv_value(res['final_score'])}\n"
                 )
     print(f"[OK] Đã lưu báo cáo CSV: {csv_path}")
     print("=" * 135)
 
 
 if __name__ == "__main__":
-    run_advanced_benchmark()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output-dir", default="outputs", help="Root for figures/ and reports/")
+    run_advanced_benchmark(parser.parse_args().output_dir)

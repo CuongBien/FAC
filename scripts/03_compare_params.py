@@ -18,18 +18,23 @@ if sys.platform.startswith("win"):
 # Ensure src package is importable
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from src import config
 from src.core.pitch_detector import PitchDetector
-from src.analysis.evaluation import evaluate_against_ground_truth
+from src.analysis.evaluation import (
+    evaluate_against_ground_truth, format_metric,
+)
 from src.visualization.plotter import plot_parameter_comparison
 
 
 def run_comparison(
     wav_path: str = "TinHieuHuanLuyen/phone_M1.wav",
     lab_path: str = "TinHieuHuanLuyen/phone_M1.lab",
-    threshold: float = 0.4408,
+    threshold: float = None,
     output_fig: str = "outputs/figures/03_compare_frame_length.png",
     output_json: str = "outputs/reports/compare_params.json",
 ):
+    threshold_source = config.THRESHOLD_SOURCE if threshold is None else "explicit_override"
+    threshold = config.baseline_threshold("acf") if threshold is None else threshold
     if not os.path.exists(wav_path):
         raise FileNotFoundError(f"File not found: {wav_path}")
     if not os.path.exists(lab_path):
@@ -71,7 +76,7 @@ def run_comparison(
 
     # 4. In kết quả đối sánh định lượng
     print(f"File: {wav_path} (Ground Truth: F0mean={ref_mean}Hz, F0std={ref_std}Hz)")
-    print(f"Threshold T = {threshold:.3f}")
+    print(f"Threshold T = {format_metric(threshold, '.3f')}")
     print("-" * 100)
     print(f"{'Metric':<30} | {'Frame 20 ms':<18} | {'Frame 25 ms (Chuẩn)':<22} | {'Frame 30 ms':<18}")
     print("-" * 100)
@@ -79,12 +84,12 @@ def run_comparison(
     print(f"{'Detected Voiced frames':<30} | {res_20ms['num_voiced']:<18d} | {res_25ms['num_voiced']:<22d} | {res_30ms['num_voiced']:<18d}")
     print(f"{'Detected Unvoiced frames':<30} | {res_20ms['num_unvoiced']:<18d} | {res_25ms['num_unvoiced']:<22d} | {res_30ms['num_unvoiced']:<18d}")
     print(f"{'Detected Silence frames':<30} | {res_20ms['num_silence']:<18d} | {res_25ms['num_silence']:<22d} | {res_30ms['num_silence']:<18d}")
-    print(f"{'F0 mean (Hz)':<30} | {eval_20ms['pred_f0_mean']:<18.2f} | {eval_25ms['pred_f0_mean']:<22.2f} | {eval_30ms['pred_f0_mean']:<18.2f}")
-    print(f"{'F0 std (Hz)':<30} | {eval_20ms['pred_f0_std']:<18.2f} | {eval_25ms['pred_f0_std']:<22.2f} | {eval_30ms['pred_f0_std']:<18.2f}")
-    print(f"{'Abs Error F0mean (Hz)':<30} | {eval_20ms['abs_error_mean']:<18.2f} | {eval_25ms['abs_error_mean']:<22.2f} | {eval_30ms['abs_error_mean']:<18.2f}")
-    print(f"{'Rel Error F0mean (%)':<30} | {eval_20ms['rel_error_mean_pct']:<18.2f} | {eval_25ms['rel_error_mean_pct']:<22.2f} | {eval_30ms['rel_error_mean_pct']:<18.2f}")
-    print(f"{'V/UV Accuracy (%)':<30} | {eval_20ms['classification_accuracy']:<18.2f} | {eval_25ms['classification_accuracy']:<22.2f} | {eval_30ms['classification_accuracy']:<18.2f}")
-    print(f"{'Voiced F1-Score (%)':<30} | {eval_20ms['voiced_f1']:<18.2f} | {eval_25ms['voiced_f1']:<22.2f} | {eval_30ms['voiced_f1']:<18.2f}")
+    print(f"{'F0 mean (Hz)':<30} | {format_metric(eval_20ms['pred_f0_mean'], '<18.2f')} | {format_metric(eval_25ms['pred_f0_mean'], '<22.2f')} | {format_metric(eval_30ms['pred_f0_mean'], '<18.2f')}")
+    print(f"{'F0 std (Hz)':<30} | {format_metric(eval_20ms['pred_f0_std'], '<18.2f')} | {format_metric(eval_25ms['pred_f0_std'], '<22.2f')} | {format_metric(eval_30ms['pred_f0_std'], '<18.2f')}")
+    print(f"{'Abs Error F0mean (Hz)':<30} | {format_metric(eval_20ms['abs_error_mean'], '<18.2f')} | {format_metric(eval_25ms['abs_error_mean'], '<22.2f')} | {format_metric(eval_30ms['abs_error_mean'], '<18.2f')}")
+    print(f"{'Rel Error F0mean (%)':<30} | {format_metric(eval_20ms['rel_error_mean_pct'], '<18.2f')} | {format_metric(eval_25ms['rel_error_mean_pct'], '<22.2f')} | {format_metric(eval_30ms['rel_error_mean_pct'], '<18.2f')}")
+    print(f"{'V/UV Accuracy (%)':<30} | {format_metric(eval_20ms['classification_accuracy'], '<18.2f')} | {format_metric(eval_25ms['classification_accuracy'], '<22.2f')} | {format_metric(eval_30ms['classification_accuracy'], '<18.2f')}")
+    print(f"{'Voiced F1-Score (%)':<30} | {format_metric(eval_20ms['voiced_f1'], '<18.2f')} | {format_metric(eval_25ms['voiced_f1'], '<22.2f')} | {format_metric(eval_30ms['voiced_f1'], '<18.2f')}")
     print("-" * 100)
 
     # 5. Vẽ đồ thị so sánh 3 panels
@@ -105,6 +110,7 @@ def run_comparison(
 
     # 6. Lưu báo cáo JSON
     report = {
+        "threshold_source": threshold_source,
         "file": wav_name,
         "threshold": threshold,
         "frame_20ms": {
@@ -155,7 +161,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Compare 20ms vs 30ms frame lengths.")
     parser.add_argument("--wav", type=str, default="TinHieuHuanLuyen/phone_M1.wav", help="Path to .wav file")
     parser.add_argument("--lab", type=str, default="TinHieuHuanLuyen/phone_M1.lab", help="Path to .lab file")
-    parser.add_argument("--threshold", type=float, default=0.4408, help="V/UV classification threshold")
+    parser.add_argument("--threshold", type=float, default=None, help="V/UV threshold (shared ACF default if omitted)")
     parser.add_argument("--output_fig", type=str, default="outputs/figures/03_compare_frame_length.png", help="Figure path")
     parser.add_argument("--output_json", type=str, default="outputs/reports/compare_params.json", help="Report JSON path")
 

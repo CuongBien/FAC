@@ -1,6 +1,7 @@
 """Autocorrelation Function (ACF) implementation for F0 estimation and periodicity detection."""
-from typing import Optional, Tuple
+from typing import Tuple
 import numpy as np
+from src.core.processing import center_frame, pitch_lag_bounds, refined_f0
 
 
 def compute_acf(frame: np.ndarray, mode: str = "normalized") -> np.ndarray:
@@ -80,13 +81,14 @@ def find_f0_acf(
         tuple: (f0_hz: float, peak_value: float, best_lag: int)
             If no valid peak is found, f0_hz = 0.0.
     """
+    frame = center_frame(frame)
     n = len(frame)
+    if n == 0 or np.mean(frame ** 2) <= 1e-12:
+        return 0.0, 0.0, 0
     r = compute_acf(frame, mode=mode)
+    lag_min, lag_max = pitch_lag_bounds(sample_rate, f0_min, f0_max, n - 1)
 
-    lag_min = max(1, int(round(sample_rate / f0_max)))
-    lag_max = min(n - 1, int(round(sample_rate / f0_min)))
-
-    if lag_min >= lag_max or lag_max >= len(r):
+    if lag_min > lag_max or lag_max >= len(r):
         return 0.0, 0.0, 0
 
     search_region = r[lag_min : lag_max + 1]
@@ -111,17 +113,5 @@ def find_f0_acf(
         best_lag = lag_min + rel_idx
         peak_value = float(r[best_lag])
 
-    # Parabolic (quadratic) refinement for continuous sub-sample precision
-    if 0 < best_lag < len(r) - 1:
-        alpha = float(r[best_lag - 1])
-        beta = float(r[best_lag])
-        gamma = float(r[best_lag + 1])
-        denom = alpha - 2.0 * beta + gamma
-        delta = 0.5 * (alpha - gamma) / denom if abs(denom) > 1e-12 else 0.0
-        delta = float(np.clip(delta, -1.0, 1.0))
-    else:
-        delta = 0.0
-
-    refined_lag = float(best_lag + delta)
-    f0_hz = float(sample_rate / refined_lag) if refined_lag > 0 else 0.0
+    f0_hz = refined_f0(r, best_lag, sample_rate, f0_min, f0_max)
     return f0_hz, peak_value, best_lag

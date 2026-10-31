@@ -1,4 +1,3 @@
-from typing import Optional
 import warnings
 import numpy as np
 from scipy.io import wavfile
@@ -18,19 +17,24 @@ def load_wav(filepath: str):
     """
     sr, data = wavfile.read(filepath)
 
-    # Convert stereo to mono if necessary
-    if data.ndim > 1:
-        data = np.mean(data, axis=1)
+    if data.size == 0:
+        raise ValueError("Audio signal is empty")
 
-    # Convert integer types to float [-1.0, 1.0]
-    if np.issubdtype(data.dtype, np.integer):
-        max_val = float(np.iinfo(data.dtype).max)
-        signal = data.astype(np.float64) / max_val
+    # Normalize PCM before averaging channels; uint8 PCM silence is 128.
+    if np.issubdtype(data.dtype, np.unsignedinteger):
+        midpoint = float(np.iinfo(data.dtype).max + 1) / 2.0
+        signal = (data.astype(np.float64) - midpoint) / midpoint
+    elif np.issubdtype(data.dtype, np.signedinteger):
+        info = np.iinfo(data.dtype)
+        signal = data.astype(np.float64) / max(abs(int(info.min)), int(info.max))
     else:
         signal = data.astype(np.float64)
         max_abs = np.max(np.abs(signal))
         if max_abs > 0:
             signal = signal / max_abs
+
+    if signal.ndim > 1:
+        signal = np.mean(signal, axis=1)
 
     duration = len(signal) / sr
     return sr, signal, duration
@@ -58,6 +62,10 @@ def frame_signal(
     """
     frame_len = int(round(frame_duration_ms * 1e-3 * sample_rate))
     hop_len = int(round(hop_duration_ms * 1e-3 * sample_rate))
+    if frame_len < 1 or hop_len < 1 or sample_rate <= 0:
+        raise ValueError("Frame length, hop length and sample rate must be positive")
+    if np.ndim(signal) != 1 or len(signal) == 0:
+        raise ValueError("Audio must be a non-empty one-dimensional signal")
 
     total_samples = len(signal)
     if total_samples < frame_len:
@@ -96,7 +104,7 @@ def compute_ste(
 ):
     """Compute Short-Time Energy (STE) for each frame.
 
-    STE = sum(x[n]^2) / N
+    STE = sum((x[n] - mean(x))^2) / N; constant DC is not speech energy.
 
     Returns:
         tuple: (ste_values: np.ndarray, frame_times: np.ndarray)
@@ -104,33 +112,6 @@ def compute_ste(
     frames, frame_times = frame_signal(
         signal, sample_rate, frame_duration_ms, hop_duration_ms, window="rectangular"
     )
-    ste = np.mean(frames ** 2, axis=1)
+    centered = frames - np.mean(frames, axis=1, keepdims=True)
+    ste = np.mean(centered ** 2, axis=1)
     return ste, frame_times
-
-
-def add_awgn_noise(
-    signal: np.ndarray,
-    snr_db: Optional[float],
-    seed: Optional[int] = 42,
-) -> np.ndarray:
-    """Add Additive White Gaussian Noise (AWGN) to achieve a target Signal-to-Noise Ratio (SNR in dB).
-
-    Args:
-        signal: 1D input audio array.
-        snr_db: Target SNR in dB. If None or inf, returns a copy of the clean signal.
-        seed: Random seed for reproducibility.
-
-    Returns:
-        np.ndarray: Noisy audio signal.
-    """
-    if snr_db is None or np.isinf(snr_db):
-        return np.copy(signal)
-
-    sig_power = float(np.mean(signal ** 2))
-    if sig_power <= 0:
-        return np.copy(signal)
-
-    noise_power = sig_power / (10.0 ** (snr_db / 10.0))
-    rng = np.random.default_rng(seed)
-    noise = rng.normal(0.0, np.sqrt(noise_power), size=len(signal))
-    return signal + noise

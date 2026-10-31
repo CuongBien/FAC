@@ -1,0 +1,298 @@
+{
+  "num_trials": 222,
+  "num_train_pipeline_file_pairs": 888,
+  "selected": {
+    "acf": {
+      "method": "acf",
+      "plugins": [
+        "BP",
+        "Energy",
+        "Viterbi"
+      ],
+      "threshold": 0.45,
+      "frame_duration_ms": 30.0,
+      "hop_duration_ms": 10.0,
+      "clipping_ratio": 0.4
+    },
+    "amdf": {
+      "method": "amdf",
+      "plugins": [
+        "Energy",
+        "Viterbi"
+      ],
+      "threshold": 0.5,
+      "frame_duration_ms": 30.0,
+      "hop_duration_ms": 10.0,
+      "clipping_ratio": 0.4
+    },
+    "cepstrum": {
+      "method": "cepstrum",
+      "plugins": [
+        "BP",
+        "Clip",
+        "Energy",
+        "Viterbi"
+      ],
+      "threshold": 0.1,
+      "frame_duration_ms": 30.0,
+      "hop_duration_ms": 10.0,
+      "clipping_ratio": 0.4
+    }
+  },
+  "pipelines": [
+    {
+      "dataset": "train",
+      "method": "acf",
+      "strategy": "baseline",
+      "metrics": {
+        "abs_error_mean": 3.045,
+        "mape_f0": 2.06,
+        "abs_error_std": 4.672499999999999,
+        "mape_std": 27.0675,
+        "abs_error_num": 19.25,
+        "mape_num": 12.53,
+        "final_score": 13.8875
+      }
+    },
+    {
+      "dataset": "train",
+      "method": "acf",
+      "strategy": "historical_champion",
+      "metrics": {
+        "abs_error_mean": 1.2149999999999999,
+        "mape_f0": 0.62,
+        "abs_error_std": 0.77,
+        "mape_std": 3.2675,
+        "abs_error_num": 11.75,
+        "mape_num": 7.7475000000000005,
+        "final_score": 3.88
+      }
+    },
+    {
+      "dataset": "train",
+      "method": "acf",
+      "strategy": "selected_champion",
+      "metrics": {
+        "abs_error_mean": 1.1225,
+        "mape_f0": 0.6025,
+        "abs_error_std": 0.9550000000000001,
+        "mape_std": 4.720000000000001,
+        "abs_error_num": 1.75,
+        "mape_num": 1.3175,
+        "final_score": 2.2150000000000003
+      }
+    },
+    {
+      "dataset": "train",
+      "method": "amdf",
+      "strategy": "baseline",
+      "metrics": {
+        "abs_error_mean": 1.6375,
+        "mape_f0": 0.9749999999999999,
+        "abs_error_std": 1.9175,
+        "mape_std": 10.2325,
+        "abs_error_num": 15.0,
+        "mape_num": 9.072500000000002,
+        "final_score": 6.76
+      }
+    },
+    {
+      "dataset": "train",
+      "method": "amdf",
+      "strategy": "historical_champion",
+      "metrics": {
+        "abs_error_mean": 0.9375000000000001,
+        "mape_f0": 0.54,
+        "abs_error_std": 1.025,
+        "mape_std": 3.995,
+        "abs_error_num": 10.75,
+        "mape_num": 6.742500000000001,
+        "final_score": 3.7575
+      }
+    },
+    {
+      "dataset": "train",
+      "method": "amdf",
+      "strategy": "selected_champion",
+      "metrics": {
+        "abs_error_mean": 1.3575,
+        "mape_f0": 0.7825,
+        "abs_error_std": 0.725,
+        "mape_std": 3.2925,
+        "abs_error_num": 3.5,
+        "mape_num": 2.165,
+        "final_score": 2.0775
+      }
+    },
+    {
+      "dataset": "train",
+      "method": "cepstrum",
+      "strategy": "baseline",
+      "metrics": {
+        "abs_error_mean": 13.7225,
+        "mape_f0": 11.0625,
+        "abs_error_std": 22.015,
+        "mape_std": 105.8475,
+        "abs_error_num": 18.25,
+        "mape_num": 16.7075,
+        "final_score": 44.54
+      }
+    },
+    {
+      "dataset": "train",
+      "method": "cepstrum",
+      "strategy": "historical_champion",
+      "metrics": {
+        "abs_error_mean": 4.765,
+        "mape_f0": 3.37,
+        "abs_error_std": 7.1475,
+        "mape_std": 36.615,
+        "abs_error_num": 8.75,
+        "mape_num": 5.5024999999999995,
+        "final_score": 15.159999999999998
+      }
+    },
+    {
+      "dataset": "train",
+      "method": "cepstrum",
+      "strategy": "selected_champion",
+      "metrics": {
+        "abs_error_mean": 2.3375000000000004,
+        "mape_f0": 1.455,
+        "abs_error_std": 3.8499999999999996,
+        "mape_std": 17.5675,
+        "abs_error_num": 20.5,
+        "mape_num": 15.1425,
+        "final_score": 11.39
+      }
+    },
+    {
+      "dataset": "test",
+      "method": "acf",
+      "strategy": "baseline",
+      "metrics": {
+        "abs_error_mean": 1.7875,
+        "mape_f0": 1.21,
+        "abs_error_std": 2.105,
+        "mape_std": 5.7875,
+        "abs_error_num": 17.25,
+        "mape_num": 10.4725,
+        "final_score": 5.8225
+      }
+    },
+    {
+      "dataset": "test",
+      "method": "acf",
+      "strategy": "historical_champion",
+      "metrics": {
+        "abs_error_mean": 1.895,
+        "mape_f0": 1.2875,
+        "abs_error_std": 1.3225,
+        "mape_std": 4.135,
+        "abs_error_num": 12.0,
+        "mape_num": 7.2375,
+        "final_score": 4.2225
+      }
+    },
+    {
+      "dataset": "test",
+      "method": "acf",
+      "strategy": "selected_champion",
+      "metrics": {
+        "abs_error_mean": 1.8025000000000002,
+        "mape_f0": 1.12,
+        "abs_error_std": 0.9025,
+        "mape_std": 2.6,
+        "abs_error_num": 6.0,
+        "mape_num": 3.4325,
+        "final_score": 2.3850000000000002
+      }
+    },
+    {
+      "dataset": "test",
+      "method": "amdf",
+      "strategy": "baseline",
+      "metrics": {
+        "abs_error_mean": 0.885,
+        "mape_f0": 0.54,
+        "abs_error_std": 3.11,
+        "mape_std": 10.39,
+        "abs_error_num": 14.25,
+        "mape_num": 8.1475,
+        "final_score": 6.3575
+      }
+    },
+    {
+      "dataset": "test",
+      "method": "amdf",
+      "strategy": "historical_champion",
+      "metrics": {
+        "abs_error_mean": 0.6399999999999999,
+        "mape_f0": 0.37749999999999995,
+        "abs_error_std": 1.735,
+        "mape_std": 6.392499999999999,
+        "abs_error_num": 10.25,
+        "mape_num": 5.6000000000000005,
+        "final_score": 4.125
+      }
+    },
+    {
+      "dataset": "test",
+      "method": "amdf",
+      "strategy": "selected_champion",
+      "metrics": {
+        "abs_error_mean": 0.5575,
+        "mape_f0": 0.32999999999999996,
+        "abs_error_std": 1.2975,
+        "mape_std": 3.7625,
+        "abs_error_num": 7.25,
+        "mape_num": 4.175000000000001,
+        "final_score": 2.7550000000000003
+      }
+    },
+    {
+      "dataset": "test",
+      "method": "cepstrum",
+      "strategy": "baseline",
+      "metrics": {
+        "abs_error_mean": 18.615000000000002,
+        "mape_f0": 12.955,
+        "abs_error_std": 22.695,
+        "mape_std": 113.5675,
+        "abs_error_num": 23.0,
+        "mape_num": 18.0375,
+        "final_score": 48.184999999999995
+      }
+    },
+    {
+      "dataset": "test",
+      "method": "cepstrum",
+      "strategy": "historical_champion",
+      "metrics": {
+        "abs_error_mean": 6.1525,
+        "mape_f0": 4.4350000000000005,
+        "abs_error_std": 10.05,
+        "mape_std": 48.6725,
+        "abs_error_num": 13.75,
+        "mape_num": 10.504999999999999,
+        "final_score": 21.2025
+      }
+    },
+    {
+      "dataset": "test",
+      "method": "cepstrum",
+      "strategy": "selected_champion",
+      "metrics": {
+        "abs_error_mean": 6.12,
+        "mape_f0": 4.1274999999999995,
+        "abs_error_std": 9.615,
+        "mape_std": 51.6175,
+        "abs_error_num": 18.75,
+        "mape_num": 13.085,
+        "final_score": 22.9425
+      }
+    }
+  ],
+  "num_protocols_per_method": 17,
+  "test_was_not_used_for_selection": true
+}

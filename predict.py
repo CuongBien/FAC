@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """PREDICT & TEST CLI TOOL - DÀNH CHO BUỔI BẢO VỆ / THỰC NGHIỆM TRÊN DỮ LIỆU CỦA THẦY
 Hỗ trợ kiểm thử tức thì trên 1 file .wav bất kỳ hoặc toàn bộ thư mục âm thanh.
-Tự động kích hoạt các cấu hình Quán quân tối ưu nhất (ACF Champion, AMDF Champion, Cepstrum Champion).
+Tự động kích hoạt các cấu hình Champion đã chọn trên train (ACF, AMDF, Cepstrum).
 Tự động đối soát nhãn Ground Truth (.lab) nếu có cùng tên trong thư mục.
 
 Ví dụ sử dụng:
@@ -15,10 +15,11 @@ Ví dụ sử dụng:
    uv run python predict.py --input audio.wav --method cepstrum
 """
 import argparse
+import csv
 import glob
 import os
 import sys
-from typing import Dict, List, Optional, Tuple
+from typing import Dict
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -35,62 +36,22 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 from src.core.audio import load_wav
 from src.core.pitch_detector import PitchDetector
-from src.plugins import (
-    PluginPitchDetector,
-    BandpassFilterPlugin,
-    CenterClippingPlugin,
-    EnergyExtensionPlugin,
-    ViterbiTrackingPlugin,
+from src.pipelines import build_baseline, build_champion
+from src.analysis.evaluation import (
+    evaluate_against_ground_truth, round_metric, mean_metric, format_metric, csv_value,
 )
-from src.analysis.evaluation import evaluate_against_ground_truth
 
 
 def get_champion_detectors() -> Dict[str, PitchDetector]:
-    """Khởi tạo 3 hệ thống Quán quân tối ưu nhất của đề tài (ACF, AMDF, Cepstrum)."""
-    # 1. ACF Champion: BP + Energy + Viterbi (Tối ưu toàn diện: Score = 2.95%)
-    acf_champ = PluginPitchDetector(
-        base_detector=PitchDetector(method="acf", threshold=0.4892),
-        plugins=[
-            BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
-            EnergyExtensionPlugin(threshold_discount=0.20),
-            ViterbiTrackingPlugin(w_freq=3.0, w_octave=4.0),
-        ],
-    )
-
-    # 2. AMDF Champion: Energy + Viterbi (Tối ưu toàn diện: Score = 3.29%)
-    amdf_champ = PluginPitchDetector(
-        base_detector=PitchDetector(method="amdf", threshold=0.4380),
-        plugins=[
-            EnergyExtensionPlugin(threshold_discount=0.20),
-            ViterbiTrackingPlugin(w_freq=3.0, w_octave=4.0),
-        ],
-    )
-
-    # 3. Cepstrum Champion: BP + Clip + Energy + Viterbi (Tối ưu toàn diện: Score = 4.44%)
-    cepstrum_champ = PluginPitchDetector(
-        base_detector=PitchDetector(method="cepstrum", threshold=0.0500),
-        plugins=[
-            BandpassFilterPlugin(low_cutoff=70.0, high_cutoff=900.0),
-            CenterClippingPlugin(clipping_ratio=0.40),
-            EnergyExtensionPlugin(threshold_discount=0.20),
-            ViterbiTrackingPlugin(w_freq=3.0, w_octave=4.0),
-        ],
-    )
-
-    return {
-        "ACF Champion": acf_champ,
-        "AMDF Champion": amdf_champ,
-        "Cepstrum Champion": cepstrum_champ,
-    }
+    """Frozen train-selected Champion configurations shared with benchmark 14."""
+    return {f"{method.title() if method == 'cepstrum' else method.upper()} Champion": build_champion(method)
+            for method in ('acf', 'amdf', 'cepstrum')}
 
 
 def get_baseline_detectors() -> Dict[str, PitchDetector]:
-    """Khởi tạo các hệ thống Baseline nguyên bản (không plugin)."""
-    return {
-        "ACF Baseline": PitchDetector(method="acf", threshold=0.440788),
-        "AMDF Baseline": PitchDetector(method="amdf", threshold=0.437976),
-        "Cepstrum Baseline": PitchDetector(method="cepstrum", threshold=0.060000),
-    }
+    """Baseline configurations shared with the public API and benchmarks."""
+    return {f"{method.title() if method == 'cepstrum' else method.upper()} Baseline": build_baseline(method)
+            for method in ('acf', 'amdf', 'cepstrum')}
 
 
 def process_single_file(
@@ -110,10 +71,11 @@ def process_single_file(
 
     file_results = {}
     f0_contours = {}
-    frame_times = None
+    frame_times_by_method = {}
+    labels_by_method = {}
 
     print(f"\n{'='*80}")
-    print(f"  ĐANG PHÂN TÍCH: {os.path.basename(wav_path)} (Thời lượng: {duration:.2f}s | Fs: {sample_rate} Hz)")
+    print(f"  ĐANG PHÂN TÍCH: {os.path.basename(wav_path)} (Thời lượng: {format_metric(duration, '.2f')}s | Fs: {sample_rate} Hz)")
     if has_ground_truth:
         print(f"  [*] Đã tìm thấy nhãn Ground Truth: {os.path.basename(lab_path)}")
     else:
@@ -122,8 +84,8 @@ def process_single_file(
 
     for name, detector in detectors.items():
         res = detector.process_signal(signal, sample_rate)
-        if frame_times is None:
-            frame_times = res["frame_times"]
+        frame_times_by_method[name] = res['frame_times']
+        labels_by_method[name] = res['labels']
 
         f0_raw = res["f0_contour"]
         f0_contours[name] = f0_raw
@@ -135,9 +97,9 @@ def process_single_file(
         voiced_ratio = (np.sum(voiced_mask) / len(voiced_mask)) * 100.0 if len(voiced_mask) > 0 else 0.0
 
         metrics = {
-            "pred_f0_mean": round(f0_mean, 2),
-            "pred_f0_std": round(f0_std, 2),
-            "voiced_ratio_pct": round(voiced_ratio, 2),
+            "pred_f0_mean": round_metric(f0_mean, 2),
+            "pred_f0_std": round_metric(f0_std, 2),
+            "voiced_ratio_pct": round_metric(voiced_ratio, 2),
             "voiced_frames": int(np.sum(voiced_mask)),
             "total_frames": len(voiced_mask),
         }
@@ -146,17 +108,17 @@ def process_single_file(
         eval_res = None
         if has_ground_truth:
             eval_res = evaluate_against_ground_truth(res, lab_path)
-            metrics["ref_f0_mean"] = round(eval_res["ref_f0_mean"], 2)
-            metrics["ref_f0_std"] = round(eval_res["ref_f0_std"], 2)
-            metrics["abs_error_mean"] = round(eval_res["abs_error_mean"], 2)
-            metrics["rel_error_mean_pct"] = round(eval_res["rel_error_mean_pct"], 2)
-            metrics["mape_f0"] = round(eval_res["mape_f0"], 2)
-            metrics["mape_mean"] = round(eval_res["mape_mean"], 2)
-            metrics["abs_error_std"] = round(eval_res["abs_error_std"], 2)
-            metrics["rel_error_std_pct"] = round(eval_res["rel_error_std_pct"], 2)
-            metrics["mape_std"] = round(eval_res["mape_std"], 2)
-            metrics["accuracy"] = round(eval_res["classification_accuracy"], 2) if eval_res.get("classification_accuracy") is not None else None
-            metrics["voiced_f1"] = round(eval_res["voiced_f1"], 2) if eval_res.get("voiced_f1") is not None else None
+            metrics["ref_f0_mean"] = round_metric(eval_res["ref_f0_mean"], 2)
+            metrics["ref_f0_std"] = round_metric(eval_res["ref_f0_std"], 2)
+            metrics["abs_error_mean"] = round_metric(eval_res["abs_error_mean"], 2)
+            metrics["rel_error_mean_pct"] = round_metric(eval_res["rel_error_mean_pct"], 2)
+            metrics["mape_f0"] = round_metric(eval_res["mape_f0"], 2)
+            metrics["mape_mean"] = round_metric(eval_res["mape_mean"], 2)
+            metrics["abs_error_std"] = round_metric(eval_res["abs_error_std"], 2)
+            metrics["rel_error_std_pct"] = round_metric(eval_res["rel_error_std_pct"], 2)
+            metrics["mape_std"] = round_metric(eval_res["mape_std"], 2)
+            metrics["accuracy"] = round_metric(eval_res["classification_accuracy"], 2) if eval_res.get("classification_accuracy") is not None else None
+            metrics["voiced_f1"] = round_metric(eval_res["voiced_f1"], 2) if eval_res.get("voiced_f1") is not None else None
             if "pred_f0_num" in eval_res and eval_res.get("ref_f0_num") is not None:
                 metrics["pred_f0_num"] = eval_res["pred_f0_num"]
                 metrics["ref_f0_num"] = eval_res["ref_f0_num"]
@@ -169,34 +131,32 @@ def process_single_file(
 
         # In kết quả dạng liệt kê rõ ràng
         print(f"\n--- {name.upper()} ---")
-        print(f"  * Tần số F0 dự đoán (Pred) : {f0_mean:.2f} Hz ± {f0_std:.2f} Hz (Mean ± Std)")
-        print(f"  * Tỉ lệ Hữu thanh (V)       : {voiced_ratio:.1f}% ({np.sum(voiced_mask)}/{len(voiced_mask)} khung)")
+        print(f"  * Tần số F0 dự đoán (Pred) : {format_metric(f0_mean, '.2f')} Hz ± {format_metric(f0_std, '.2f')} Hz (Mean ± Std)")
+        print(f"  * Tỉ lệ Hữu thanh (V)       : {format_metric(voiced_ratio, '.1f')}% ({np.sum(voiced_mask)}/{len(voiced_mask)} khung)")
         if has_ground_truth:
             ref_m = metrics["ref_f0_mean"]
             ref_s = metrics["ref_f0_std"]
-            print(f"  * Nhãn chuẩn .lab (GT)      : {ref_m:.2f} Hz ± {ref_s:.2f} Hz (F0mean ± F0std)")
-            print(f"  * Sai số F0mean (|ΔMean|)   : {metrics['abs_error_mean']:.2f} Hz (MAPE F0mean: {metrics['mape_f0']:.2f}%)")
-            print(f"  * Sai số F0std  (|ΔStd|)    : {metrics['abs_error_std']:.2f} Hz (MAPE F0std : {metrics['mape_std']:.2f}%)")
+            print(f"  * Nhãn chuẩn .lab (GT)      : {format_metric(ref_m, '.2f')} Hz ± {format_metric(ref_s, '.2f')} Hz (F0mean ± F0std)")
+            print(f"  * Sai số F0mean (|ΔMean|)   : {format_metric(metrics['abs_error_mean'], '.2f')} Hz (MAPE F0mean: {format_metric(metrics['mape_f0'], '.2f')}%)")
+            print(f"  * Sai số F0std  (|ΔStd|)    : {format_metric(metrics['abs_error_std'], '.2f')} Hz (MAPE F0std : {format_metric(metrics['mape_std'], '.2f')}%)")
             if "ref_f0_num" in metrics and metrics["ref_f0_num"] is not None:
-                print(f"  * Số khung Voiced (F0num)   : Pred={metrics['pred_f0_num']} vs Ref={metrics['ref_f0_num']} (Lệch: {metrics['abs_error_num']} khung | MAPE F0num: {metrics['mape_num']:.2f}%)")
+                print(f"  * Số khung Voiced (F0num)   : Pred={metrics['pred_f0_num']} vs Ref={metrics['ref_f0_num']} (Lệch: {metrics['abs_error_num']} khung | MAPE F0num: {format_metric(metrics['mape_num'], '.2f')}%)")
             if "composite_score" in metrics:
-                print(f"  * ĐIỂM LỖI TỔNG HỢP (Composite Score): {metrics['composite_score']:.2f}% (TB các MAPE)")
+                print(f"  * ĐIỂM LỖI TỔNG HỢP (Composite Score): {format_metric(metrics['composite_score'], '.2f')}% (TB các MAPE)")
             if metrics.get("accuracy") is not None:
-                print(f"  * Độ chính xác V/UV         : {metrics['accuracy']:.2f}% | Voiced F1-Score: {metrics['voiced_f1']:.2f}%")
+                print(f"  * Độ chính xác V/UV         : {format_metric(metrics['accuracy'], '.2f')}% | Voiced F1-Score: {format_metric(metrics['voiced_f1'], '.2f')}%")
 
     # 1. Xuất file CSV dự đoán
     if save_csv:
         os.makedirs(output_dir, exist_ok=True)
         csv_path = os.path.join(output_dir, f"{base_name}_pitch_prediction.csv")
-        with open(csv_path, "w", encoding="utf-8") as f:
-            headers = ["Frame_Index", "Time_Sec"] + [f"{n}_F0_Hz" for n in detectors.keys()]
-            f.write(",".join(headers) + "\n")
-            for i, t in enumerate(frame_times):
-                row = [str(i), f"{t:.3f}"]
-                for n in detectors.keys():
-                    val = f0_contours[n][i]
-                    row.append(f"{val:.2f}")
-                f.write(",".join(row) + "\n")
+        with open(csv_path, 'w', encoding='utf-8', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['Method', 'Frame_Index', 'Time_Sec', 'Label', 'F0_Hz'])
+            for name, contour in f0_contours.items():
+                writer.writerows((name, i, format(float(t), '.6f'), label, format(float(f0), '.6f'))
+                                 for i, (t, label, f0) in enumerate(zip(
+                                     frame_times_by_method[name], labels_by_method[name], contour)))
         print(f"\n[+] Đã lưu bảng số liệu F0 chi tiết từng khung: {csv_path}")
 
     # 2. Xuất biểu đồ trực quan
@@ -209,7 +169,7 @@ def process_single_file(
         # Panel 1: Dạng sóng âm thanh
         ax0 = fig.add_subplot(gs[0])
         ax0.plot(time_sig, signal, color="#2b5c8f", linewidth=0.8, alpha=0.9)
-        ax0.set_title(f"Dạng sóng âm thanh: {base_name}.wav (Thời lượng: {duration:.2f}s)", fontsize=11, fontweight="bold")
+        ax0.set_title(f"Dạng sóng âm thanh: {base_name}.wav (Thời lượng: {format_metric(duration, '.2f')}s)", fontsize=11, fontweight="bold")
         ax0.set_xlabel("Thời gian (giây)", fontsize=10)
         ax0.set_ylabel("Biên độ", fontsize=10)
         ax0.set_xlim(0, max(time_sig))
@@ -234,23 +194,22 @@ def process_single_file(
                     continue
                 if lbl.lower() == "v":
                     ax1.axvspan(start_s, end_s, color="#2ca02c", alpha=0.10, label="Khoảng Hữu thanh Chuẩn (GT)" if "Khoảng Hữu thanh Chuẩn (GT)" not in ax1.get_legend_handles_labels()[1] else "")
-            if ref_f0 > 0:
-                ax1.axhline(ref_f0, color="black", linestyle="--", linewidth=1.5, label=f"GT F0mean = {ref_f0:.1f} Hz")
+            if ref_f0 is not None and ref_f0 > 0:
+                ax1.axhline(ref_f0, color="black", linestyle="--", linewidth=1.5, label=f"GT F0mean = {format_metric(ref_f0, '.1f')} Hz")
                 if ref_std > 0:
-                    ax1.axhspan(max(0, ref_f0 - ref_std), ref_f0 + ref_std, color="black", alpha=0.06, label=f"GT Dải chuẩn F0mean ± F0std ({ref_f0:.1f} ± {ref_std:.1f} Hz)")
+                    ax1.axhspan(max(0, ref_f0 - ref_std), ref_f0 + ref_std, color="black", alpha=0.06, label=f"GT Dải chuẩn F0mean ± F0std ({format_metric(ref_f0, '.1f')} ± {format_metric(ref_std, '.1f')} Hz)")
 
         for n, contour in f0_contours.items():
             c = colors.get(n, "#333333")
             s = styles.get(n, "-")
-            mask = contour > 0
-            v_times = frame_times[mask]
-            v_f0 = contour[mask]
+            v_times = frame_times_by_method[n]
+            v_f0 = np.where(contour > 0, contour, np.nan)
             stat = file_results[n]
-            lbl = f"{n}: {stat['pred_f0_mean']:.1f} ± {stat['pred_f0_std']:.1f} Hz"
+            lbl = f"{n}: {format_metric(stat['pred_f0_mean'], '.1f')} ± {format_metric(stat['pred_f0_std'], '.1f')} Hz"
             if has_ground_truth:
-                f1_part = f", F1: {stat['voiced_f1']:.1f}%" if stat.get('voiced_f1') is not None else ""
-                score_part = f", Score: {stat['composite_score']:.1f}%" if stat.get('composite_score') is not None else ""
-                lbl += f" (|ΔM|: {stat['abs_error_mean']:.2f}Hz, |ΔS|: {stat['abs_error_std']:.2f}Hz{score_part}{f1_part})"
+                f1_part = f", F1: {format_metric(stat['voiced_f1'], '.1f')}%" if stat.get('voiced_f1') is not None else ""
+                score_part = f", Score: {format_metric(stat['composite_score'], '.1f')}%" if stat.get('composite_score') is not None else ""
+                lbl += f" (|ΔM|: {format_metric(stat['abs_error_mean'], '.2f')}Hz, |ΔS|: {format_metric(stat['abs_error_std'], '.2f')}Hz{score_part}{f1_part})"
             ax1.plot(v_times, v_f0, s, color=c, linewidth=2.0, alpha=0.9, label=lbl)
 
         ax1.set_title("Quỹ đạo Tần số cơ bản F0 (Hz) qua các thuật toán", fontsize=11, fontweight="bold")
@@ -272,7 +231,7 @@ def process_single_file(
 def main():
     parser = argparse.ArgumentParser(description="Pitch Prediction & Testing CLI on Custom Data.")
     parser.add_argument("--input", "-i", type=str, required=True, help="Đường dẫn tới 1 file .wav hoặc thư mục chứa các file .wav")
-    parser.add_argument("--method", "-m", type=str, default="champions", choices=["champions", "all", "acf", "amdf", "cepstrum", "baseline"], help="Chế độ thuật toán (mặc định: 'champions' gồm các Quán quân tốt nhất)")
+    parser.add_argument("--method", "-m", type=str, default="champions", choices=["champions", "all", "acf", "amdf", "cepstrum", "baseline"], help="Chế độ thuật toán (mặc định: 'champions' đã chọn trên train)")
     parser.add_argument("--output-dir", "-o", type=str, default="outputs/predictions", help="Thư mục xuất kết quả (ảnh PNG và bảng CSV)")
     args = parser.parse_args()
 
@@ -316,13 +275,16 @@ def main():
 
     all_summary = {}
     for wav_f in wav_files:
-        res = process_single_file(
-            wav_path=wav_f,
-            detectors=detectors,
-            output_dir=args.output_dir,
-            save_plot=True,
-            save_csv=True,
-        )
+        try:
+            res = process_single_file(
+                wav_path=wav_f,
+                detectors=detectors,
+                output_dir=args.output_dir,
+                save_plot=True,
+                save_csv=True,
+            )
+        except ValueError as exc:
+            parser.exit(2, f"[!] {os.path.basename(wav_f)}: {exc}\n")
         all_summary[os.path.basename(wav_f)] = res
 
     # Xuất file CSV tổng hợp đánh giá (nếu có ground truth)
@@ -340,22 +302,22 @@ def main():
                 row = [
                     fname,
                     mname,
-                    str(mval.get("ref_f0_mean", "")),
-                    str(mval.get("pred_f0_mean", "")),
-                    str(mval.get("abs_error_mean", "")),
-                    str(mval.get("mape_f0", mval.get("rel_error_mean_pct", ""))),
-                    str(mval.get("ref_f0_std", "")),
-                    str(mval.get("pred_f0_std", "")),
-                    str(mval.get("abs_error_std", "")),
-                    str(mval.get("mape_std", mval.get("rel_error_std_pct", ""))),
-                    str(mval.get("ref_f0_num", "")),
-                    str(mval.get("pred_f0_num", "")),
-                    str(mval.get("abs_error_num", "")),
-                    str(mval.get("mape_num", "")),
-                    str(mval.get("composite_score", "")),
-                    str(mval.get("voiced_ratio_pct", "")),
-                    str(mval.get("accuracy", "") if mval.get("accuracy") is not None else ""),
-                    str(mval.get("voiced_f1", "") if mval.get("voiced_f1") is not None else ""),
+                    csv_value(mval.get("ref_f0_mean", "")),
+                    csv_value(mval.get("pred_f0_mean", "")),
+                    csv_value(mval.get("abs_error_mean", "")),
+                    csv_value(mval.get("mape_f0", mval.get("rel_error_mean_pct", ""))),
+                    csv_value(mval.get("ref_f0_std", "")),
+                    csv_value(mval.get("pred_f0_std", "")),
+                    csv_value(mval.get("abs_error_std", "")),
+                    csv_value(mval.get("mape_std", mval.get("rel_error_std_pct", ""))),
+                    csv_value(mval.get("ref_f0_num", "")),
+                    csv_value(mval.get("pred_f0_num", "")),
+                    csv_value(mval.get("abs_error_num", "")),
+                    csv_value(mval.get("mape_num", "")),
+                    csv_value(mval.get("composite_score", "")),
+                    csv_value(mval.get("voiced_ratio_pct", "")),
+                    csv_value(mval.get("accuracy", "") if mval.get("accuracy") is not None else ""),
+                    csv_value(mval.get("voiced_f1", "") if mval.get("voiced_f1") is not None else ""),
                 ]
                 f.write(",".join(row) + "\n")
     print(f"\n[+] Đã xuất file thống kê tổng hợp (F0mean, F0std, F0num & Composite Score): {summary_csv_path}")
@@ -370,43 +332,23 @@ def main():
             stds = [all_summary[f][sys_name]["pred_f0_std"] for f in all_summary.keys()]
             voiced_ratios = [all_summary[f][sys_name]["voiced_ratio_pct"] for f in all_summary.keys()]
             print(f"\n* {sys_name}:")
-            print(f"  - Tần số F0 dự đoán trung bình  : {np.mean(means):.2f} Hz ± {np.mean(stds):.2f} Hz (Mean ± Std)")
-            print(f"  - Tỉ lệ phân đoạn Voiced TB     : {np.mean(voiced_ratios):.2f}%")
+            print(f"  - Tần số F0 dự đoán trung bình  : {format_metric(np.mean(means), '.2f')} Hz ± {format_metric(np.mean(stds), '.2f')} Hz (Mean ± Std)")
+            print(f"  - Tỉ lệ phân đoạn Voiced TB     : {format_metric(np.mean(voiced_ratios), '.2f')}%")
 
-            # Nếu tất cả các file đều có ground truth
-            has_err = all("abs_error_mean" in all_summary[f][sys_name] for f in all_summary.keys())
-            if has_err:
-                ref_means = [all_summary[f][sys_name]["ref_f0_mean"] for f in all_summary.keys()]
-                ref_stds = [all_summary[f][sys_name]["ref_f0_std"] for f in all_summary.keys()]
-                err_means = [all_summary[f][sys_name]["abs_error_mean"] for f in all_summary.keys()]
-                mape_means = [all_summary[f][sys_name].get("mape_f0", all_summary[f][sys_name].get("rel_error_mean_pct", 0.0)) for f in all_summary.keys()]
-                err_stds = [all_summary[f][sys_name]["abs_error_std"] for f in all_summary.keys()]
-                mape_stds = [all_summary[f][sys_name].get("mape_std", all_summary[f][sys_name].get("rel_error_std_pct", 0.0)) for f in all_summary.keys()]
-                
-                f1_vals = [all_summary[f][sys_name]["voiced_f1"] for f in all_summary.keys() if all_summary[f][sys_name].get("voiced_f1") is not None]
-                acc_vals = [all_summary[f][sys_name]["accuracy"] for f in all_summary.keys() if all_summary[f][sys_name].get("accuracy") is not None]
-                
-                print(f"  - Chuẩn file .lab trung bình    : {np.mean(ref_means):.2f} Hz ± {np.mean(ref_stds):.2f} Hz (F0mean ± F0std)")
-                print(f"  - Sai số tuyệt đối F0mean TB    : {np.mean(err_means):.2f} Hz (MAPE F0mean TB: {np.mean(mape_means):.2f}%)")
-                print(f"  - Sai số độ lệch chuẩn F0std TB : {np.mean(err_stds):.2f} Hz (MAPE F0std TB : {np.mean(mape_stds):.2f}%)")
-
-                num_files = [f for f in all_summary.keys() if "ref_f0_num" in all_summary[f][sys_name] and all_summary[f][sys_name]["ref_f0_num"] is not None]
-                if len(num_files) > 0:
-                    ref_nums = [all_summary[f][sys_name]["ref_f0_num"] for f in num_files]
-                    pred_nums = [all_summary[f][sys_name]["pred_f0_num"] for f in num_files]
-                    err_nums = [all_summary[f][sys_name]["abs_error_num"] for f in num_files]
-                    mape_nums = [all_summary[f][sys_name]["mape_num"] for f in num_files]
-                    print(f"  - Số khung Voiced (F0num) TB    : Pred={np.mean(pred_nums):.1f} vs Ref={np.mean(ref_nums):.1f} (|ΔNum|={np.mean(err_nums):.1f} khung | MAPE F0num TB: {np.mean(mape_nums):.2f}%)")
-                    composite_score_mean = (np.mean(mape_means) + np.mean(mape_stds) + np.mean(mape_nums)) / 3.0
-                    print(f"  >>> ĐIỂM SỐ TỔNG HỢP (FINAL COMPOSITE SCORE - TB 3 MAPE): {composite_score_mean:.2f}% (Độ chính xác tương đối: {100.0 - composite_score_mean:.2f}%) <<<")
-                else:
-                    composite_score_mean = (np.mean(mape_means) + np.mean(mape_stds)) / 2.0
-                    print(f"  >>> ĐIỂM SỐ TỔNG HỢP (FINAL COMPOSITE SCORE - TB 2 MAPE): {composite_score_mean:.2f}% <<<")
-
-                if len(f1_vals) > 0:
-                    print(f"  - Voiced F1-Score TB            : {np.mean(f1_vals):.2f}%")
-                if len(acc_vals) > 0:
-                    print(f"  - V/UV Accuracy TB              : {np.mean(acc_vals):.2f}%")
+            rows = [all_summary[f][sys_name] for f in all_summary]
+            if all("abs_error_mean" in row for row in rows):
+                for label, key in [("Sai số tuyệt đối F0mean TB (Hz)", "abs_error_mean"),
+                                   ("MAPE F0mean TB (%)", "mape_f0"),
+                                   ("Sai số tuyệt đối F0std TB (Hz)", "abs_error_std"),
+                                   ("MAPE F0std TB (%)", "mape_std"),
+                                   ("MAPE F0num TB (%)", "mape_num")]:
+                    print(f"  - {label}: {format_metric(mean_metric(row.get(key) for row in rows))}")
+                score = mean_metric(row.get("composite_score") for row in rows)
+                print(f"  >>> FINAL SCORE (%; TB đủ 3 MAPE, thấp hơn tốt hơn): {format_metric(score)} <<<")
+                for label, key in [("Voiced F1", "voiced_f1"), ("V/UV Accuracy", "accuracy")]:
+                    values = [row[key] for row in rows if row.get(key) is not None]
+                    if values:
+                        print(f"  - {label}: {format_metric(mean_metric(values))}% ({len(values)}/{len(rows)} file có nhãn thời gian)")
         print("=" * 80)
 
 

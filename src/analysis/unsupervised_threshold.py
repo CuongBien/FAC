@@ -5,18 +5,11 @@ Implements:
 3. Median / 50th Percentile Thresholding (Direct exploitation of P(V) ~ P(UV) ~ 0.5)
 4. 1D K-Means Clustering (Mid-point boundary between two cluster centroids)
 """
-import glob
-import os
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict
 import numpy as np
 from scipy.ndimage import gaussian_filter1d
 from scipy.signal import find_peaks
 
-from src.core.audio import load_wav, frame_signal, compute_ste
-from src.core.lab_parser import parse_lab_file, get_frame_labels
-from src.core.acf import find_f0_acf
-from src.core.amdf import find_f0_amdf
-from src.core.cepstrum import find_f0_cepstrum
 
 
 def compute_otsu_threshold(values: np.ndarray, n_bins: int = 100) -> float:
@@ -177,126 +170,4 @@ def compute_all_unsupervised_thresholds(
         ),
         "median": compute_median_threshold(values),
         "kmeans": compute_kmeans_threshold(values),
-    }
-
-
-def extract_active_speech_frame_metrics(
-    wav_paths: List[str],
-    method: str = "acf",
-    frame_duration_ms: float = 25.0,
-    hop_duration_ms: float = 10.0,
-    f0_min: float = 70.0,
-    f0_max: float = 400.0,
-    ste_silence_ratio: float = 0.008,
-    plugins: Optional[List[Any]] = None,
-) -> Dict[str, Any]:
-    """Extract periodicity metric values from non-silence (active speech) frames
-    across a set of WAV audio files.
-
-    If ground-truth *.lab files exist, also matches each frame to 'v' or 'uv'
-    for validation of unsupervised threshold accuracy.
-
-    Returns:
-        dict: {
-            'all_values': np.ndarray,
-            'voiced_values': np.ndarray,
-            'unvoiced_values': np.ndarray,
-            'ground_truth_labels': List[str],
-            'frame_file_origins': List[str],
-            'num_silence_dropped': int,
-            'num_active_frames': int,
-        }
-    """
-    method = method.lower()
-    all_values = []
-    v_values = []
-    uv_values = []
-    gt_labels = []
-    file_origins = []
-    num_silence_dropped = 0
-
-    for wav_path in wav_paths:
-        sr, signal, _ = load_wav(wav_path)
-        base_name = os.path.basename(wav_path)
-
-        if plugins:
-            for p in plugins:
-                if hasattr(p, "pre_process_signal"):
-                    signal = p.pre_process_signal(signal, sr)
-
-        frames, frame_times = frame_signal(
-            signal,
-            sr,
-            frame_duration_ms=frame_duration_ms,
-            hop_duration_ms=hop_duration_ms,
-            window="rectangular",
-        )
-        ste, _ = compute_ste(
-            signal,
-            sr,
-            frame_duration_ms=frame_duration_ms,
-            hop_duration_ms=hop_duration_ms,
-        )
-
-        max_ste = np.max(ste) if len(ste) > 0 else 1.0
-        ste_thresh = ste_silence_ratio * max_ste
-
-        # Check for matching LAB file
-        lab_path = wav_path.rsplit(".", 1)[0] + ".lab"
-        labels = None
-        if os.path.exists(lab_path):
-            lab_data = parse_lab_file(lab_path)
-            labels = get_frame_labels(frame_times, lab_data["segments"])
-
-        for i, frame in enumerate(frames):
-            # Silence gating: drop silence frames from V/UV distribution
-            if ste[i] < ste_thresh:
-                num_silence_dropped += 1
-                continue
-
-            if plugins:
-                for p in plugins:
-                    if hasattr(p, "pre_process_frame"):
-                        frame = p.pre_process_frame(frame, sr)
-
-            if method == "acf":
-                _, metric_val, _ = find_f0_acf(
-                    frame, sr, f0_min=f0_min, f0_max=f0_max, mode="normalized"
-                )
-            elif method == "amdf":
-                _, metric_val, _ = find_f0_amdf(
-                    frame, sr, f0_min=f0_min, f0_max=f0_max, mode="normalized"
-                )
-            elif method == "cepstrum":
-                _, metric_val, _ = find_f0_cepstrum(
-                    frame,
-                    sr,
-                    f0_min=f0_min,
-                    f0_max=f0_max,
-                    window="hamming",
-                    n_fft=2048,
-                    mode="peak",
-                )
-            else:
-                raise ValueError(f"Unknown method: {method}")
-
-            all_values.append(metric_val)
-            file_origins.append(base_name)
-
-            if labels is not None:
-                lbl = labels[i]
-                gt_labels.append(lbl)
-                if lbl == "v":
-                    v_values.append(metric_val)
-                elif lbl == "uv":
-                    uv_values.append(metric_val)
-
-    return {
-        "all_values": np.array(all_values, dtype=np.float64),
-        "voiced_values": np.array(v_values, dtype=np.float64),
-        "unvoiced_values": np.array(uv_values, dtype=np.float64),
-        "ground_truth_labels": gt_labels,
-        "frame_file_origins": file_origins,
-        "num_silence_dropped": num_silence_dropped,
-        "num_active_frames": len(all_values),
     }

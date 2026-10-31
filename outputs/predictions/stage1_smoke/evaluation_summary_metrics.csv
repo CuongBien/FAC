@@ -1,0 +1,7 @@
+File,Method,Ref_F0mean,Pred_F0mean,Abs_Err_F0mean,MAPE_F0mean_pct,Ref_F0std,Pred_F0std,Abs_Err_F0std,MAPE_F0std_pct,Ref_F0num,Pred_F0num,Abs_Err_F0num,MAPE_F0num_pct,Composite_Score_pct,Voiced_Ratio_pct,V_UV_Accuracy,Voiced_F1
+phone_F2.wav,ACF Champion,150.2,152.17,1.97,1.31,30.7,31.03,0.33,1.07,219,192,27,12.33,4.91,40.17,,
+phone_F2.wav,AMDF Champion,150.2,149.77,0.43,0.28,30.7,32.2,1.5,4.88,219,190,29,13.24,6.14,39.75,,
+phone_F2.wav,Cepstrum Champion,150.2,154.91,4.71,3.14,30.7,36.99,6.29,20.48,219,226,7,3.2,8.94,47.28,,
+phone_F2.wav,ACF Baseline,150.2,152.87,2.67,1.78,30.7,31.57,0.87,2.85,219,182,37,16.89,7.17,38.08,,
+phone_F2.wav,AMDF Baseline,150.2,149.91,0.29,0.2,30.7,33.06,2.36,7.69,219,183,36,16.44,8.11,38.28,,
+phone_F2.wav,Cepstrum Baseline,150.2,167.02,16.82,11.2,30.7,53.15,22.45,73.13,219,224,5,2.28,28.87,46.86,,

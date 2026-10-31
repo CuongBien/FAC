@@ -1,5 +1,10 @@
 # CHƯƠNG IV: ĐÁNH GIÁ ĐỐI SÁNH TRÊN TẬP KIỂM THỬ (TinHieuKiemThu) & PHÂN TÍCH HIỆN TƯỢNG SAI SỐ
 
+> **Cập nhật 30/10/2026:** Bảng/hình gốc trong chương là kết quả lịch sử. Phần bổ sung cuối chương và [báo cáo đợt 4](STAGE4_RESULTS.md) ghi kết quả hiện hành, giao thức chọn cấu hình trên train và nguyên nhân chênh lệch Cepstrum.
+
+
+> **Trạng thái sau rà soát 28/10/2026:** ACF/AMDF tái lập khớp JSON đã lưu. Cepstrum Champion hiện chạy lại đạt 13,24% thay vì 7,62%; các bảng cũ bên dưới được giữ để đối chiếu. F0num đúng chỉ xác nhận tổng số khung bằng nhau, không chứng minh từng khung được phân loại đúng. Xem [các vấn đề cần xử lý](KNOWN_ISSUES.md).
+
 > **Tài liệu tham chiếu:** Thuộc hệ thống tài liệu nghiên cứu Bài Tập 2 - Xử lý tín hiệu tiếng nói.  
 > **Dẫn hướng:** [← Chương III: Thuật toán Cepstrum](03_cepstrum_theory_and_experiments.md) | [Trang chủ README](../README.md)
 
@@ -10,7 +15,7 @@
 Để kiểm chứng tính khái quát hóa (generalization) của các mô hình ước lượng cao độ và phân loại Hữu thanh / Vô thanh, toàn bộ các cấu hình đã được tối ưu từ Tập Huấn Luyện được đưa vào đánh giá độc lập trên **Tập Kiểm Thử (`TinHieuKiemThu`)**.
 
 ### 1. Danh sách các file âm thanh và Ground Truth nhãn chuẩn
-Tập kiểm thử bao gồm 4 bản ghi âm thanh với tần số lấy mẫu $f_s = 16\text{ kHz}$, định dạng WAV 16-bit PCM, kèm theo nhãn mốc thời gian thủ công (`.lab`):
+Tập kiểm thử gồm WAV PCM 16-bit: phone ở 16 kHz, studio ở 44,1 kHz. Mỗi LAB chỉ chứa F0mean, F0std và F0num; không có mốc thời gian từng đoạn:
 
 | Tên File | Người nói | Môi trường thu âm | Tần số $F_0$ chuẩn (Hz) | Độ lệch chuẩn $\text{Std}$ chuẩn (Hz) | Số khung Voiced chuẩn (Khung) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
@@ -161,3 +166,19 @@ uv run python predict.py -i TinHieuKiemThu/studio_M2.wav -m champions
 ---
 
 **Dẫn hướng:** [← Chương III: Thuật toán Cepstrum](03_cepstrum_theory_and_experiments.md) | [Trang chủ README](../README.md)
+
+<!-- STAGE4_CURRENT_START -->
+## Kết quả kiểm chứng hiện hành — 30/10/2026
+
+Nguồn: cấu hình đóng băng và `outputs/stage4_validation/evaluation.json`. Final Score là sai số thống kê toàn file; thấp hơn tốt hơn. Accuracy/F1 từng khung không xác định vì thiếu nhãn thời gian.
+
+| Thuật toán | Baseline test (%) | Trước hiệu chỉnh (%) | Sau chọn trên train (%) |
+|---|---:|---:|---:|
+| ACF | 5.822 | 4.223 | 2.385 |
+| AMDF | 6.357 | 4.125 | 2.755 |
+| CEPSTRUM | 48.185 | 21.203 | 22.942 |
+
+![Kết quả hiện hành](../outputs/stage4_validation/figures/pipelines_train_test.png)
+
+[Chi tiết và giới hạn kiểm chứng](STAGE4_RESULTS.md).
+<!-- STAGE4_CURRENT_END -->

@@ -3,6 +3,7 @@ import os
 from typing import Optional
 import matplotlib.pyplot as plt
 import numpy as np
+from src.analysis.evaluation import format_metric
 
 
 def plot_frame_acf_comparison(
@@ -252,7 +253,7 @@ def plot_signal_and_f0_contour(
     if f0_mean is not None:
         stats_str += f"F0mean ước lượng = {f0_mean:.1f} Hz, F0std = {f0_std:.1f} Hz"
     if ref_f0_mean is not None:
-        stats_str += f"\nTham chiếu Lab   = {ref_f0_mean:.1f} Hz, F0std = {ref_f0_std:.1f} Hz"
+        stats_str += f"\nTham chiếu Lab   = {ref_f0_mean:.1f} Hz, F0std = {format_metric(ref_f0_std, '.1f')} Hz"
 
     if stats_str:
         ax2.text(0.02, 0.88, stats_str, transform=ax2.transAxes,
@@ -286,7 +287,11 @@ def plot_distributions_and_threshold(
     save_path: Optional[str] = None,
     title: str = "Phân bố biên độ cực trị Voiced/Unvoiced và Ngưỡng phân tách tối ưu T",
 ):
-    """Plot histograms and fitted Gaussian curves for Voiced and Unvoiced frames, marking threshold T."""
+    """Plot only identifiable Gaussian fits with enough labeled observations."""
+    if len(values_v) < 2 or len(values_u) < 2:
+        raise ValueError("Gaussian plots require at least 2 labeled V and UV frames")
+    if not np.all(np.isfinite([mean_v, std_v, mean_u, std_u, threshold])) or min(std_v, std_u) <= 0:
+        raise ValueError("Gaussian plots require finite parameters and positive standard deviations")
     fig, ax = plt.subplots(figsize=(11, 6))
 
     # Range of values
@@ -389,7 +394,7 @@ def plot_parameter_comparison(
     ax2.plot(t_30, f0_30, "s--", color="#1f77b4", markersize=3, linewidth=1.1, alpha=0.7,
              label=f"Khung 30 ms (F0mean={eval_30ms['pred_f0_mean']} Hz, Err={eval_30ms['abs_error_mean']} Hz)")
 
-    if ref_mean > 0:
+    if ref_mean is not None and ref_mean > 0:
         ax2.axhline(ref_mean, color="black", linestyle=":", linewidth=2.0, label=f"Ground Truth F0mean = {ref_mean} Hz")
 
     ax2.set_title("2. So sánh đường bao tần số F0 (F0 Contours)", fontsize=11, fontweight="bold")
@@ -398,7 +403,7 @@ def plot_parameter_comparison(
     ax2.grid(True, linestyle="--", alpha=0.5)
     ax2.legend(loc="upper right", frameon=True)
 
-    # 3. Bar chart of comparison metrics
+    # 3. Bar chart of comparison metrics; missing measurements are not zero bars.
     labels_bar = ["Sai số F0mean (|ΔF0| Hz)", "Sai số F0std (|Δstd| Hz)", "Số khung Voiced phát hiện", "Độ chính xác V/UV (%)"]
     vals_20 = [
         eval_20ms["abs_error_mean"],
@@ -413,6 +418,8 @@ def plot_parameter_comparison(
         eval_30ms["classification_accuracy"],
     ]
 
+    vals_20 = np.asarray(vals_20, dtype=float)
+    vals_30 = np.asarray(vals_30, dtype=float)
     x = np.arange(len(labels_bar))
 
     if results_25ms is not None and eval_25ms is not None:
@@ -422,6 +429,7 @@ def plot_parameter_comparison(
             results_25ms["num_voiced"],
             eval_25ms["classification_accuracy"],
         ]
+        vals_25 = np.asarray(vals_25, dtype=float)
         width = 0.25
         rects1 = ax3.bar(x - width, vals_20, width, label="Khung 20 ms", color="#ff7f0e", alpha=0.85, edgecolor="gray")
         rects_mid = ax3.bar(x, vals_25, width, label="Khung 25 ms (Chuẩn)", color="#2ca02c", alpha=0.9, edgecolor="black")
@@ -436,6 +444,8 @@ def plot_parameter_comparison(
     ax3.set_title("3. Bảng số liệu đối sánh định lượng", fontsize=11, fontweight="bold")
     ax3.set_xticks(x)
     ax3.set_xticklabels(labels_bar, fontsize=10)
+    ax3.set_xlim(-0.6, len(labels_bar) - 0.4)
+    ax3.margins(y=0.15)
     ax3.grid(True, axis="y", linestyle="--", alpha=0.5)
     ax3.legend(loc="upper right")
 
@@ -443,7 +453,8 @@ def plot_parameter_comparison(
     for rect_group in all_rects:
         for r in rect_group:
             h = r.get_height()
-            ax3.annotate(f"{h:.1f}", xy=(r.get_x() + r.get_width() / 2, h), xytext=(0, 3),
+            label = f"{h:.1f}" if np.isfinite(h) else "N/A"
+            ax3.annotate(label, xy=(r.get_x() + r.get_width() / 2, h if np.isfinite(h) else 0), xytext=(0, 3),
                          textcoords="offset points", ha="center", va="bottom", fontsize=8)
 
     plt.tight_layout()
@@ -452,187 +463,6 @@ def plot_parameter_comparison(
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
 
     plt.close(fig)
-    return fig
-
-
-def plot_plugin_contour_comparison(
-    time_sig: np.ndarray,
-    signal: np.ndarray,
-    time_f0: np.ndarray,
-    f0_baseline: np.ndarray,
-    f0_enhanced: np.ndarray,
-    eval_baseline: dict,
-    eval_enhanced: dict,
-    ground_truth_segments: Optional[list] = None,
-    file_name: str = "",
-    plugin_names_str: str = "Combined Plugins",
-    save_path: Optional[str] = None,
-):
-    """Plot a 3-panel comparison between Baseline and Plugin-enhanced F0 contours."""
-    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(14, 10), sharex=True)
-    fig.suptitle(f"So sánh đường bao F0: Baseline vs. Cải tiến Plugin ({file_name})", fontsize=14, fontweight="bold")
-
-    # 1. Waveform
-    ax1.plot(time_sig, signal, color="#444444", linewidth=0.8, label="Dạng sóng tín hiệu")
-    ax1.set_ylabel("Biên độ")
-    ax1.set_title("1. Dạng sóng tín hiệu (Waveform)", fontsize=11, fontweight="bold")
-    ax1.grid(True, linestyle="--", alpha=0.5)
-
-    # Shading ground truth segments
-    if ground_truth_segments:
-        color_map = {
-            "v": ("#2ca02c", 0.15, "Hữu thanh (V)"),
-            "uv": ("#ff7f0e", 0.15, "Vô thanh (UV)"),
-            "sil": ("#7f7f7f", 0.10, "Khoảng lặng (Sil)"),
-        }
-        used_labels = set()
-        for start, end, lbl in ground_truth_segments:
-            if lbl in color_map:
-                c, alpha, name = color_map[lbl]
-                lbl_name = name if lbl not in used_labels else ""
-                ax1.axvspan(start, end, color=c, alpha=alpha, label=lbl_name)
-                ax2.axvspan(start, end, color=c, alpha=alpha)
-                ax3.axvspan(start, end, color=c, alpha=alpha)
-                used_labels.add(lbl)
-    ax1.legend(loc="upper right")
-
-    ref_mean = eval_baseline.get("ref_f0_mean", 0.0)
-
-    # 2. Baseline F0 contour
-    f0_base_v = np.where(f0_baseline > 0, f0_baseline, np.nan)
-    ax2.plot(time_f0, f0_base_v, ".-", color="#d62728", markersize=5, linewidth=1.3, label="Baseline F0 (ACF gốc)")
-    if ref_mean > 0:
-        ax2.axhline(ref_mean, color="black", linestyle=":", linewidth=1.5, label=f"Ground Truth = {ref_mean:.1f} Hz")
-    ax2.set_ylabel("F0 (Hz)")
-    ax2.set_ylim(50, 420)
-    f1_b = eval_baseline.get('voiced_f1')
-    f1_b_str = f" | F1: {f1_b:.1f}%" if f1_b is not None else f" | Num: {eval_baseline.get('pred_f0_num', 0)}/{eval_baseline.get('ref_f0_num', 0)}"
-    ax2.set_title(
-        f"2. Baseline (Chưa dùng Plugin) -> F0mean = {eval_baseline['pred_f0_mean']:.1f} Hz (Sai số: {eval_baseline['abs_error_mean']:.2f} Hz{f1_b_str})",
-        fontsize=11, fontweight="bold", color="#d62728",
-    )
-    ax2.grid(True, linestyle="--", alpha=0.5)
-    ax2.legend(loc="upper right")
-
-    # 3. Enhanced F0 contour
-    f0_enh_v = np.where(f0_enhanced > 0, f0_enhanced, np.nan)
-    ax3.plot(time_f0, f0_enh_v, ".-", color="#1f77b4", markersize=5, linewidth=1.5, label=f"Enhanced F0 ({plugin_names_str})")
-    if ref_mean > 0:
-        ax3.axhline(ref_mean, color="black", linestyle=":", linewidth=1.5, label=f"Ground Truth = {ref_mean:.1f} Hz")
-    ax3.set_xlabel("Thời gian (giây)", fontsize=11)
-    ax3.set_ylabel("F0 (Hz)")
-    ax3.set_ylim(50, 420)
-    f1_e = eval_enhanced.get('voiced_f1')
-    f1_e_str = f" | F1: {f1_e:.1f}%" if f1_e is not None else f" | Num: {eval_enhanced.get('pred_f0_num', 0)}/{eval_enhanced.get('ref_f0_num', 0)}"
-    ax3.set_title(
-        f"3. Enhanced (Áp dụng {plugin_names_str}) -> F0mean = {eval_enhanced['pred_f0_mean']:.1f} Hz (Sai số: {eval_enhanced['abs_error_mean']:.2f} Hz{f1_e_str})",
-        fontsize=11, fontweight="bold", color="#1f77b4",
-    )
-    ax3.grid(True, linestyle="--", alpha=0.5)
-    ax3.legend(loc="upper right")
-
-    plt.tight_layout()
-    if save_path:
-        os.makedirs(os.path.dirname(os.path.abspath(save_path)), exist_ok=True)
-        plt.savefig(save_path, dpi=300, bbox_inches="tight")
-
-    plt.close(fig)
-    return fig
-
-
-def plot_combinations_ranking(
-    summary_records: list,
-    save_path: Optional[str] = None,
-    title: str = "Đánh giá toàn bộ 32 tổ hợp Plugins trên tập Kiểm thử",
-):
-    """Plot horizontal bar charts comparing Composite Score, F0 Error, F0num Error, and F1-Score across all plugin combinations."""
-    names = [rec["config_name"] for rec in summary_records]
-    scores = [rec.get("final_composite_score_pct", rec.get("composite_score", 0.0)) for rec in summary_records]
-    errs = [rec["average_error_hz"] for rec in summary_records]
-    num_errs = [rec.get("average_num_error", 0.0) for rec in summary_records]
-    f1s = [rec["average_voiced_f1_pct"] for rec in summary_records]
-
-    fig_height = max(8, len(names) * 0.42)
-    fig, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(28, fig_height))
-    fig.suptitle(title, fontsize=15, fontweight="bold")
-
-    y_pos = np.arange(len(names))
-    label_fontsize = 8.5 if len(names) > 20 else 10
-    annot_fontsize = 8.0 if len(names) > 20 else 9.0
-
-    # Panel 1: Composite Final Score (Lower is better)
-    min_score = min(scores) if scores else 0.0
-    colors_score = ["#2ca02c" if s == min_score else "#1f77b4" for s in scores]
-    bars1 = ax1.barh(y_pos, scores, color=colors_score, alpha=0.85, edgecolor="gray")
-    ax1.set_yticks(y_pos)
-    ax1.set_yticklabels(names, fontsize=label_fontsize)
-    ax1.invert_yaxis()
-    ax1.set_xlabel("Final Score (%) [TB 3 MAPE] - (Thấp hơn là tốt)", fontsize=10, fontweight="bold")
-    ax1.set_title("1. Final Composite Score (%)", fontsize=11, fontweight="bold")
-    ax1.grid(True, axis="x", linestyle="--", alpha=0.5)
-
-    for bar in bars1:
-        w = bar.get_width()
-        ax1.annotate(f"{w:.2f}%", xy=(w, bar.get_y() + bar.get_height() / 2),
-                     xytext=(4, 0), textcoords="offset points", va="center", fontsize=annot_fontsize, fontweight="bold")
-
-    # Panel 2: Error F0 (Lower is better)
-    min_err = min(errs)
-    colors_err = ["#2ca02c" if e == min_err else "#9467bd" for e in errs]
-    bars2 = ax2.barh(y_pos, errs, color=colors_err, alpha=0.85, edgecolor="gray")
-    ax2.set_yticks(y_pos)
-    ax2.set_yticklabels([])
-    ax2.invert_yaxis()
-    ax2.set_xlabel("Sai số tuyệt đối TB |ΔF0| (Hz) - (Thấp hơn là tốt)", fontsize=10, fontweight="bold")
-    ax2.set_title("2. Sai số F0 TB (|ΔF0|)", fontsize=11, fontweight="bold")
-    ax2.grid(True, axis="x", linestyle="--", alpha=0.5)
-
-    for bar in bars2:
-        w = bar.get_width()
-        ax2.annotate(f"{w:.2f} Hz", xy=(w, bar.get_y() + bar.get_height() / 2),
-                     xytext=(4, 0), textcoords="offset points", va="center", fontsize=annot_fontsize, fontweight="bold")
-
-    # Panel 3: F1-Score (Higher is better)
-    max_f1 = max(f1s)
-    colors_f1 = ["#2ca02c" if f == max_f1 else "#ff7f0e" for f in f1s]
-    bars3 = ax3.barh(y_pos, f1s, color=colors_f1, alpha=0.85, edgecolor="gray")
-    ax3.set_yticks(y_pos)
-    ax3.set_yticklabels([])
-    ax3.invert_yaxis()
-    f1_min = max(0.0, float(np.floor(min(f1s) - 2.0)))
-    f1_max = min(100.0, float(np.ceil(max(f1s) + 2.0)))
-    ax3.set_xlim(f1_min, f1_max)
-    ax3.set_xlabel("Voiced F1-Score (%) - (Cao hơn là tốt)", fontsize=10, fontweight="bold")
-    ax3.set_title("3. Voiced F1-Score (%)", fontsize=11, fontweight="bold")
-    ax3.grid(True, axis="x", linestyle="--", alpha=0.5)
-
-    for bar in bars3:
-        w = bar.get_width()
-        ax3.annotate(f"{w:.2f}%", xy=(w, bar.get_y() + bar.get_height() / 2),
-                     xytext=(4, 0), textcoords="offset points", va="center", fontsize=annot_fontsize, fontweight="bold")
-
-    # Panel 4: Num Error (Lower is better)
-    min_num = min(num_errs) if num_errs else 0.0
-    colors_num = ["#2ca02c" if n == min_num else "#17becf" for n in num_errs]
-    bars4 = ax4.barh(y_pos, num_errs, color=colors_num, alpha=0.85, edgecolor="gray")
-    ax4.set_yticks(y_pos)
-    ax4.set_yticklabels([])
-    ax4.invert_yaxis()
-    ax4.set_xlabel("Sai lệch số khung Voiced |ΔNum| (Khung) - (Thấp hơn là tốt)", fontsize=10, fontweight="bold")
-    ax4.set_title("4. Sai lệch số khung Voiced (|ΔNum|)", fontsize=11, fontweight="bold")
-    ax4.grid(True, axis="x", linestyle="--", alpha=0.5)
-
-    for bar in bars4:
-        w = bar.get_width()
-        ax4.annotate(f"{w:.1f}", xy=(w, bar.get_y() + bar.get_height() / 2),
-                     xytext=(4, 0), textcoords="offset points", va="center", fontsize=annot_fontsize, fontweight="bold")
-
-    plt.tight_layout()
-    if save_path:
-        os.makedirs(os.path.dirname(os.path.abspath(save_path)), exist_ok=True)
-        plt.savefig(save_path, dpi=300, bbox_inches="tight")
-        print(f"Saved figure: {save_path}")
-    plt.close()
     return fig
 
 

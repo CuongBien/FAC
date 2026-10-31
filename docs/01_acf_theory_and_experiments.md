@@ -1,5 +1,10 @@
 # CHƯƠNG I: THUẬT TOÁN HÀM TỰ TƯƠNG QUAN (AUTOCORRELATION FUNCTION - ACF)
 
+> **Cập nhật 30/10/2026:** Bảng/hình gốc trong chương là kết quả lịch sử. Phần bổ sung cuối chương và [báo cáo đợt 4](STAGE4_RESULTS.md) ghi kết quả hiện hành, giao thức chọn cấu hình trên train và nguyên nhân chênh lệch Cepstrum.
+
+
+> **Trạng thái sau rà soát 28/10/2026:** Các phân bố Gaussian 614/180 khung trong chương là kết quả lịch sử. LAB hiện hành không có timestamps để huấn luyện lại; các ngưỡng đang được dùng như tham số đã lưu. Xem [các vấn đề cần xử lý](KNOWN_ISSUES.md).
+
 > **Dẫn hướng tài liệu:** [Trang chủ README](../README.md) > **Chương I: Thuật toán ACF**
 
 ---
@@ -47,7 +52,7 @@ Thực nghiệm trên file âm thanh `TinHieuHuanLuyen/phone_F1.wav` ($f_s = 160
 | **Độ trễ cực đại $\tau_0$** | $\tau_0 = 71$ mẫu | Không có độ trễ tuần hoàn rõ ràng ($\tau = 53$) |
 | **Biên độ cực đại $R(\tau_0)$** | **$0.801$** ($\gg T = 0.4408$) | **$0.386$** ($< T = 0.4408$) |
 | **Chu kỳ cơ bản $T_0$** | $T_0 = 71 / 16000 = 4.44\text{ ms}$ | Không xác định |
-| **Tần số cơ bản $F_0$** | **$F_0 = 225.35\text{ Hz}$** (gần nhãn $217\text{ Hz}$) | **$F_0 = \text{Undefined}$** (Vô thanh) |
+| **Tần số cơ bản $F_0$** | **$F_0 = 225.35\text{ Hz}$** (minh họa khung; LAB hiện hành chỉ có mean toàn file) | **$F_0 = \text{Undefined}$** (Vô thanh) |
 
 ---
 
@@ -78,60 +83,13 @@ $$
 
 ---
 
-## I.4. Khảo Sát Ảnh Hưởng Chiều Dài Khung (20ms vs 25ms [Chuẩn] vs 30ms)
+## I.4. Khảo sát khung và đánh giá kiểm thử
 
-Theo định hướng của giảng viên, hệ thống được **chốt cố định khung 25 ms** làm thước đo chuẩn mực công bằng cho toàn bộ sinh viên. Thực nghiệm đối chiếu giữa 3 mức chiều dài khung (20 ms, 25 ms, 30 ms) trên file giọng nam trầm `TinHieuHuanLuyen/phone_M1.wav` ($F_{0\text{-mean}} = 122.0\text{ Hz}$, $F_{0\text{-std}} = 18.0\text{ Hz}$, $T = 0.4408$):
+Cấu hình hiện tại dùng khung 25 ms và hop 10 ms. Bảng so sánh 20/25/30 ms trước đây dùng nhãn có timestamps và giá trị tham chiếu khác; đã chuyển vào [bản lưu lịch sử](../archive/2026-10-28-pre-cleanup/README.md).
 
-### Bảng so sánh định lượng:
+Script `03_compare_params.py` còn lỗi định dạng chỉ số None khi LAB không có segments; xem [danh sách cần sửa](KNOWN_ISSUES.md). Không dùng Accuracy/F1 lịch sử để đánh giá dữ liệu hiện hành.
 
-| Chỉ số đánh giá | Khung 20 ms | Khung 25 ms (Chuẩn môn học) | Khung 30 ms | Nhận xét phân tích |
-| :--- | :---: | :---: | :---: | :--- |
-| **Số mẫu / khung ($f_s=16\text{k}$)** | 320 mẫu | **400 mẫu** | 480 mẫu | 25ms tương ứng đúng 400 mẫu chẵn |
-| **Số khung Voiced phát hiện** | 180 khung | **193 khung** | 204 khung | 25ms bắt trọn vẹn số chu kỳ của giọng nam |
-| **$F_{0\text{-mean}}$ ước lượng** | 134.52 Hz | **130.93 Hz** | 130.04 Hz | Tiệm cận chuẩn 122.0 Hz hơn rất nhiều so với 20ms |
-| **Sai số tuyệt đối $\lvert\Delta F_0\rvert$** | 12.52 Hz | **8.93 Hz** | 8.04 Hz | **Giảm 28.7% sai số so với khung 20ms** |
-| **Sai số tương đối (%)** | 10.26 % | **7.32 %** | 6.59 % | Sai số kiểm soát tốt dưới 7.5% |
-| **V/UV Accuracy (%)** | 74.70 % | **78.02 %** | 81.16 % | Tăng +3.32% so với 20ms |
-| **Voiced F1-Score (%)** | 84.43 % | **87.41 %** | 90.18 % | Tăng gần +3% so với 20ms |
-
-![03_compare_frame_length.png](../outputs/figures/03_compare_frame_length.png)
-
-$\implies$ **Luận điểm khoa học cho việc chốt chuẩn 25 ms:**
-1. **Khung 20 ms (320 mẫu):** Quá ngắn đối với các âm vực nam trầm ($F_0 \approx 70 - 80\text{ Hz} \implies T_0 \approx 12.5 - 14.3\text{ ms}$). Khung 20 ms chỉ chứa được khoảng $1.4 - 1.6$ chu kỳ, khiến phép tự tương quan dễ bị nhiễu và bắt trượt đỉnh, dẫn tới sai số cao (12.52 Hz).
-2. **Khung 30 ms (480 mẫu):** Chứa nhiều chu kỳ tuần hoàn ($> 2.4$ chu kỳ), tuy nhiên độ dài khung lớn làm giảm độ phân giải thời gian và gây hiệu ứng nhòe (*smearing*) tại các ranh giới chuyển tiếp âm nhanh.
-3. **Khung 25 ms (400 mẫu):** Là **điểm cân bằng vàng (Golden Middle Ground)**. Ở tần số đáy $80\text{ Hz}$, $25\text{ ms}$ chứa trọn vẹn đúng $2.0$ chu kỳ tuần hoàn đầy đủ, đủ điều kiện tiên quyết cho phép tìm cực đại tự tương quan hoạt động chính xác, đồng thời vẫn giữ được độ nhạy thời gian vượt trội. Do đó, **25 ms (hop 10 ms)** là lựa chọn chuẩn xác và công bằng nhất.
-
----
-
-## I.5. Đánh Giá Kiểm Thử Trên 4 File Kiểm Thử (Baseline)
-
-Hệ thống đánh giá toàn diện trên 3 trục chỉ số chuẩn mực:
-1. **Độ chính xác tần số cơ bản ($F_{0	ext{-mean}}$):** Sai số tuyệt đối $\lvert\Delta F_0\rvert$ (Hz) và sai số phần trăm tương đối $\text{MAPE}_{F_0}$ (%).
-2. **Độ ổn định đường bao cao độ ($F_{0	ext{-std}}$):** Sai số độ lệch chuẩn $\lvert\Delta\text{Std}\rvert$ (Hz) và sai số tương đối $\text{MAPE}_{\text{std}}$ (%).
-3. **Chất lượng phân loại Hữu thanh ($F_{0	ext{-num}}$):** Sai lệch số khung $\lvert\Delta\text{Num}\rvert$ (khung) và sai số tương đối $\text{MAPE}_{\text{num}}$ (%).
-
-**Điểm lỗi tổng hợp cuối cùng (Final Composite Score):**
-$$
-\text{Final Score (\%)} = \frac{\text{MAPE}(F_0) + \text{MAPE}(\text{std}) + \text{MAPE}(\text{num})}{3}
-$$
-
-### Bảng kết quả kiểm thử định lượng Baseline ($T = 0.4408$, Frame = 25 ms):
-
-| File kiểm thử | Kênh / Giới tính | Ref $F_0$ | Pred $F_0$ | $\lvert\Delta F_0\rvert$ | MAPE $F_0$ | Ref Std | Pred Std | $\lvert\Delta\text{Std}\rvert$ | MAPE Std | Ref Num | Pred Num | $\lvert\Delta\text{Num}\rvert$ | MAPE Num | **FINAL SCORE** |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `phone_F2.wav` | Điện thoại / Nữ | 150.20 Hz | 152.77 Hz | 2.57 Hz | 1.71% | 30.70 | 31.44 | 0.74 | 2.40% | 219 | 182 | 37 | 16.89% | **7.00%** |
-| `phone_M2.wav` | Điện thoại / Nam | 130.20 Hz | 131.92 Hz | 1.72 Hz | 1.32% | 15.40 | 14.07 | 1.33 | 8.63% | 123 | 108 | 15 | 12.20% | **7.38%** |
-| `studio_F2.wav`| Studio / Nữ | 198.60 Hz | 198.98 Hz | 0.38 Hz | 0.19% | 47.80 | 43.35 | 4.45 | 9.31% | 139 | 126 | 13 | 9.35% | **6.28%** |
-| `studio_M2.wav`| Studio / Nam | 154.70 Hz | 155.97 Hz | 1.27 Hz | 0.82% | 30.30 | 30.24 | 0.06 | 0.19% | 116 | 112 | 4 | 3.45% | **1.49%** |
-| **TRUNG BÌNH** | — | — | — | **1.48 Hz** | **1.01%** | — | — | **1.65** | **5.13%** | — | — | **17.2** | **10.47%** | **5.54%** |
-
-### Đồ thị đường bao Pitch Contour### Đồ thị đường bao Pitch Contour 4 file kiểm thử (Baseline):
-
-| `phone_F2.wav` (Nữ - Kênh điện thoại) | `phone_M2.wav` (Nam - Kênh điện thoại) |
-| :---: | :---: |
-| ![04_test_phone_F2.png](../outputs/figures/04_test_phone_F2.png) | ![04_test_phone_M2.png](../outputs/figures/04_test_phone_M2.png) |
-| **`studio_F2.wav` (Nữ - Phòng thu Studio)** | **`studio_M2.wav` (Nam - Phòng thu Studio)** |
-| ![04_test_studio_F2.png](../outputs/figures/04_test_studio_F2.png) | ![04_test_studio_M2.png](../outputs/figures/04_test_studio_M2.png) |
+Kết quả test tập trung tại [Chương IV](04_test_set_benchmark_and_analysis.md) và `outputs/reports/compare_acf_amdf_cepstrum.json`.
 
 ---
 
@@ -308,17 +266,34 @@ Toàn bộ quá trình thử nghiệm, tinh chỉnh siêu tham số và lựa ch
 | **TRUNG BÌNH** | Baseline | — | — | 2.84 Hz | 1.95% | — | — | 4.55 | 25.21% | — | — | 19.2 | 12.53% | **13.23%** |
 | | **Champion** | — | — | **1.34 Hz** | **0.64%** | — | — | **0.66** | **2.39%** | — | — | **8.2** | **5.83%** | **2.95%** 🏆 |
 
-### Biểu đồ cột xếp hạng### Biểu đồ cột xếp hạng toàn bộ 32 cấu hình ACF:
+### Biểu đồ các cấu hình đại diện từ khảo sát 16 tổ hợp ACF:
 ![05_all_combinations_ranking.png](../outputs/figures/05_all_combinations_ranking.png)
 
-### Biểu đồ trực quan đối sánh Baseline vs Cấu hình tối ưu sai số (Cấu hình 29):
-
-| `phone_F2.wav` | `phone_M2.wav` |
-| :---: | :---: |
-| ![05_compare_plugin_phone_F2.png](../outputs/figures/05_compare_plugin_phone_F2.png) | ![05_compare_plugin_phone_M2.png](../outputs/figures/05_compare_plugin_phone_M2.png) |
-| **`studio_F2.wav`** | **`studio_M2.wav`** |
-| ![05_compare_plugin_studio_F2.png](../outputs/figures/05_compare_plugin_studio_F2.png) | ![05_compare_plugin_studio_M2.png](../outputs/figures/05_compare_plugin_studio_M2.png) |
+Các hình so sánh cấu hình cũ đã được chuyển vào [archive](../archive/2026-10-28-pre-cleanup/README.md). Cách tạo dự đoán mới được trình bày trong [hướng dẫn kiểm thử](TESTING.md).
 
 ---
 
 **Dẫn hướng:** [Trang chủ README](../README.md) | [Chương II: Thuật toán AMDF →](02_amdf_theory_and_experiments.md)
+
+<!-- STAGE4_CURRENT_START -->
+## Kết quả kiểm chứng hiện hành — 30/10/2026
+
+Nguồn: cấu hình đóng băng và `outputs/stage4_validation/evaluation.json`. Final Score là sai số thống kê toàn file; thấp hơn tốt hơn. Accuracy/F1 từng khung không xác định vì thiếu nhãn thời gian.
+
+Preset: BP + Energy + Viterbi, frame/hop 30/10 ms, T=0.45.
+
+| Cấu hình | Train (%) | Test (%) |
+|---|---:|---:|
+| baseline | 13.887 | 5.822 |
+| historical_champion | 3.880 | 4.223 |
+| selected_champion | 2.215 | 2.385 |
+
+| File test | Mean dự đoán (Hz) | Std dự đoán (Hz) | Khung voiced | Final Score (%) |
+|---|---:|---:|---:|---:|
+| phone_F2.wav | 150.98 | 31.38 | 203 | 3.35 |
+| phone_M2.wav | 132.19 | 15.83 | 124 | 1.71 |
+| studio_F2.wav | 201.64 | 45.45 | 136 | 2.87 |
+| studio_M2.wav | 156.10 | 30.15 | 120 | 1.61 |
+
+[Chi tiết và giới hạn kiểm chứng](STAGE4_RESULTS.md).
+<!-- STAGE4_CURRENT_END -->

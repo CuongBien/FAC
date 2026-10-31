@@ -1,5 +1,10 @@
 # CHƯƠNG II: THUẬT TOÁN HÀM HIỆU ĐỘ LỚN TRUNG BÌNH (AMDF)
 
+> **Cập nhật 30/10/2026:** Bảng/hình gốc trong chương là kết quả lịch sử. Phần bổ sung cuối chương và [báo cáo đợt 4](STAGE4_RESULTS.md) ghi kết quả hiện hành, giao thức chọn cấu hình trên train và nguyên nhân chênh lệch Cepstrum.
+
+
+> **Trạng thái sau rà soát 28/10/2026:** Các phân bố Gaussian trong chương là kết quả lịch sử. LAB hiện hành chỉ có thống kê toàn file; các ngưỡng đang được dùng như tham số đã lưu. Xem [các vấn đề cần xử lý](KNOWN_ISSUES.md).
+
 > **Dẫn hướng tài liệu:** [Trang chủ README](../README.md) > **Chương II: Thuật toán AMDF**
 
 ---
@@ -50,7 +55,7 @@ Thực nghiệm trên file âm thanh `TinHieuHuanLuyen/phone_F1.wav` ($f_s = 160
 | **Độ trễ cực tiểu $\tau_0$** | $\tau_0 = 71$ mẫu | Đáy cục bộ trôi nổi tại $\tau = 52$ |
 | **Biên độ cực tiểu $D(\tau_0)$** | **$0.075$** ($\ll T = 0.4380$) | **$0.542$** ($> T = 0.4380$) |
 | **Chu kỳ cơ bản $T_0$** | $T_0 = 71 / 16000 = 4.44\text{ ms}$ | Không xác định |
-| **Tần số cơ bản $F_0$** | **$F_0 = 225.35\text{ Hz}$** (gần nhãn $217\text{ Hz}$) | **$F_0 = \text{Undefined}$** (Vô thanh) |
+| **Tần số cơ bản $F_0$** | **$F_0 = 225.35\text{ Hz}$** (minh họa khung; LAB hiện hành chỉ có mean toàn file) | **$F_0 = \text{Undefined}$** (Vô thanh) |
 
 ---
 
@@ -77,25 +82,11 @@ Thực nghiệm trên file âm thanh `TinHieuHuanLuyen/phone_F1.wav` ($f_s = 160
 
 ---
 
-## II.4. Đánh Giá Kiểm Thử Trên 4 File Kiểm Thử (AMDF Baseline)
+## II.4. Đánh giá trên tập kiểm thử
 
-Chạy kiểm thử tự động toàn bộ 4 file kiểm thử với thuật toán AMDF ($T = 0.4380$, Frame = 25 ms), đánh giá toàn diện cả 3 chỉ số và **Final Score**:
+Kết quả test được trình bày tập trung tại [Chương IV](04_test_set_benchmark_and_analysis.md). Bảng baseline và các hình từ lần chạy cũ được giữ trong [archive](../archive/2026-10-28-pre-cleanup/README.md).
 
-| File kiểm thử | Kênh / Giới tính | Ref $F_0$ | Pred $F_0$ | $\lvert\Delta F_0\rvert$ | MAPE $F_0$ | Ref Std | Pred Std | $\lvert\Delta\text{Std}\rvert$ | MAPE Std | Ref Num | Pred Num | $\lvert\Delta\text{Num}\rvert$ | MAPE Num | **FINAL SCORE** |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| `phone_F2.wav` | Điện thoại / Nữ | 150.20 Hz | 150.19 Hz | 0.01 Hz | 0.00% | 30.70 | 32.46 | 1.76 | 5.74% | 219 | 183 | 36 | 16.44% | **7.39%** |
-| `phone_M2.wav` | Điện thoại / Nam | 130.20 Hz | 129.48 Hz | 0.72 Hz | 0.55% | 15.40 | 15.58 | 0.18 | 1.17% | 123 | 118 | 5 | 4.07% | **1.93%** |
-| `studio_F2.wav`| Studio / Nữ | 198.60 Hz | 199.80 Hz | 1.20 Hz | 0.61% | 47.80 | 44.93 | 2.87 | 6.00% | 139 | 127 | 12 | 8.63% | **5.08%** |
-| `studio_M2.wav`| Studio / Nam | 154.70 Hz | 155.52 Hz | 0.82 Hz | 0.53% | 30.30 | 30.55 | 0.25 | 0.83% | 116 | 112 | 4 | 3.45% | **1.60%** |
-| **TRUNG BÌNH** | — | — | — | **0.69 Hz** | **0.42%** | — | — | **1.27** | **3.44%** | — | — | **14.2** | **8.15%** | **4.00%** |
-
-### Đồ thị Pitch Contour### Đồ thị Pitch Contour 4 file kiểm thử (AMDF):
-
-| `phone_F2.wav` | `phone_M2.wav` |
-| :---: | :---: |
-| ![04_test_amdf_phone_F2.png](../outputs/figures/04_test_amdf_phone_F2.png) | ![04_test_amdf_phone_M2.png](../outputs/figures/04_test_amdf_phone_M2.png) |
-| **`studio_F2.wav`** | **`studio_M2.wav`** |
-| ![04_test_amdf_studio_F2.png](../outputs/figures/04_test_amdf_studio_F2.png) | ![04_test_amdf_studio_M2.png](../outputs/figures/04_test_amdf_studio_M2.png) |
+LAB hiện hành chỉ có F0mean/F0std/F0num nên chưa tính được Accuracy/F1 theo từng khung.
 
 ---
 
@@ -234,54 +225,34 @@ Toàn bộ quá trình thực nghiệm, khảo sát 16 tổ hợp plugin và l�
 | **TRUNG BÌNH** | Baseline | — | — | 1.49 Hz | 0.93% | — | — | 2.31 | 11.34% | — | — | 14.8 | 8.77% | **7.01%** |
 | | **Champion** | — | — | **1.30 Hz** | **0.80%** | — | — | **0.95** | **3.42%** | — | — | **9.2** | **5.64%** | **3.29%** 🏆 |
 
-### Biểu đồ cột xếp hạng### Biểu đồ cột xếp hạng toàn bộ 32 cấu hình AMDF:
+### Biểu đồ các cấu hình đại diện từ khảo sát 16 tổ hợp AMDF:
 ![05_all_combinations_ranking_amdf.png](../outputs/figures/05_all_combinations_ranking_amdf.png)
 
-### Biểu đồ trực quan đối sánh Baseline vs Cấu hình tối ưu sai số (Cấu hình 13):
-
-| `phone_F2.wav` | `phone_M2.wav` |
-| :---: | :---: |
-| ![05_compare_plugin_amdf_phone_F2.png](../outputs/figures/05_compare_plugin_amdf_phone_F2.png) | ![05_compare_plugin_amdf_phone_M2.png](../outputs/figures/05_compare_plugin_amdf_phone_M2.png) |
-| **`studio_F2.wav`** | **`studio_M2.wav`** |
-| ![05_compare_plugin_amdf_studio_F2.png](../outputs/figures/05_compare_plugin_amdf_studio_F2.png) | ![05_compare_plugin_amdf_studio_M2.png](../outputs/figures/05_compare_plugin_amdf_studio_M2.png) |
-
----
-
-## II.7. Đối Sánh Trực Tiếp: ACF vs. AMDF
-
-### Bảng 1: So sánh tổng hợp hiệu năng giữa hai thuật toán ở mô hình Baseline (Frame = 25 ms):
-
-| Tiêu chí đánh giá | Thuật toán ACF (Baseline) | Thuật toán AMDF (Baseline) | So sánh & Nhận xét |
-| :--- | :---: | :---: | :--- |
-| **Dấu hiệu nhận diện $T_0$** | Cực đại $R(\tau) \ge T$ | Cực tiểu $D(\tau) \le T$ | Đối ngẫu (Dual representations) |
-| **Ngưỡng tối ưu Gauss $T$** | $T_{\text{ACF}} = 0.4408$ | $T_{\text{AMDF}} = 0.4380$ | Rất cân xứng quanh giá trị $0.44$ |
-| **Sai số tuyệt đối $\lvert\Delta F_0\rvert$ TB** | 3.17 Hz (2.19%) | **1.60 Hz (1.09%)** | **AMDF giảm 49.5% sai số so với ACF** |
-| **Sai số trên giọng nam trầm (`phone_M2`)** | 2.92 Hz | **0.48 Hz** | AMDF bắt cực tiểu đáy sâu cực nhạy |
-| **Sai số phòng thu (`studio_F2`)** | 1.02 Hz | **0.20 Hz** | Cả hai đều xuất sắc ($< 0.5\%$) |
-| **Độ chính xác phân loại V/UV** | 83.58% | **84.65%** | AMDF nhỉnh hơn +1.07% |
-| **Voiced F1-Score** | 91.03% | **92.30%** | AMDF nhỉnh hơn +1.27% |
-| **Chi phí tính toán** | Phép nhân $(x \cdot x)$ | Phép trừ ($\lvert x_1 - x_2 \rvert$) | **AMDF nhẹ hơn**, không cần bộ nhân phần cứng |
-
-### Bảng 2: So sánh cấu hình tối ưu giữa hai thuật toán (Best Enhanced ACF vs Best Enhanced AMDF):
-
-| Tiêu chí so sánh | Cấu hình ACF Tối Ưu | Cấu hình AMDF Tối Ưu | So sánh & Đánh giá |
-| :--- | :---: | :---: | :--- |
-| **Cấu hình đạt sai số $F_0$ thấp nhất** | **Cấu hình 29 `[BP+Clip+Energy+Viterbi]`** | **Cấu hình 13 `[Clip+Viterbi]`** | AMDF cho sai số thấp hơn ($1.24\text{ Hz}$ vs $1.90\text{ Hz}$) |
-| **Sai số tuyệt đối $\lvert\Delta F_0\rvert$ tối ưu** | **1.90 Hz** (giảm 40.1% từ 3.17 Hz) | **1.24 Hz** (giảm 22.5% từ 1.60 Hz) | AMDF chính xác hơn $0.66\text{ Hz}$ |
-| **Cấu hình phân loại V/UV tốt nhất** | **Cấu hình 14 `[Hyst + Energy]`** | **Cấu hình 05 `[Energy Ext]`** | AMDF nhỉnh hơn cả F1 và Accuracy |
-| **F1-Score cao nhất đạt được** | 93.07% | **93.86%** | AMDF dẫn đầu (+0.79%) |
-| **Độ chính xác Acc cao nhất** | 85.25% | **85.95%** | AMDF dẫn đầu (+0.70%) |
-| **Sai số trên file khó `phone_F2`** | 4.35 Hz (Cấu hình 29) | **3.66 Hz** (Cấu hình 09) / 4.05 Hz (Cấu hình 13) | AMDF đạt độ lệch thấp hơn |
-| **Sai số trên file thoại nam `phone_M2`** | 1.44 Hz (Cấu hình 23) / 2.38 Hz | **0.01 Hz** (Cấu hình 31) / 0.37 Hz (Cấu hình 13) | AMDF bám sát tần số thực của giọng nam trầm |
-| **Sai số phòng thu nữ `studio_F2`** | 0.05 Hz (Cấu hình 27) / 0.22 Hz | **0.01 Hz** (Cấu hình 11) / 0.34 Hz (Cấu hình 13) | Cả hai phương pháp đều đạt độ chính xác cao |
-| **Sai số phòng thu nam `studio_M2`** | 0.13 Hz (Cấu hình 21/22/30) / 0.64 Hz | **0.04 Hz** (Cấu hình 12 & 23) / 0.22 Hz (Cấu hình 13) | Cả hai phương pháp đều tiệm cận 0 Hz |
-
-$\implies$ **Tổng kết đối sánh kỹ thuật:**
-1. **Hiệu năng của AMDF:** Ở cả cấu hình cơ bản lẫn các tổ hợp nâng cao, AMDF luôn đạt sai số tuyệt đối thấp hơn và chỉ số phân loại V/UV nhạy hơn so với ACF.
-2. **Vai trò của Center Clipping:** Cắt gọt biên độ trung tâm giúp triệt tiêu thành phần cộng hưởng formant $F_1, F_2$, làm phẳng phổ, hỗ trợ cả ACF và AMDF giảm mạnh sai số trên các nguyên âm phức tạp.
-3. **Vai trò của Hysteresis và Energy Extension:** Bộ đôi này giúp ổn định quá trình phân loại V/UV tại các vùng chuyển tiếp, bù đắp các khung biên có năng lượng suy giảm, nâng F1-Score lên mức 93–94%.
-4. **Vai trò của Quy hoạch động Viterbi Tracking:** Tối ưu hóa chuỗi cao độ trên toàn bộ phân đoạn hữu thanh thông qua lưới Trellis, phạt các bước nhảy tần số đột ngột và hiện tượng nhảy quãng tám (Octave jumps), giúp làm mượt pitch contour hiệu quả.
+Các hình và bảng đối sánh dùng cấu hình/nhãn cũ đã chuyển vào [archive](../archive/2026-10-28-pre-cleanup/README.md). Đối sánh ACF–AMDF hiện tại xem [Chương IV](04_test_set_benchmark_and_analysis.md).
 
 ---
 
 **Dẫn hướng:** [← Chương I: Thuật toán ACF](01_acf_theory_and_experiments.md) | [Trang chủ README](../README.md) | [Chương III: Thuật toán Cepstrum →](03_cepstrum_theory_and_experiments.md)
+
+<!-- STAGE4_CURRENT_START -->
+## Kết quả kiểm chứng hiện hành — 30/10/2026
+
+Nguồn: cấu hình đóng băng và `outputs/stage4_validation/evaluation.json`. Final Score là sai số thống kê toàn file; thấp hơn tốt hơn. Accuracy/F1 từng khung không xác định vì thiếu nhãn thời gian.
+
+Preset: Energy + Viterbi, frame/hop 30/10 ms, T=0.5.
+
+| Cấu hình | Train (%) | Test (%) |
+|---|---:|---:|
+| baseline | 6.760 | 6.357 |
+| historical_champion | 3.757 | 4.125 |
+| selected_champion | 2.078 | 2.755 |
+
+| File test | Mean dự đoán (Hz) | Std dự đoán (Hz) | Khung voiced | Final Score (%) |
+|---|---:|---:|---:|---:|
+| phone_F2.wav | 150.07 | 30.86 | 201 | 2.94 |
+| phone_M2.wav | 130.07 | 16.23 | 129 | 3.45 |
+| studio_F2.wav | 199.65 | 43.92 | 134 | 4.08 |
+| studio_M2.wav | 155.62 | 30.62 | 116 | 0.55 |
+
+[Chi tiết và giới hạn kiểm chứng](STAGE4_RESULTS.md).
+<!-- STAGE4_CURRENT_END -->
