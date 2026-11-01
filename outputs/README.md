@@ -1,5 +1,7 @@
 # Danh mục kết quả
 
+Danh mục tự dựng: [registry.json](registry.json). `python -B -m src.experiments list` liệt kê run và `verify` kiểm chứng mà không chạy mô hình. [Refactor đợt 1](refactor_phase1/README.md) đã đạt 137 test và đối chiếu đủ 288 trường hợp khớp chính xác; run cũ được giữ nguyên. Xem [hướng dẫn cấu trúc mới](../docs/EXPERIMENTS.md).
+
 Kết quả hiện hành sau hiệu chỉnh: [stage4_validation/](stage4_validation/README.md), với cấu hình chốt trên train trước test. [Báo cáo đợt 4](../docs/STAGE4_RESULTS.md) giải thích cải thiện ACF/AMDF, suy giảm Cepstrum và lỗi pipeline lai trong artifact lịch sử.
 
 Rà soát main ngày 01/11/2026: [benchmark 15/16 sau sửa Otsu](main_review_2026-11-01/README.md). Bộ Stage 4 đã được sửa snapshot/checksum và kiểm tra lại; 100 test hồi quy đạt. Điểm Stage 4 đã đóng băng vẫn giữ phiên bản thuật toán của lần chạy đó.

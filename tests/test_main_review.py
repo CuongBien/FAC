@@ -160,7 +160,7 @@ class ArtifactIntegrityTests(unittest.TestCase):
             original = b'x = 1\r\n'
             provenance = {'base_commit': 'saved', 'source_sha256': {
                 'src/a.py': hashlib.sha256(original).hexdigest()}}
-            with patch('src.analysis.validation.subprocess.check_output', return_value=b'x = 1\n') as git:
+            with patch('src.experiments.snapshots.subprocess.check_output', return_value=b'x = 1\n') as git:
                 target = root/'snapshot.tar.gz'
                 self.assertEqual(write_source_snapshot(root, target, provenance), 1)
                 git.assert_called_once_with(['git', 'show', 'saved:src/a.py'], cwd=root)
@@ -168,7 +168,7 @@ class ArtifactIntegrityTests(unittest.TestCase):
                 self.assertEqual(archive.extractfile('src/a.py').read(), original)
             with self.assertRaises(FileExistsError):
                 write_source_snapshot(root, target, provenance)
-            with patch('src.analysis.validation.subprocess.check_output', return_value=b'wrong'):
+            with patch('src.experiments.snapshots.subprocess.check_output', return_value=b'wrong'):
                 with self.assertRaisesRegex(ValueError, 'Cannot reconstruct'):
                     write_source_snapshot(root, root/'failed.tar.gz', provenance)
                 self.assertFalse((root/'failed.tar.gz').exists())

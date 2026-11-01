@@ -23,11 +23,11 @@ from src.analysis.champion_unsupervised import (
     fit_champion_models, predict_decisions,
 )
 from src.analysis.protocols import threshold_labels
-from src.analysis.validation import (
-    source_manifest, dataset_manifest, verify_dataset, write_json, freeze_json,
-    read_frozen, read_evaluation_bundle, sha256, write_source_snapshot,
-    verify_source_snapshot, evaluate_result, aggregate, pitch_cache,
-)
+from src.analysis.validation import evaluate_result, aggregate, pitch_cache
+from src.experiments.manifest import source_manifest, dataset_manifest, verify_dataset, sha256
+from src.experiments.serialization import write_json
+from src.experiments.legacy import freeze_json, read_frozen, read_evaluation_bundle
+from src.experiments.snapshots import write_source_snapshot, verify_source_snapshot
 from src.analysis.evaluation import format_metric
 from src.pipelines import build_champion, build_baseline
 

@@ -24,10 +24,12 @@ if sys.platform == 'win32':
 from src import config
 from src.pipelines import build_detector
 from src.analysis.validation import (
-    aggregate, evaluate_result, source_manifest, dataset_manifest, verify_dataset,
-    write_json, freeze_json, read_frozen, pitch_cache, select_trial, selection_key,
-    write_source_snapshot, verify_source_snapshot, sha256,
+    aggregate, evaluate_result, pitch_cache, select_trial, selection_key,
 )
+from src.experiments.manifest import source_manifest, dataset_manifest, verify_dataset, sha256
+from src.experiments.serialization import write_json
+from src.experiments.legacy import freeze_json, read_frozen
+from src.experiments.snapshots import write_source_snapshot, verify_source_snapshot
 from src.analysis.protocols import fit_models, predict_strategies, result_from_labels
 
 

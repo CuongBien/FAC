@@ -11,7 +11,8 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from src.analysis.validation import write_json, sha256
+from src.experiments.serialization import write_json
+from src.experiments.manifest import sha256
 
 
 DRIVER = '''import importlib.util, json, sys

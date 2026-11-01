@@ -16,10 +16,10 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from src.calibrated_presets import CHAMPIONS, FROZEN_CONFIG_SHA256
-from src.analysis.validation import (
-    read_evaluation_bundle, sha256, verify_source_snapshot, write_source_snapshot, write_json,
-    source_manifest,
-)
+from src.experiments.legacy import read_evaluation_bundle
+from src.experiments.manifest import sha256, source_manifest
+from src.experiments.snapshots import verify_source_snapshot, write_source_snapshot
+from src.experiments.serialization import write_json
 
 
 def verify(folder, check_presets=True):

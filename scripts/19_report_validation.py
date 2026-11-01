@@ -12,7 +12,10 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from src.analysis.validation import read_evaluation_bundle, verify_source_snapshot, sha256, write_json
+from src.experiments.legacy import read_evaluation_bundle
+from src.experiments.snapshots import verify_source_snapshot
+from src.experiments.manifest import sha256
+from src.experiments.serialization import write_json
 
 CHAPTERS = ('01_acf_theory_and_experiments.md', '02_amdf_theory_and_experiments.md',
             '03_cepstrum_theory_and_experiments.md', '04_test_set_benchmark_and_analysis.md',

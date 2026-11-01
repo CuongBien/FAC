@@ -16,7 +16,7 @@ Có thể thay `uv run python` bằng `.\.venv\Scripts\python.exe` nếu môi tr
 uv run python -B -m unittest discover -s tests -v
 ```
 
-Có 120 test: 90 test thuộc bốn đợt trước, 10 test tại `tests/test_main_review.py`, 8 test tại `tests/test_champion_unsupervised.py` và 12 test tại `tests/test_final_edge_cases.py` về LAB/BOM, phạm vi F0 và bảo toàn tài liệu khi sinh báo cáo. Số test thực chạy được ghi trong `outputs/stage4_validation/validation.json`. Detector yêu cầu audio dài ít nhất một khung; CLI thoát mã 2 với thông báo rõ nếu input không đủ dài.
+Có 137 test: 120 test của các đợt sửa trước và 17 test trong `tests/test_experiments.py` cho hạ tầng refactor mới. Kết quả hiện tại nằm trong `outputs/refactor_phase1/validation.json`; validation cũ vẫn giữ mốc lịch sử của nó. Detector yêu cầu audio dài ít nhất một khung; CLI thoát mã 2 với thông báo rõ nếu input không đủ dài.
 
 ## Dự đoán file hoặc thư mục
 
@@ -119,6 +119,18 @@ uv run python -B scripts/21_benchmark_champion_unsupervised.py report --output-d
 Train chỉ fit active train sau đúng BP/Clipping và frame 30 ms; không dùng LAB để fit. Hai freeze và snapshot được ghi trước evaluate. Evaluate từ chối source/cấu hình/dữ liệu train đã đổi; không ghi đè evaluation cũ. Report chỉ ghi bảng/hình trong thư mục run, không sửa preset. Dùng thư mục mới khi chạy lại.
 
 Tám dòng chính dùng mô hình train. Hai dòng `input_active` fit 2D/HMM từng input, có JSON mô hình riêng. Các quyết định dùng chung Energy guard cố định và Viterbi native. Đây là phần quyết định không giám sát bên trong Champion đã hiệu chỉnh trước đây, không phải toàn bộ pipeline học không dùng tham chiếu. [Báo cáo và bảng tám cột](CHAMPION_UNSUPERVISED_RESULTS.md), [artifact đã chạy](../outputs/champion_unsupervised_2026-11-01/README.md).
+
+## Danh mục run mới
+
+Tra cứu run bằng hạ tầng mới mà không chạy mô hình:
+
+```powershell
+uv run python -B -m src.experiments list
+uv run python -B -m src.experiments verify
+uv run python -B -m src.experiments index
+```
+
+Hai lệnh đầu chỉ đọc; lệnh cuối dựng lại danh mục. Xem [EXPERIMENTS.md](EXPERIMENTS.md) về raw/canonical SHA, đổi root và lớp tương thích. API ghi/đọc freeze cũ vẫn giữ hợp đồng byte để không đổi kết quả lịch sử.
 
 ## Nội dung lịch sử
 

@@ -1,6 +1,6 @@
 # Kế hoạch refactor để tái lập thí nghiệm và quản lý báo cáo
 
-Ngày 01/11/2026. Trạng thái: **kế hoạch, chưa triển khai kiến trúc mới**. Nhánh lập kế hoạch: `codex/refactor-reproducibility-plan`, xuất phát từ `main` tại `f059592` sau khi merge toàn bộ sửa lỗi.
+Ngày 01/11/2026. Trạng thái: **đã hoàn tất đợt 1** trên `codex/refactor-experiments`; các đợt 2–6 còn lại. Nhánh lập kế hoạch: `codex/refactor-reproducibility-plan`, xuất phát từ `main` tại `f059592` sau khi merge toàn bộ sửa lỗi. [Cấu trúc và kiểm chứng đợt 1](EXPERIMENTS.md).
 
 ## Mốc phải giữ được
 
@@ -107,6 +107,6 @@ Chỉ chạy đối chứng cần cho đợt đang làm; không quét lại 222 
 
 ## Bắt đầu từ đâu
 
-**Triển khai đợt 1 trước:** chốt schema và chính sách hash, đăng ký hai run hiện có bằng adapter chỉ đọc, thêm list/verify và kiểm thử LF/CRLF. Chưa di chuyển outputs, chưa thay công thức hoặc preset. Sau khi đợt 1 qua nghiệm thu mới tách pipeline ở đợt 2.
+**Đợt 1 đã qua nghiệm thu:** schema/hash có phiên bản, hai run hiện có được đăng ký bằng adapter chỉ đọc, CLI list/verify/index hoạt động; 137 test đạt, 288 kết quả đối chiếu khớp chính xác. Không di chuyển outputs hoặc thay công thức/preset. Bước tiếp theo là feature contract và engine dùng chung ở đợt 2.
 
 Phần tối ưu Cepstrum, bổ sung tập test độc lập và nhãn theo thời gian vẫn thuộc phát triển/đánh giá thuật toán, không phải điều kiện để hoàn thành refactor tổ chức mã. Refactor này chỉ tạo nền để thực hiện các việc đó có thể tái lập và truy xuất được.

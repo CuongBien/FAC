@@ -19,7 +19,7 @@ Nếu đã có môi trường `.venv`, có thể chạy trực tiếp:
 
 Xem [hướng dẫn kiểm thử](docs/TESTING.md) để chọn thuật toán, xử lý dữ liệu mới và chạy benchmark.
 
-[Kế hoạch refactor](docs/REFACTOR_PLAN.md) chia việc chuẩn hóa thí nghiệm và quản lý báo cáo thành sáu đợt, bắt đầu bằng manifest/registry; chưa triển khai kiến trúc mới.
+[Kế hoạch refactor](docs/REFACTOR_PLAN.md) chia việc chuẩn hóa thí nghiệm và quản lý báo cáo thành sáu đợt. **Đợt 1 đã hoàn tất**: tách `src/experiments/`, thêm spec/manifest/store/registry và CLI `list/verify`; 137 test đạt. Xem [cấu trúc và cách dùng](docs/EXPERIMENTS.md).
 
 ## Dữ liệu và chỉ số
 
@@ -57,6 +57,7 @@ LAB hiện hành chỉ có thống kê toàn file nên chưa thể fit lại Gau
 
 ```text
 FAC/
+├── configs/                 # Spec JSON có phiên bản cho hạ tầng thí nghiệm mới
 ├── TinHieuHuanLuyen/         # WAV/LAB train
 ├── TinHieuKiemThu/           # WAV/LAB test
 ├── src/
@@ -66,6 +67,7 @@ FAC/
 │   │   ├── decision/        # Hysteresis
 │   │   └── post_processing/ # Energy extension, Viterbi
 │   ├── analysis/            # Thresholds và evaluation
+│   ├── experiments/         # Spec, manifest, snapshot, store và registry
 │   └── visualization/       # Plotter dùng chung
 ├── scripts/                 # Demo và benchmark
 ├── docs/                    # Năm chương báo cáo, hướng dẫn, vấn đề cần sửa

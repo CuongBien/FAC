@@ -1,0 +1,8 @@
+# Only new experiment infrastructure adopts a canonical checkout policy.
+src/experiments/** text eol=lf
+tests/test_experiments.py text eol=lf
+configs/** text eol=lf
+# New stores write UTF-8/LF themselves; Git must preserve artifact bytes.
+outputs/runs/** -text
+outputs/registry.json -text
+outputs/refactor_phase1/** -text
