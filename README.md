@@ -19,6 +19,8 @@ Nếu đã có môi trường `.venv`, có thể chạy trực tiếp:
 
 Xem [hướng dẫn kiểm thử](docs/TESTING.md) để chọn thuật toán, xử lý dữ liệu mới và chạy benchmark.
 
+[Kế hoạch refactor](docs/REFACTOR_PLAN.md) chia việc chuẩn hóa thí nghiệm và quản lý báo cáo thành sáu đợt, bắt đầu bằng manifest/registry; chưa triển khai kiến trúc mới.
+
 ## Dữ liệu và chỉ số
 
 - Train: `TinHieuHuanLuyen/` — phone_F1, phone_M1, studio_F1, studio_M1.
