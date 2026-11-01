@@ -1,6 +1,6 @@
 # Kế hoạch refactor để tái lập thí nghiệm và quản lý báo cáo
 
-Ngày 01/11/2026. Trạng thái: **đã hoàn tất đợt 1** trên `codex/refactor-experiments`; các đợt 2–6 còn lại. Nhánh lập kế hoạch: `codex/refactor-reproducibility-plan`, xuất phát từ `main` tại `f059592` sau khi merge toàn bộ sửa lỗi. [Cấu trúc và kiểm chứng đợt 1](EXPERIMENTS.md).
+Ngày 01/11/2026. Trạng thái: **đã hoàn tất đợt 1–2**; đợt 2 trên `codex/refactor-pipeline`, kế thừa `codex/refactor-experiments`; các đợt 3–6 còn lại. Nhánh lập kế hoạch: `codex/refactor-reproducibility-plan`, xuất phát từ `main` tại `f059592` sau khi merge toàn bộ sửa lỗi. [Quản lý thí nghiệm](EXPERIMENTS.md), [cấu trúc và kiểm chứng pipeline](PIPELINE.md).
 
 ## Mốc phải giữ được
 
@@ -70,7 +70,7 @@ outputs/
 
 ## Thứ tự thực hiện và điều kiện nghiệm thu
 
-Mỗi đợt là một nhánh/PR nhỏ từ main, có commit riêng và kết quả đối chứng trước khi merge. Không gộp sáu đợt thành một lần viết lại.
+Mỗi đợt là một nhánh/PR riêng, có commit và kết quả đối chứng trước khi merge. Khi đợt trước chưa merge main, nhánh mới kế thừa đợt trước để giữ đầy đủ thay đổi; ghi rõ quan hệ nhánh. Không gộp sáu đợt thành một lần viết lại.
 
 | Đợt | Phạm vi chính | Đầu ra cụ thể | Điều kiện hoàn thành |
 |---|---|---|---|
@@ -107,6 +107,6 @@ Chỉ chạy đối chứng cần cho đợt đang làm; không quét lại 222 
 
 ## Bắt đầu từ đâu
 
-**Đợt 1 đã qua nghiệm thu:** schema/hash có phiên bản, hai run hiện có được đăng ký bằng adapter chỉ đọc, CLI list/verify/index hoạt động; 137 test đạt, 288 kết quả đối chiếu khớp chính xác. Không di chuyển outputs hoặc thay công thức/preset. Bước tiếp theo là feature contract và engine dùng chung ở đợt 2.
+**Đợt 1–2 đã qua nghiệm thu:** schema/hash có phiên bản, hai run được đăng ký bằng adapter chỉ đọc, CLI list/verify/index hoạt động. `src/pipeline` có feature contract, engine, extractor raw/Champion và cache theo run; script 17 không import script 16; metadata model lấy từ cấu hình thực. 152 test đạt; 78 nhóm dữ liệu trước refactor, 288 trường hợp, 93.423 contour và 3.873 dòng đặc trưng train khớp chính xác. Không di chuyển outputs hoặc thay công thức/preset. Bước tiếp theo là service runner chung ở đợt 3.
 
 Phần tối ưu Cepstrum, bổ sung tập test độc lập và nhãn theo thời gian vẫn thuộc phát triển/đánh giá thuật toán, không phải điều kiện để hoàn thành refactor tổ chức mã. Refactor này chỉ tạo nền để thực hiện các việc đó có thể tái lập và truy xuất được.

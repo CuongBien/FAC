@@ -16,6 +16,7 @@ from scipy.io import wavfile
 
 import predict
 from src.pipelines import build_detector, build_champion
+from src.pipeline.contracts import FeatureSpec
 from src.core.pitch_detector import PitchDetector
 from src.analysis.validation import (
     pitch_cache, freeze_json, read_frozen, select_trial, dataset_manifest, verify_dataset, json_default,
@@ -30,9 +31,9 @@ from src.plugins.post_processing.viterbi_tracking import ViterbiTrackingPlugin
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def features():
+def features(method='acf'):
     p = np.r_[np.linspace(.1, .2, 6), np.linspace(.7, .8, 6)]
-    return {'periodicity_vals': p, 'zcr_vals': 1-p, 'is_active': np.ones(12, dtype=bool),
+    return {'feature_contract': FeatureSpec(method, 25., 10., 70., 400., .008, 'centered_all').to_dict(), 'periodicity_vals': p, 'zcr_vals': 1-p, 'is_active': np.ones(12, dtype=bool),
             'candidate_f0': np.full(12, 180.), 'ste': np.ones(12), 'frame_times': np.arange(12)*.01}
 
 
@@ -85,15 +86,15 @@ class FreezeAndSelectionTests(unittest.TestCase):
             accessed = []
             def extract(path, method):
                 accessed.append(Path(path).parent)
-                return features()
-            def fake_trial(spec, paths, tag):
+                return features(method)
+            def fake_trial(spec, paths, tag, *, cache=None):
                 self.assertTrue(all(path.parent == train for path in paths))
                 score = 1 + abs(spec['threshold']-.4) + len(spec['plugins'])*.01
                 return {'id': tag, 'spec': spec, 'metrics': {'final_score': score},
                         'files': [{'file': 'a.wav', 'final_score': score}]}
             output = Path(folder)/'run'
             with patch.object(runner, 'trial', side_effect=fake_trial), \
-                 patch.object(runner, 'feature_module', return_value=SimpleNamespace(extract_features_for_file=extract)):
+                 patch.object(runner, 'extract_file_features', side_effect=extract):
                 runner.train(SimpleNamespace(train_dir=str(train), test_dir=str(test), output_dir=str(output)))
             self.assertFalse(test.exists())
             self.assertEqual(accessed, [train]*3)
@@ -150,7 +151,7 @@ class FrozenProtocolTests(unittest.TestCase):
 
     def test_all_protocols_preserve_silence_range_and_frozen_parameters(self):
         for method in ('acf', 'amdf', 'cepstrum'):
-            fd = features()
+            fd = features(method)
             model = fit_models([deepcopy(fd)], method)
             before = json.dumps(model, default=json_default, sort_keys=True)
             fd['is_active'][3] = False

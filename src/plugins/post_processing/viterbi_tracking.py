@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 import numpy as np
 
 from src.plugins.base import PostProcessingPlugin
+from src.pipeline.cache import cached_call
 from src.core.acf import compute_acf
 from src.core.amdf import compute_amdf
 from src.core.cepstrum import compute_real_cepstrum
@@ -17,13 +18,14 @@ class ViterbiTrackingPlugin(PostProcessingPlugin):
     """
 
     def __init__(self, w_freq=3.0, w_octave=4.0, max_candidates=5,
-                 f0_min=70.0, f0_max=400.0):
+                 f0_min=70.0, f0_max=400.0, cache=None):
         super().__init__(name="ViterbiTracking")
         self.w_freq = w_freq
         self.w_octave = w_octave
         self.max_candidates = max_candidates
         self.f0_min = f0_min
         self.f0_max = f0_max
+        self._cache = cache
 
     def _curve_candidates(self, curve, sample_rate, method, f0_min, f0_max):
         last_lag = len(curve) // 2 if method == "cepstrum" else len(curve) - 2
@@ -63,6 +65,11 @@ class ViterbiTrackingPlugin(PostProcessingPlugin):
         return candidates
 
     def _extract_acf_candidates(self, frame, sample_rate, f0_min=None, f0_max=None):
+        return cached_call(self._cache, self._compute_acf_candidates, frame, sample_rate,
+                           f0_min=f0_min, f0_max=f0_max,
+                           namespace=(self.f0_min, self.f0_max, self.max_candidates))
+
+    def _compute_acf_candidates(self, frame, sample_rate, f0_min=None, f0_max=None):
         frame = center_frame(frame)
         if not len(frame) or np.mean(frame ** 2) <= 1e-12:
             return []
@@ -73,6 +80,11 @@ class ViterbiTrackingPlugin(PostProcessingPlugin):
         )
 
     def _extract_amdf_candidates(self, frame, sample_rate, f0_min=None, f0_max=None):
+        return cached_call(self._cache, self._compute_amdf_candidates, frame, sample_rate,
+                           f0_min=f0_min, f0_max=f0_max,
+                           namespace=(self.f0_min, self.f0_max, self.max_candidates))
+
+    def _compute_amdf_candidates(self, frame, sample_rate, f0_min=None, f0_max=None):
         frame = center_frame(frame)
         if not len(frame) or np.mean(frame ** 2) <= 1e-12:
             return []
@@ -83,6 +95,11 @@ class ViterbiTrackingPlugin(PostProcessingPlugin):
         )
 
     def _extract_cepstrum_candidates(self, frame, sample_rate, f0_min=None, f0_max=None):
+        return cached_call(self._cache, self._compute_cepstrum_candidates, frame, sample_rate,
+                           f0_min=f0_min, f0_max=f0_max,
+                           namespace=(self.f0_min, self.f0_max, self.max_candidates))
+
+    def _compute_cepstrum_candidates(self, frame, sample_rate, f0_min=None, f0_max=None):
         frame = center_frame(frame)
         if not len(frame) or np.mean(frame ** 2) <= 1e-12:
             return []

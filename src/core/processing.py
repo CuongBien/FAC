@@ -6,6 +6,17 @@ from scipy.ndimage import median_filter
 ENERGY_FLOOR = 1e-12
 
 
+def compute_zcr(frame: np.ndarray) -> float:
+    """Compute normalized Zero Crossing Rate for a 1D audio frame."""
+    if len(frame) < 2:
+        return 0.0
+    signs = np.sign(frame)
+    # Replace zeros with 1 to avoid zero-product artifacts
+    signs[signs == 0] = 1.0
+    crossings = np.sum(np.abs(signs[1:] - signs[:-1])) / 2.0
+    return float(crossings / (len(frame) - 1))
+
+
 def center_frame(frame: np.ndarray) -> np.ndarray:
     """Return a floating-point, DC-free frame without mutating the input."""
     values = np.asarray(frame, dtype=np.float64)

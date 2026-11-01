@@ -77,4 +77,4 @@ Run mới không cho ghi đè thư mục hoặc artifact đã tồn tại. Nếu
 - AST của aggregate, evaluate_result, selection_key, select_trial và pitch_cache không đổi. Kiểm tra cú pháp Python 3.9 trên 67 file đạt.
 - Các thư mục run cũ, WAV/LAB và preset giữ nguyên. Danh mục mới và bằng chứng refactor nằm riêng, không viết lại provenance cũ.
 
-Nguồn kiểm chứng: [outputs/refactor_phase1](../outputs/refactor_phase1/README.md). Bước tiếp theo là tách feature contract/engine dùng chung ở đợt 2; không tạo trước các thư mục pipeline/metrics/reporting rỗng hoặc đổi hàng loạt tên package trong đợt 1.
+Nguồn kiểm chứng lịch sử của đợt 1: [outputs/refactor_phase1](../outputs/refactor_phase1/README.md). **Đợt 2 đã hoàn tất**: [feature contract/engine/cache](PIPELINE.md) dùng chung trong `src/pipeline`; 152 test đạt và kết quả đối chiếu không đổi. `pitch_cache` hiện được re-export từ `pipeline.cache`, dùng `ContextVar` tương thích caller cũ; runner mới truyền đối tượng cache tường minh. Bước tiếp theo là runner chung ở đợt 3.

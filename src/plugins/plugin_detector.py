@@ -6,18 +6,14 @@
 from typing import Dict, List, Optional
 import numpy as np
 
-from src.core.audio import load_wav, frame_signal, compute_ste
+from src.core.audio import load_wav
 from src.core.acf import find_f0_acf
 from src.core.amdf import find_f0_amdf
 from src.core.cepstrum import find_f0_cepstrum
 from src.core.pitch_detector import PitchDetector
-from src.core.processing import (
-    center_frame,
-    prepare_analysis_signal,
-    silence_energy_threshold,
-    smooth_voiced_segments,
-    validate_pitch_range,
-)
+from src.core.processing import smooth_voiced_segments
+from src.pipeline.contracts import FeatureSpec, PredictionResult, plugin_configuration
+from src.pipeline.engine import extract_signal
 from .base import (
     BasePlugin,
     PluginStage,
@@ -79,11 +75,7 @@ class PluginPitchDetector:
         return self
 
     def pre_processing_configuration(self):
-        return [{"name": p.name, "parameters": {
-            key: value for key, value in vars(p).items()
-            if key not in ("name", "stage") and not key.startswith("_")
-            and isinstance(value, (int, float, str, bool))
-        }} for p in self.pre_processors]
+        return plugin_configuration(self.pre_processors)
 
     def process_file(self, wav_path: str) -> Dict:
         """Process a WAV file and return F0 contour, frame times, and labels."""
@@ -98,174 +90,19 @@ class PluginPitchDetector:
         duration: Optional[float] = None,
     ) -> Dict:
         """Process an in-memory 1D audio array through the 3-stage plugin pipeline."""
-        validate_pitch_range(sample_rate, self.base_detector.f0_min, self.base_detector.f0_max)
-        analysis_signal = prepare_analysis_signal(
-            signal, sample_rate, self.base_detector.frame_duration_ms
+        pre = self.pre_processing_configuration()
+        base = self.base_detector
+        spec = FeatureSpec.from_detector(base, pre, plugin_wrapper=True)
+        result = extract_signal(
+            signal, sample_rate, spec, wav_path=wav_path, duration=duration,
+            pre_processors=self.pre_processors, decision_modifiers=self.decision_modifiers,
+            threshold=base.threshold, use_median_filter=base.use_median_filter,
+            median_size=base.median_size, cache=base.cache,
+            reset_plugins=self.plugins,
+            extractors={'acf': find_f0_acf, 'amdf': find_f0_amdf, 'cepstrum': find_f0_cepstrum},
         )
-        if duration is None:
-            duration = len(signal) / sample_rate
-
-        # 1. Reset all plugins in all stages
-        for p in self.plugins:
-            p.reset()
-
-        # =========================================================================
-        # STAGE 1: PRE-PROCESSING (Signal-level filtering)
-        # =========================================================================
-        processed_signal = np.copy(analysis_signal)
-        for p in self.pre_processors:
-            processed_signal = p.pre_process_signal(processed_signal, sample_rate)
-
-        # 2. Framing
-        frames, frame_times = frame_signal(
-            processed_signal,
-            sample_rate,
-            frame_duration_ms=self.base_detector.frame_duration_ms,
-            hop_duration_ms=self.base_detector.hop_duration_ms,
-            window="rectangular",
-        )
-        # Gate on DC-free speech energy before signal-level plugins.
-        ste, _ = compute_ste(
-            analysis_signal,
-            sample_rate,
-            frame_duration_ms=self.base_detector.frame_duration_ms,
-            hop_duration_ms=self.base_detector.hop_duration_ms,
-        )
-
-        ste_thresh = silence_energy_threshold(ste, self.base_detector.ste_silence_ratio)
-
-        num_frames = len(frames)
-        f0_raw = np.zeros(num_frames, dtype=np.float64)
-        labels = np.full(num_frames, "sil", dtype=object)
-        peak_values = np.zeros(num_frames, dtype=np.float64)
-        lags = np.zeros(num_frames, dtype=int)
-        candidate_f0 = np.zeros(num_frames, dtype=np.float64)
-        pitch_frames = np.copy(frames)
-
-        method = getattr(self.base_detector, "method", "acf").lower()
-
-        # =========================================================================
-        # STAGE 2: PITCH DETECTION & IN-LOOP DECISION (Frame-level)
-        # =========================================================================
-        for i in range(num_frames):
-            is_silence = ste[i] < ste_thresh
-            context = {
-                "frame_idx": i,
-                "is_silence": is_silence,
-                "ste": ste[i],
-                "sample_rate": sample_rate,
-                "frame": frames[i],
-                "method": method,
-            }
-
-            if is_silence:
-                labels[i] = "sil"
-                f0_raw[i] = 0.0
-                candidate_f0[i] = 0.0
-                # Notify decision modifiers of silence frame
-                for p in self.decision_modifiers:
-                    p.adjust_frame_decision(i, 0.0, 0.0, False, context)
-                continue
-
-            # Stage 1 (cont.): Frame-level pre-processing (Center Clipping)
-            pitch_frame = center_frame(frames[i])
-            for p in self.pre_processors:
-                pitch_frame = p.pre_process_frame(pitch_frame, sample_rate)
-            pitch_frames[i] = pitch_frame
-
-            # Core pitch extraction
-            if method == "amdf":
-                f0_val, dip_val, lag = find_f0_amdf(
-                    pitch_frame,
-                    sample_rate,
-                    f0_min=self.base_detector.f0_min,
-                    f0_max=self.base_detector.f0_max,
-                    mode="normalized",
-                )
-                peak_values[i] = dip_val
-                lags[i] = lag
-                candidate_f0[i] = f0_val
-                is_voiced = dip_val <= self.base_detector.threshold
-                current_metric = dip_val
-            elif method == "cepstrum":
-                f0_val, peak_val, lag = find_f0_cepstrum(
-                    pitch_frame,
-                    sample_rate,
-                    f0_min=self.base_detector.f0_min,
-                    f0_max=self.base_detector.f0_max,
-                    window="hamming",
-                    n_fft=2048,
-                    mode="peak",
-                )
-                peak_values[i] = peak_val
-                lags[i] = lag
-                candidate_f0[i] = f0_val
-                is_voiced = peak_val >= self.base_detector.threshold
-                current_metric = peak_val
-            else:
-                f0_val, peak_val, lag = find_f0_acf(
-                    pitch_frame,
-                    sample_rate,
-                    f0_min=self.base_detector.f0_min,
-                    f0_max=self.base_detector.f0_max,
-                    mode="normalized",
-                )
-                peak_values[i] = peak_val
-                lags[i] = lag
-                candidate_f0[i] = f0_val
-                is_voiced = peak_val >= self.base_detector.threshold
-                current_metric = peak_val
-
-            # Stage 2: Decision adjustment hooks (Hysteresis thresholding)
-            for p in self.decision_modifiers:
-                is_voiced, f0_val = p.adjust_frame_decision(
-                    i, current_metric, f0_val, is_voiced, context
-                )
-
-            if is_voiced and np.isfinite(f0_val) and self.base_detector.f0_min <= f0_val <= self.base_detector.f0_max:
-                labels[i] = "v"
-                f0_raw[i] = f0_val
-            else:
-                labels[i] = "uv"
-                f0_raw[i] = 0.0
-
-        # Baseline Median filter smoothing
-        f0_contour = np.copy(f0_raw)
-        if self.base_detector.use_median_filter:
-            f0_contour = smooth_voiced_segments(
-                f0_contour, labels, self.base_detector.median_size
-            )
-
-        initial_result = {
-            "wav_path": wav_path,
-            "sample_rate": sample_rate,
-            "signal": signal,
-            "processed_signal": processed_signal,
-            "pitch_frames": pitch_frames,
-            "frame_duration_ms": self.base_detector.frame_duration_ms,
-            "hop_duration_ms": self.base_detector.hop_duration_ms,
-            "f0_min": self.base_detector.f0_min,
-            "f0_max": self.base_detector.f0_max,
-            "use_median_filter": self.base_detector.use_median_filter,
-            "median_size": self.base_detector.median_size,
-            "duration": duration,
-            "frame_times": frame_times,
-            "f0_contour": f0_contour,
-            "f0_raw": f0_raw,
-            "candidate_f0": candidate_f0,
-            "labels": labels,
-            "peak_values": peak_values,
-            "lags": lags,
-            "ste": ste,
-            "ste_thresh": ste_thresh,
-            "threshold": self.base_detector.threshold,
-            "num_frames": num_frames,
-            "method": method,
-            "applied_plugins": [p.name for p in self.plugins],
-            "pre_processing_configuration": self.pre_processing_configuration(),
-        }
-
-        return self._finalize_results(initial_result)
+        result.update(applied_plugins=[p.name for p in self.plugins], pre_processing_configuration=pre)
+        return self._finalize_results(result)
 
     def process_feature_labels(self, features: Dict, labels: np.ndarray) -> Dict:
         """Apply native median and post-processing to aligned external decisions.
@@ -285,6 +122,9 @@ class PluginPitchDetector:
                 or feature_pre != expected_pre
                 or features.get("pre_processing_configuration") != self.pre_processing_configuration()):
             raise ValueError("Features do not match detector method/framing/pre-processing")
+        expected_contract = FeatureSpec.from_detector(base, self.pre_processing_configuration(), plugin_wrapper=True)
+        if features.get('feature_contract') != expected_contract.to_dict():
+            raise ValueError('Features do not match detector feature contract/gate/pre-processing')
         count = len(features["frame_times"])
         labels = np.array(labels, dtype=object, copy=True)
         if labels.shape != (count,) or not np.all(np.isin(labels, ["v", "uv", "sil"])):
@@ -326,4 +166,4 @@ class PluginPitchDetector:
         result["num_unvoiced"] = int(np.sum(result["labels"] == "uv"))
         result["num_silence"] = int(np.sum(result["labels"] == "sil"))
 
-        return result
+        return PredictionResult(result, self.base_detector.f0_min, self.base_detector.f0_max).to_dict()

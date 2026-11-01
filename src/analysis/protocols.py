@@ -4,6 +4,7 @@ from scipy.stats import norm
 
 from src import config
 from src.core.processing import smooth_voiced_segments, voiced_segments
+from src.pipeline.contracts import FeatureSpec, training_contract, PredictionResult
 from src.analysis.unsupervised_threshold import compute_all_unsupervised_thresholds
 from src.analysis.advanced_unsupervised import (
     compute_gmm_em_1d, cluster_multifeature_2d, train_and_decode_2state_hmm,
@@ -11,8 +12,9 @@ from src.analysis.advanced_unsupervised import (
 )
 
 
-def fit_models(features, method):
+def fit_models(features, method, *, median_size=3, dynamic_window_frames=50, dynamic_alpha=.30):
     """Fit from train features only; never consume LAB statistics or test data."""
+    spec = training_contract(features, method)
     all_p = np.concatenate([fd['periodicity_vals'] for fd in features])
     active_p = np.concatenate([fd['periodicity_vals'][fd['is_active']] for fd in features])
     active_z = np.concatenate([fd['zcr_vals'][fd['is_active']] for fd in features])
@@ -30,8 +32,10 @@ def fit_models(features, method):
     _, hmm = train_and_decode_2state_hmm(timeline, method, active_mask=active)
     return {'method': method, 'thresholds': thresholds, 'cluster_2d': cluster, 'hmm': hmm,
             'num_train_frames': len(all_p), 'num_train_active': len(active_p),
-            'frame_duration_ms': 25., 'hop_duration_ms': 10., 'median_size': 3,
-            'dynamic_window_frames': 50, 'dynamic_alpha': .30}
+            'feature_contract': spec.to_dict(), 'fit_populations': ['train_all', 'train_active'],
+            'frame_duration_ms': spec.frame_duration_ms, 'hop_duration_ms': spec.hop_duration_ms,
+            'f0_min': spec.f0_min, 'f0_max': spec.f0_max, 'median_size': median_size,
+            'dynamic_window_frames': dynamic_window_frames, 'dynamic_alpha': dynamic_alpha}
 
 
 def threshold_labels(fd, method, threshold):
@@ -72,6 +76,13 @@ def predict_frozen_hmm(fd, model):
 def predict_strategies(fd, models):
     """All strategies use the same frames, silence gate, candidates and median."""
     method = models['method']
+    # Legacy Stage 4 records its historical 25/10 framing but has no v1 contract.
+    # The adapter is explicit; new models always carry the full physical space.
+    spec = (FeatureSpec.from_dict(models['feature_contract']) if 'feature_contract' in models
+            else FeatureSpec(method, models['frame_duration_ms'], models['hop_duration_ms'],
+                             70., 400., .008, 'centered_all'))
+    if spec.method != method or fd.get('feature_contract') != spec.to_dict():
+        raise ValueError('Prediction features differ from frozen training feature space')
     labels = {'historical_static': threshold_labels(fd, method, config.baseline_threshold(method))}
     for population, values in models['thresholds'].items():
         for name in ('median', 'otsu', 'valley', 'kmeans', 'gmm'):
@@ -91,7 +102,8 @@ def predict_strategies(fd, models):
     labels['kmeans2d_input_active'] = adaptive
     labels['hmm_input_active'], _ = train_and_decode_2state_hmm(
         fd['periodicity_vals'], method, active_mask=active)
-    valid = np.isfinite(fd['candidate_f0']) & (fd['candidate_f0'] >= 70) & (fd['candidate_f0'] <= 400)
+    valid = (np.isfinite(fd['candidate_f0']) & (fd['candidate_f0'] >= spec.f0_min)
+             & (fd['candidate_f0'] <= spec.f0_max))
     for prediction in labels.values():
         prediction[(prediction == 'v') & ~valid] = 'uv'
     return labels
@@ -102,7 +114,9 @@ def result_from_labels(fd, labels, median_size=3):
     contour = np.where(labels == 'v', fd['candidate_f0'], 0.)
     contour = smooth_voiced_segments(contour, labels, median_size)
     voiced = contour[labels == 'v']
-    return {**fd, 'labels': labels, 'f0_contour': contour,
+    result = {**fd, 'labels': labels, 'f0_contour': contour,
             'f0_mean': float(np.mean(voiced)) if len(voiced) else 0.,
             'f0_std': float(np.std(voiced)) if len(voiced) else 0.,
             'num_voiced': len(voiced), 'num_frames': len(labels)}
+    spec = FeatureSpec.from_dict(fd['feature_contract'])
+    return PredictionResult(result, spec.f0_min, spec.f0_max).to_dict()

@@ -19,7 +19,7 @@ Nếu đã có môi trường `.venv`, có thể chạy trực tiếp:
 
 Xem [hướng dẫn kiểm thử](docs/TESTING.md) để chọn thuật toán, xử lý dữ liệu mới và chạy benchmark.
 
-[Kế hoạch refactor](docs/REFACTOR_PLAN.md) chia việc chuẩn hóa thí nghiệm và quản lý báo cáo thành sáu đợt. **Đợt 1 đã hoàn tất**: tách `src/experiments/`, thêm spec/manifest/store/registry và CLI `list/verify`; 137 test đạt. Xem [cấu trúc và cách dùng](docs/EXPERIMENTS.md).
+[Kế hoạch refactor](docs/REFACTOR_PLAN.md) chia việc chuẩn hóa thí nghiệm và quản lý báo cáo thành sáu đợt. **Đã hoàn tất đợt 1–2**: tách `src/experiments/`, thêm spec/manifest/store/registry và CLI `list/verify`; tách `src/pipeline/` với engine, feature contract và cache riêng cho từng run. 152 test đạt, 288 trường hợp đối chiếu khớp chính xác. Xem [quản lý thí nghiệm](docs/EXPERIMENTS.md) và [cấu trúc pipeline](docs/PIPELINE.md).
 
 ## Dữ liệu và chỉ số
 
@@ -62,6 +62,7 @@ FAC/
 ├── TinHieuKiemThu/           # WAV/LAB test
 ├── src/
 │   ├── core/                # Audio, framing, LAB, ACF, AMDF, Cepstrum, detector
+│   ├── pipeline/            # Feature contract, engine, extractor và cache theo run
 │   ├── plugins/
 │   │   ├── pre_processing/  # Bandpass, center clipping
 │   │   ├── decision/        # Hysteresis

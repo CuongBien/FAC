@@ -4,7 +4,14 @@ from .lab_parser import parse_lab_file, get_frame_labels
 from .acf import compute_acf, find_f0_acf
 from .amdf import compute_amdf, find_f0_amdf
 from .cepstrum import compute_real_cepstrum, find_f0_cepstrum
-from .pitch_detector import PitchDetector
+
+
+def __getattr__(name):
+    # Preserve `from src.core import PitchDetector` without a core/pipeline cycle.
+    if name == 'PitchDetector':
+        from .pitch_detector import PitchDetector
+        return PitchDetector
+    raise AttributeError(name)
 
 __all__ = [
     "load_wav",

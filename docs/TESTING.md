@@ -16,7 +16,15 @@ Có thể thay `uv run python` bằng `.\.venv\Scripts\python.exe` nếu môi tr
 uv run python -B -m unittest discover -s tests -v
 ```
 
-Có 137 test: 120 test của các đợt sửa trước và 17 test trong `tests/test_experiments.py` cho hạ tầng refactor mới. Kết quả hiện tại nằm trong `outputs/refactor_phase1/validation.json`; validation cũ vẫn giữ mốc lịch sử của nó. Detector yêu cầu audio dài ít nhất một khung; CLI thoát mã 2 với thông báo rõ nếu input không đủ dài.
+Có 152 test: 120 test của các đợt sửa trước, 17 test hạ tầng thí nghiệm và 15 test feature contract/cache trong `tests/test_pipeline_contracts.py`. Bằng chứng hiện tại nằm trong `outputs/refactor_phase2/`; validation cũ vẫn giữ mốc lịch sử của nó. Detector yêu cầu audio dài ít nhất một khung; CLI thoát mã 2 với thông báo rõ nếu input không đủ dài.
+
+Đối chiếu số học với mốc trước refactor và mô hình Champion đã freeze:
+
+```powershell
+uv run python -B scripts/22_verify_pipeline_refactor.py verify
+```
+
+Lệnh chỉ đọc dữ liệu/kết quả cũ, không đổi expected hoặc model. Đối chiếu 78 nhóm dữ liệu, 288 trường hợp/file, 93.423 dòng contour và 3.873 dòng đặc trưng train. Frozen train models không fit lại; hai control input-adaptive chạy lại phép fit từng input theo đúng giao thức của chúng. Xem [hợp đồng pipeline](PIPELINE.md).
 
 ## Dự đoán file hoặc thư mục
 

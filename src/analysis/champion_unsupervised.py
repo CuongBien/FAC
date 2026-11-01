@@ -3,13 +3,17 @@ from copy import deepcopy
 import numpy as np
 
 from src import config
-from src.pipelines import build_detector, build_champion
-from src.core.audio import load_wav
+from src.pipelines import build_champion
 from src.core.processing import voiced_segments
+from src.pipeline.contracts import training_contract
+# Compatibility exports; extraction is owned by the pipeline package.
+from src.pipeline.champion import (
+    feature_spec, feature_contract, extract_signal_features, extract_file_features,
+)
 from src.analysis.unsupervised_threshold import compute_all_unsupervised_thresholds
 from src.analysis.advanced_unsupervised import (
     compute_gmm_em_1d, cluster_multifeature_2d, train_and_decode_2state_hmm,
-    compute_zcr, compute_sliding_window_adaptive_threshold,
+    compute_sliding_window_adaptive_threshold,
 )
 from src.analysis.protocols import threshold_labels, predict_frozen_cluster, predict_frozen_hmm
 
@@ -43,53 +47,14 @@ def experiment_configuration():
     }
 
 
-def feature_spec(method, settings):
-    champion = settings['champions'][method]
-    return {'method': method, 'plugins': [p for p in champion['plugins'] if p in ('BP', 'Clip')],
-            **{key: champion[key] for key in ('frame_duration_ms', 'hop_duration_ms', 'clipping_ratio')},
-            **{key: settings[key] for key in ('f0_min', 'f0_max', 'ste_silence_ratio', 'bandpass_low', 'bandpass_high')}}
-
-
-def extract_signal_features(signal, sample_rate, method, settings, wav_path=None):
-    spec = feature_spec(method, settings)
-    detector = build_detector(method, plugins=spec['plugins'], threshold=settings['champions'][method]['threshold'],
-                              frame_duration_ms=spec['frame_duration_ms'], hop_duration_ms=spec['hop_duration_ms'],
-                              clipping_ratio=spec['clipping_ratio'])
-    # AMDF has no pre-processing plugin, but the wrapper exposes the same native
-    # frames/candidates for it. No post-processing occurs during feature fitting.
-    from src.plugins import PluginPitchDetector
-    if not isinstance(detector, PluginPitchDetector):
-        detector = PluginPitchDetector(detector)
-    detector.base_detector.f0_min = spec['f0_min']
-    detector.base_detector.f0_max = spec['f0_max']
-    detector.base_detector.ste_silence_ratio = spec['ste_silence_ratio']
-    detector.base_detector.median_size = settings['median_size']
-    for plugin in detector.pre_processors:
-        if hasattr(plugin, 'low_cutoff'):
-            plugin.low_cutoff = spec['bandpass_low']
-            plugin.high_cutoff = spec['bandpass_high']
-    fd = detector.process_signal(signal, sample_rate, wav_path=wav_path)
-    fd['feature_pre_processors'] = [p.name for p in detector.pre_processors]
-    fd['feature_spec'] = spec
-    fd['is_active'] = fd['ste'] >= fd['ste_thresh']
-    fd['periodicity_vals'] = fd['peak_values']
-    fd['zcr_vals'] = np.zeros(fd['num_frames'])
-    for index in np.flatnonzero(fd['is_active']):
-        # The pitch extractor itself centers the clipped frame before analysis.
-        frame = fd['pitch_frames'][index]
-        fd['zcr_vals'][index] = compute_zcr(frame - np.mean(frame))
-    return fd
-
-
-def extract_file_features(path, method, settings):
-    rate, signal, _ = load_wav(str(path))
-    return extract_signal_features(signal, rate, method, settings, wav_path=str(path))
-
 
 def fit_champion_models(features, method, settings):
     """No LAB statistics or test inputs are accepted by this fitting API."""
     expected = feature_spec(method, settings)
     if not features or any(fd['feature_spec'] != expected for fd in features):
+        raise ValueError('Training features do not match the Champion feature space')
+    contract = training_contract(features, method)
+    if contract != feature_contract(method, settings):
         raise ValueError('Training features do not match the Champion feature space')
     p = np.concatenate([fd['periodicity_vals'][fd['is_active']] for fd in features])
     z = np.concatenate([fd['zcr_vals'][fd['is_active']] for fd in features])
@@ -102,13 +67,21 @@ def fit_champion_models(features, method, settings):
     timeline = np.concatenate([np.r_[fd['periodicity_vals'], 0.] for fd in features])
     active = np.concatenate([np.r_[fd['is_active'], False] for fd in features])
     _, hmm = train_and_decode_2state_hmm(timeline, method, active_mask=active)
-    return {'method': method, 'feature_spec': expected, 'thresholds': thresholds,
+    return {'method': method, 'feature_spec': expected, 'feature_contract': contract.to_dict(),
+            'fit_population': 'train_active', 'thresholds': thresholds,
             'cluster_2d': cluster, 'hmm': hmm, 'num_train_active': len(p),
             'num_train_frames': sum(len(fd['is_active']) for fd in features)}
 
 
 def predict_decisions(fd, model, settings, include_input_adaptation=False):
-    if fd['feature_spec'] != model['feature_spec']:
+    if (fd['feature_spec'] != model['feature_spec']
+            or feature_spec(model['method'], settings) != model['feature_spec']):
+        raise ValueError('Prediction features differ from frozen training feature space')
+    # Old Champion models carry the narrower legacy spec; expand it using the
+    # frozen experiment settings, never today's configuration defaults.
+    contract = feature_contract(model['method'], settings).to_dict()
+    if (fd.get('feature_contract') != contract
+            or model.get('feature_contract', contract) != contract):
         raise ValueError('Prediction features differ from frozen training feature space')
     method, fits = model['method'], model['thresholds']
     decisions, thresholds = {}, {}

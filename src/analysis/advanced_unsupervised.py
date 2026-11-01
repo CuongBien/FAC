@@ -7,7 +7,7 @@
 from typing import Any, Dict, Tuple
 import numpy as np
 from scipy.stats import norm
-from src.core.processing import voiced_segments
+from src.core.processing import voiced_segments, compute_zcr
 
 # ==============================================================================
 # 1. 1D GMM-EM WITH FIXED COMPONENT PRIORS (DEFAULT 50/50)
@@ -168,17 +168,6 @@ def compute_gmm_em_1d(
 # ==============================================================================
 # 2. MULTI-FEATURE 2D CLUSTERING (PERIODICITY + ZERO CROSSING RATE ZCR)
 # ==============================================================================
-
-def compute_zcr(frame: np.ndarray) -> float:
-    """Compute normalized Zero Crossing Rate for a 1D audio frame."""
-    if len(frame) < 2:
-        return 0.0
-    signs = np.sign(frame)
-    # Replace zeros with 1 to avoid zero-product artifacts
-    signs[signs == 0] = 1.0
-    crossings = np.sum(np.abs(signs[1:] - signs[:-1])) / 2.0
-    return float(crossings / (len(frame) - 1))
-
 
 def cluster_multifeature_2d(
     periodicity_vals: np.ndarray,

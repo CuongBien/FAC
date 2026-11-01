@@ -7,7 +7,6 @@ train-selection protocol, not a claim of a pristine unseen test set.
 import argparse
 import csv
 from datetime import datetime, timezone
-import importlib.util
 from importlib.metadata import version
 import itertools
 from pathlib import Path
@@ -23,8 +22,10 @@ if sys.platform == 'win32':
 
 from src import config
 from src.pipelines import build_detector
+from src.pipeline.cache import PitchCache
+from src.pipeline.features import extract_file_features
 from src.analysis.validation import (
-    aggregate, evaluate_result, pitch_cache, select_trial, selection_key,
+    aggregate, evaluate_result, select_trial, selection_key,
 )
 from src.experiments.manifest import source_manifest, dataset_manifest, verify_dataset, sha256
 from src.experiments.serialization import write_json
@@ -42,12 +43,6 @@ THRESHOLD_GRIDS = {'acf': [.25, .30, .35, .40, .45, .50, .55, .60, .65],
 FRAME_GRID = (20., 25., 30.)
 
 
-def feature_module():
-    spec = importlib.util.spec_from_file_location('stage4_features', ROOT/'scripts/16_evaluate_advanced_unsupervised.py')
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
 
 def specification(method, plugins=(), threshold=None, frame=25.):
     return {'method': method, 'plugins': list(plugins),
@@ -55,8 +50,8 @@ def specification(method, plugins=(), threshold=None, frame=25.):
             'frame_duration_ms': float(frame), 'hop_duration_ms': 10., 'clipping_ratio': .40}
 
 
-def trial(spec, paths, tag):
-    detector = build_detector(**spec)
+def trial(spec, paths, tag, *, cache=None):
+    detector = build_detector(**spec, cache=cache)
     rows = [evaluate_result(detector.process_file(str(path)), path) for path in paths]
     return {'id': tag, 'spec': spec, 'metrics': aggregate(rows), 'files': rows}
 
@@ -96,47 +91,46 @@ def train(args):
     started = time.perf_counter()
     all_trials, winners, sweep = [], {}, []
     combos = [combo for size in range(5) for combo in itertools.combinations(('BP', 'Clip', 'Energy', 'Viterbi'), size)]
-    with pitch_cache() as cache_stats:
-        for method in METHODS:
-            historical = []
-            for index, combo in enumerate(combos):
-                item = trial(specification(method, combo), paths, f'{method}_sweep_{index:02d}')
-                historical.append(item)
-                print(item['id'], item['metrics']['final_score'], flush=True)
-            sweep.extend(historical)
-            all_trials.extend(historical)
-            # Keep the two best combinations at historical settings plus the
-            # historical Champion, before any test feature is read.
-            shortlisted = [item['spec']['plugins'] for item in sorted(historical, key=selection_key)[:2]]
-            if HISTORICAL_CHAMPIONS[method] not in shortlisted:
-                shortlisted.append(HISTORICAL_CHAMPIONS[method])
-            candidates = list(historical)
-            index = 0
-            seen = {(tuple(item['spec']['plugins']), item['spec']['threshold'], 25.) for item in historical}
-            for combo in shortlisted:
-                thresholds = sorted(set(THRESHOLD_GRIDS[method] + [config.threshold_for_plugins(method, combo)]))
-                for frame, threshold in itertools.product(FRAME_GRID, thresholds):
-                    key = (tuple(combo), threshold, frame)
-                    if key in seen:
-                        continue
-                    seen.add(key)
-                    item = trial(specification(method, combo, threshold, frame), paths, f'{method}_tune_{index:03d}')
-                    candidates.append(item)
-                    all_trials.append(item)
-                    index += 1
-                print(method, '+'.join(combo) or 'Baseline', 'frame/threshold grid complete', flush=True)
-            winner = select_trial(candidates)
-            winners[method] = winner
-            write_json(output/'train'/f'{method}_trials.json', candidates)
-            print('FROZEN WINNER', method, winner['spec'], winner['metrics']['final_score'], flush=True)
-        elapsed = time.perf_counter()-started
-        cache_record = dict(cache_stats)
+    cache_stats = PitchCache()
+    for method in METHODS:
+        historical = []
+        for index, combo in enumerate(combos):
+            item = trial(specification(method, combo), paths, f'{method}_sweep_{index:02d}', cache=cache_stats)
+            historical.append(item)
+            print(item['id'], item['metrics']['final_score'], flush=True)
+        sweep.extend(historical)
+        all_trials.extend(historical)
+        # Keep the two best combinations at historical settings plus the
+        # historical Champion, before any test feature is read.
+        shortlisted = [item['spec']['plugins'] for item in sorted(historical, key=selection_key)[:2]]
+        if HISTORICAL_CHAMPIONS[method] not in shortlisted:
+            shortlisted.append(HISTORICAL_CHAMPIONS[method])
+        candidates = list(historical)
+        index = 0
+        seen = {(tuple(item['spec']['plugins']), item['spec']['threshold'], 25.) for item in historical}
+        for combo in shortlisted:
+            thresholds = sorted(set(THRESHOLD_GRIDS[method] + [config.threshold_for_plugins(method, combo)]))
+            for frame, threshold in itertools.product(FRAME_GRID, thresholds):
+                key = (tuple(combo), threshold, frame)
+                if key in seen:
+                    continue
+                seen.add(key)
+                item = trial(specification(method, combo, threshold, frame), paths, f'{method}_tune_{index:03d}', cache=cache_stats)
+                candidates.append(item)
+                all_trials.append(item)
+                index += 1
+            print(method, '+'.join(combo) or 'Baseline', 'frame/threshold grid complete', flush=True)
+        winner = select_trial(candidates)
+        winners[method] = winner
+        write_json(output/'train'/f'{method}_trials.json', candidates)
+        print('FROZEN WINNER', method, winner['spec'], winner['metrics']['final_score'], flush=True)
+    elapsed = time.perf_counter()-started
+    cache_record = dict(cache_stats)
     write_json(output/'train/plugin_sweep.json', sweep)
     write_trial_csv(output/'train/all_trials_per_file.csv', all_trials)
-    features = feature_module()
     models = {}
     for method in METHODS:
-        train_features = [features.extract_features_for_file(str(path), method) for path in paths]
+        train_features = [extract_file_features(str(path), method) for path in paths]
         models[method] = fit_models(train_features, method)
     common = {'schema_version': 1, 'frozen_at_utc': datetime.now(timezone.utc).isoformat(),
               'train_dir': str(Path(args.train_dir).resolve()), 'train_manifest': manifest,
@@ -177,7 +171,6 @@ def evaluate(args):
         raise ValueError('Frozen models/config use different training data')
     if (output/'evaluation.json').exists():
         raise FileExistsError('Evaluation already exists; retain it and choose a new run directory')
-    feature_api = feature_module()
     pipeline_rows, protocol_rows = [], []
     for dataset, folder in [('train', args.train_dir), ('test', args.test_dir)]:
         for method in METHODS:
@@ -200,7 +193,7 @@ def evaluate(args):
                                       'spec': spec, 'metrics': aggregate(records), 'files': records})
             protocol_records = {}
             for path in paths:
-                fd = feature_api.extract_features_for_file(str(path), method)
+                fd = extract_file_features(str(path), method)
                 for strategy, labels in predict_strategies(fd, models['models'][method]).items():
                     result = result_from_labels(fd, labels)
                     row = evaluate_result(result, path)

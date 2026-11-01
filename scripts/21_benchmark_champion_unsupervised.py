@@ -19,11 +19,13 @@ if sys.platform == 'win32':
     sys.stdout.reconfigure(encoding='utf-8')
 
 from src.analysis.champion_unsupervised import (
-    PRIMARY, ADAPTIVE, experiment_configuration, extract_file_features,
+    PRIMARY, ADAPTIVE, experiment_configuration,
     fit_champion_models, predict_decisions,
 )
 from src.analysis.protocols import threshold_labels
-from src.analysis.validation import evaluate_result, aggregate, pitch_cache
+from src.analysis.validation import evaluate_result, aggregate
+from src.pipeline.cache import PitchCache
+from src.pipeline.champion import extract_file_features
 from src.experiments.manifest import source_manifest, dataset_manifest, verify_dataset, sha256
 from src.experiments.serialization import write_json
 from src.experiments.legacy import freeze_json, read_frozen, read_evaluation_bundle
@@ -64,15 +66,15 @@ def train(args):
         **{name: version(name) for name in ('numpy', 'scipy', 'matplotlib')},
         'snapshot_sha256': sha256(folder/'training_source_snapshot.tar.gz')})
     models = {}
-    with pitch_cache():
-        for method in METHODS:
-            features = []
-            for path in paths:
-                fd = extract_file_features(path, method, settings)
-                features.append(fd)
-                save_frames(folder/'train_features'/method/(path.stem+'.csv'), fd)
-            models[method] = fit_champion_models(features, method, settings)
-            print('TRAIN FIT', method, models[method]['num_train_active'], 'active frames', flush=True)
+    cache = PitchCache()
+    for method in METHODS:
+        features = []
+        for path in paths:
+            fd = extract_file_features(path, method, settings, cache=cache)
+            features.append(fd)
+            save_frames(folder/'train_features'/method/(path.stem+'.csv'), fd)
+        models[method] = fit_champion_models(features, method, settings)
+        print('TRAIN FIT', method, models[method]['num_train_active'], 'active frames', flush=True)
     # Check data/source did not change during fitting. No test directory is used.
     verify_dataset(args.train_dir, manifest)
     if source_manifest(ROOT)['source_sha256'] != provenance['source_sha256']:
@@ -112,52 +114,52 @@ def evaluate(args):
     test_manifest = dataset_manifest(args.test_dir)
     pipelines, protocols = [], []
     comparison_count = 0
-    with pitch_cache() as cache:
-        for dataset, data_dir in [('train', args.train_dir), ('test', args.test_dir)]:
-            paths = sorted(Path(data_dir).glob('*.wav'))
-            for method in METHODS:
-                rows = {}
-                for path in paths:
-                    fd = extract_file_features(path, method, settings)
-                    decisions, thresholds, adaptive_models = predict_decisions(
-                        fd, models['models'][method], settings, include_input_adaptation=True)
-                    write_json(folder/'input_models'/dataset/method/(path.stem+'.json'), adaptive_models)
-                    control = threshold_labels(fd, method, settings['champions'][method]['threshold'])
-                    decisions = {'champion': control, **decisions}
-                    detector = build_champion(method)
-                    native = detector.process_file(str(path))
-                    for strategy, labels in decisions.items():
-                        result = detector.process_feature_labels(fd, labels)
-                        if strategy == 'champion':
-                            for key in ('labels', 'frame_times', 'f0_contour'):
-                                if not np.array_equal(result[key], native[key]):
-                                    raise AssertionError(f'Native Champion replay mismatch: {method}/{path.name}/{key}')
-                            comparison_count += 1
-                        row = evaluate_result(result, path)
-                        row.update({'num_frames': result['num_frames'],
-                                    'initial_voiced': int(np.sum(labels == 'v')),
-                                    'energy_guard_threshold': detector.base_detector.threshold,
-                                    'post_added_voiced': int(np.sum((labels != 'v') & (result['labels'] == 'v'))),
-                                    'post_removed_voiced': int(np.sum((labels == 'v') & (result['labels'] != 'v')))})
-                        contour = Path('contours')/dataset/method/strategy/(path.stem+'.csv')
-                        save_frames(folder/contour, result, initial=labels,
-                                    decision_threshold=thresholds.get(strategy), features=fd)
-                        row['contour_path'] = contour.as_posix()
-                        rows.setdefault(strategy, []).append(row)
-                    baseline = build_baseline(method).process_file(str(path))
-                    row = evaluate_result(baseline, path)
-                    contour = Path('contours')/dataset/method/'baseline'/(path.stem+'.csv')
-                    save_frames(folder/contour, baseline)
-                    row.update({'num_frames': baseline['num_frames'], 'contour_path': contour.as_posix()})
-                    rows.setdefault('baseline', []).append(row)
-                for strategy, records in rows.items():
-                    group = 'control' if strategy in ('baseline', 'champion') else (
-                        'input_adaptive' if strategy in ADAPTIVE else 'train_fitted')
-                    item = {'dataset': dataset, 'method': method, 'strategy': strategy,
-                            'group': group, 'metrics': aggregate(records), 'files': records}
-                    (pipelines if group == 'control' else protocols).append(item)
-                print('EVALUATED', dataset, method, len(rows), 'strategies', flush=True)
-        cache_record = dict(cache)
+    cache = PitchCache()
+    for dataset, data_dir in [('train', args.train_dir), ('test', args.test_dir)]:
+        paths = sorted(Path(data_dir).glob('*.wav'))
+        for method in METHODS:
+            rows = {}
+            for path in paths:
+                fd = extract_file_features(path, method, settings, cache=cache)
+                decisions, thresholds, adaptive_models = predict_decisions(
+                    fd, models['models'][method], settings, include_input_adaptation=True)
+                write_json(folder/'input_models'/dataset/method/(path.stem+'.json'), adaptive_models)
+                control = threshold_labels(fd, method, settings['champions'][method]['threshold'])
+                decisions = {'champion': control, **decisions}
+                detector = build_champion(method, cache=cache)
+                native = detector.process_file(str(path))
+                for strategy, labels in decisions.items():
+                    result = detector.process_feature_labels(fd, labels)
+                    if strategy == 'champion':
+                        for key in ('labels', 'frame_times', 'f0_contour'):
+                            if not np.array_equal(result[key], native[key]):
+                                raise AssertionError(f'Native Champion replay mismatch: {method}/{path.name}/{key}')
+                        comparison_count += 1
+                    row = evaluate_result(result, path)
+                    row.update({'num_frames': result['num_frames'],
+                                'initial_voiced': int(np.sum(labels == 'v')),
+                                'energy_guard_threshold': detector.base_detector.threshold,
+                                'post_added_voiced': int(np.sum((labels != 'v') & (result['labels'] == 'v'))),
+                                'post_removed_voiced': int(np.sum((labels == 'v') & (result['labels'] != 'v')))})
+                    contour = Path('contours')/dataset/method/strategy/(path.stem+'.csv')
+                    save_frames(folder/contour, result, initial=labels,
+                                decision_threshold=thresholds.get(strategy), features=fd)
+                    row['contour_path'] = contour.as_posix()
+                    rows.setdefault(strategy, []).append(row)
+                baseline = build_baseline(method, cache=cache).process_file(str(path))
+                row = evaluate_result(baseline, path)
+                contour = Path('contours')/dataset/method/'baseline'/(path.stem+'.csv')
+                save_frames(folder/contour, baseline)
+                row.update({'num_frames': baseline['num_frames'], 'contour_path': contour.as_posix()})
+                rows.setdefault('baseline', []).append(row)
+            for strategy, records in rows.items():
+                group = 'control' if strategy in ('baseline', 'champion') else (
+                    'input_adaptive' if strategy in ADAPTIVE else 'train_fitted')
+                item = {'dataset': dataset, 'method': method, 'strategy': strategy,
+                        'group': group, 'metrics': aggregate(records), 'files': records}
+                (pipelines if group == 'control' else protocols).append(item)
+            print('EVALUATED', dataset, method, len(rows), 'strategies', flush=True)
+    cache_record = dict(cache)
     verify_dataset(args.train_dir, frozen['train_manifest'])
     verify_dataset(args.test_dir, test_manifest)
     if source_manifest(ROOT)['source_sha256'] != frozen['provenance']['source_sha256']:

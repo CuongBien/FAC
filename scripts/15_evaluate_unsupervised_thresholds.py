@@ -36,11 +36,8 @@ from src.analysis.evaluation import (
     evaluate_against_ground_truth, round_metric, mean_metric, format_metric,
 )
 from src import config
-from src.core.audio import load_wav, frame_signal, compute_ste
-from src.core.processing import silence_energy_threshold
-from src.core.acf import find_f0_acf
-from src.core.amdf import find_f0_amdf
-from src.core.cepstrum import find_f0_cepstrum
+from src.core.audio import load_wav
+from src.pipeline.features import extract_raw_features
 from src.core.lab_parser import parse_lab_file
 from src.core.pitch_detector import PitchDetector
 
@@ -72,20 +69,8 @@ def extract_all_and_active_metrics(
 
     for wav_path in wav_paths:
         sr, signal, _ = load_wav(wav_path)
-        frames, _ = frame_signal(
-            signal,
-            sr,
-            frame_duration_ms=frame_duration_ms,
-            hop_duration_ms=hop_duration_ms,
-            window="rectangular",
-        )
-        ste, _ = compute_ste(
-            signal,
-            sr,
-            frame_duration_ms=frame_duration_ms,
-            hop_duration_ms=hop_duration_ms,
-        )
-        ste_thresh = silence_energy_threshold(ste, ste_silence_ratio)
+        features = extract_raw_features(signal, sr, method, frame_duration_ms, hop_duration_ms,
+                                        f0_min, f0_max, ste_silence_ratio, profile='raw_all')
 
         lab_path = wav_path.rsplit(".", 1)[0] + ".lab"
         if os.path.exists(lab_path):
@@ -93,33 +78,9 @@ def extract_all_and_active_metrics(
             if lab_data.get("f0_num") is not None:
                 total_ref_voiced += int(lab_data["f0_num"])
 
-        total_frames += len(frames)
-
-        for i, frame in enumerate(frames):
-            if method == "acf":
-                _, metric_val, _ = find_f0_acf(
-                    frame, sr, f0_min=f0_min, f0_max=f0_max, mode="normalized"
-                )
-            elif method == "amdf":
-                _, metric_val, _ = find_f0_amdf(
-                    frame, sr, f0_min=f0_min, f0_max=f0_max, mode="normalized"
-                )
-            elif method == "cepstrum":
-                _, metric_val, _ = find_f0_cepstrum(
-                    frame,
-                    sr,
-                    f0_min=f0_min,
-                    f0_max=f0_max,
-                    window="hamming",
-                    n_fft=2048,
-                    mode="peak",
-                )
-            else:
-                raise ValueError(f"Unknown method: {method}")
-
-            all_values.append(metric_val)
-            if ste[i] >= ste_thresh:
-                active_values.append(metric_val)
+        total_frames += features['num_frames']
+        all_values.extend(features['periodicity_vals'])
+        active_values.extend(features['periodicity_vals'][features['is_active']])
 
     return {
         "all_values": np.array(all_values, dtype=np.float64),

@@ -15,7 +15,7 @@ import numpy as np
 from scipy.io import wavfile
 
 from src.analysis.champion_unsupervised import (
-    PRIMARY, ADAPTIVE, experiment_configuration, feature_spec,
+    PRIMARY, ADAPTIVE, experiment_configuration, feature_spec, feature_contract,
     extract_signal_features, fit_champion_models, predict_decisions,
 )
 from src.analysis.protocols import threshold_labels
@@ -35,6 +35,7 @@ def signal(rate=16000):
 
 def simple_features(method, settings):
     return {'feature_spec': feature_spec(method, settings),
+            'feature_contract': feature_contract(method, settings).to_dict(),
             'periodicity_vals': np.r_[np.linspace(.1, .2, 6), np.linspace(.7, .8, 6)],
             'zcr_vals': np.r_[np.linspace(.8, .7, 6), np.linspace(.2, .1, 6)],
             'is_active': np.ones(12, dtype=bool), 'candidate_f0': np.full(12, 180.), 'ste': np.ones(12)}

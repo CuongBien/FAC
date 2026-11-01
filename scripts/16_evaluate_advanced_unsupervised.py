@@ -29,15 +29,12 @@ if sys.platform.startswith("win"):
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src import config
-from src.core.audio import load_wav, frame_signal, compute_ste
-from src.core.processing import center_frame, silence_energy_threshold, smooth_voiced_segments
-from src.core.acf import find_f0_acf
-from src.core.amdf import find_f0_amdf
-from src.core.cepstrum import find_f0_cepstrum
+from src.core.audio import load_wav
+from src.pipeline.features import extract_raw_features
+from src.core.processing import smooth_voiced_segments
 from src.analysis.unsupervised_threshold import compute_median_threshold, compute_otsu_threshold
 from src.analysis.advanced_unsupervised import (
     compute_gmm_em_1d,
-    compute_zcr,
     cluster_multifeature_2d,
     train_and_decode_2state_hmm,
     compute_sliding_window_adaptive_threshold,
@@ -58,61 +55,9 @@ def extract_features_for_file(
 ) -> Dict[str, Any]:
     """Extract full frame features: raw signal, frames, STE, periodicity metrics, candidate f0, and ZCR."""
     sr, signal, duration = load_wav(wav_path)
-    frames, frame_times = frame_signal(
-        signal,
-        sr,
-        frame_duration_ms=frame_duration_ms,
-        hop_duration_ms=hop_duration_ms,
-        window="rectangular",
-    )
-    ste, _ = compute_ste(
-        signal,
-        sr,
-        frame_duration_ms=frame_duration_ms,
-        hop_duration_ms=hop_duration_ms,
-    )
-
-    ste_thresh = silence_energy_threshold(ste, ste_silence_ratio)
-    num_frames = len(frames)
-
-    candidate_f0 = np.zeros(num_frames, dtype=np.float64)
-    periodicity_vals = np.zeros(num_frames, dtype=np.float64)
-    zcr_vals = np.zeros(num_frames, dtype=np.float64)
-    is_active = np.zeros(num_frames, dtype=bool)
-
-    for i in range(num_frames):
-        frame = center_frame(frames[i])
-        zcr_vals[i] = compute_zcr(frame)
-
-        if ste[i] >= ste_thresh:
-            is_active[i] = True
-
-        if method == "acf":
-            f0_val, metric_val, _ = find_f0_acf(frame, sr, f0_min=f0_min, f0_max=f0_max, mode="normalized")
-        elif method == "amdf":
-            f0_val, metric_val, _ = find_f0_amdf(frame, sr, f0_min=f0_min, f0_max=f0_max, mode="normalized")
-        elif method == "cepstrum":
-            f0_val, metric_val, _ = find_f0_cepstrum(frame, sr, f0_min=f0_min, f0_max=f0_max, window="hamming", n_fft=2048, mode="peak")
-        else:
-            raise ValueError(f"Unknown method: {method}")
-
-        candidate_f0[i] = f0_val
-        periodicity_vals[i] = metric_val
-
-    return {
-        "wav_path": wav_path,
-        "sample_rate": sr,
-        "signal": signal,
-        "duration": duration,
-        "frame_times": frame_times,
-        "frames": frames,
-        "ste": ste,
-        "ste_thresh": ste_thresh,
-        "is_active": is_active,
-        "candidate_f0": candidate_f0,
-        "periodicity_vals": periodicity_vals,
-        "zcr_vals": zcr_vals,
-    }
+    return extract_raw_features(signal, sr, method, frame_duration_ms, hop_duration_ms,
+                                f0_min, f0_max, ste_silence_ratio,
+                                wav_path=wav_path, duration=duration)
 
 
 def evaluate_custom_prediction(
