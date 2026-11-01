@@ -1,6 +1,6 @@
 # Kế hoạch refactor để tái lập thí nghiệm và quản lý báo cáo
 
-Ngày 01/11/2026. Trạng thái: **đã hoàn tất đợt 1–2**; đợt 2 trên `codex/refactor-pipeline`, kế thừa `codex/refactor-experiments`; các đợt 3–6 còn lại. Nhánh lập kế hoạch: `codex/refactor-reproducibility-plan`, xuất phát từ `main` tại `f059592` sau khi merge toàn bộ sửa lỗi. [Quản lý thí nghiệm](EXPERIMENTS.md), [cấu trúc và kiểm chứng pipeline](PIPELINE.md).
+Cập nhật 02/11/2026. Trạng thái: **đã hoàn tất đợt 1–3**; đợt 3 trên `codex/refactor-runner`, kế thừa `codex/refactor-pipeline`; các đợt 4–6 còn lại. Nhánh lập kế hoạch: `codex/refactor-reproducibility-plan`, xuất phát từ `main` tại `f059592` sau khi merge toàn bộ sửa lỗi. [Quản lý thí nghiệm](EXPERIMENTS.md), [pipeline](PIPELINE.md), [runner và resume](RUNNER.md).
 
 ## Mốc phải giữ được
 
@@ -107,6 +107,6 @@ Chỉ chạy đối chứng cần cho đợt đang làm; không quét lại 222 
 
 ## Bắt đầu từ đâu
 
-**Đợt 1–2 đã qua nghiệm thu:** schema/hash có phiên bản, hai run được đăng ký bằng adapter chỉ đọc, CLI list/verify/index hoạt động. `src/pipeline` có feature contract, engine, extractor raw/Champion và cache theo run; script 17 không import script 16; metadata model lấy từ cấu hình thực. 152 test đạt; 78 nhóm dữ liệu trước refactor, 288 trường hợp, 93.423 contour và 3.873 dòng đặc trưng train khớp chính xác. Không di chuyển outputs hoặc thay công thức/preset. Bước tiếp theo là service runner chung ở đợt 3.
+**Đợt 1–3 đã qua nghiệm thu:** spec/manifest/registry, pipeline contract/engine/cache và runner chung đã có. Script 17/21 là wrapper; run mới ghim đầy đủ artifact và trạng thái, OS lock/journal bảo vệ công bố, resume theo pha. 170 test đạt; kết quả Champion và Stage 4 đối chiếu khớp, không đổi preset hoặc chọn lại theo test. JSON thực thi hiện giới hạn hai giao thức v1 cố định; thay tham số cần protocol revision mới. Không di chuyển outputs cũ; native proof run lưu nén riêng. Bước tiếp theo là hợp đồng metric/đối sánh ở đợt 4.
 
 Phần tối ưu Cepstrum, bổ sung tập test độc lập và nhãn theo thời gian vẫn thuộc phát triển/đánh giá thuật toán, không phải điều kiện để hoàn thành refactor tổ chức mã. Refactor này chỉ tạo nền để thực hiện các việc đó có thể tái lập và truy xuất được.

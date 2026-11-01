@@ -150,7 +150,8 @@ class BenchmarkIntegrationTests(unittest.TestCase):
             (train/'a.lab').write_text('F0mean 180\nF0std 10\nF0num 20\n', encoding='utf-8')
             args = SimpleNamespace(train_dir=str(train), test_dir=str(test), output_dir=str(output))
             # Fitting is permitted to hash LAB for provenance, but never evaluate it.
-            with patch.object(runner, 'evaluate_result', side_effect=AssertionError('LAB statistics used during fit')):
+            from src.experiments import champion as backend
+            with patch.object(backend, 'evaluate_result', side_effect=AssertionError('LAB statistics used during fit')):
                 runner.train(args)
             self.assertFalse(test.exists())
             frozen_hash = sha256(output/'frozen_models.json')
@@ -158,9 +159,9 @@ class BenchmarkIntegrationTests(unittest.TestCase):
             self.assertEqual(frozen['experiment']['fit_population'], 'train_active_after_champion_preprocessing')
             with self.assertRaises(FileExistsError):
                 runner.train(args)
-            with patch.object(runner, 'experiment_configuration', return_value={}):
+            with patch.object(backend, 'experiment_configuration', return_value={}):
                 with self.assertRaisesRegex(ValueError, 'configuration changed'):
-                    runner.checked_freezes(output, str(train))
+                    backend.checked_freezes(output, str(train))
             test.mkdir()
             wavfile.write(test/'b.wav', 16000, (signal()*30000).astype(np.int16))
             (test/'b.lab').write_text('F0mean 181\nF0std 11\nF0num 19\n', encoding='utf-8')

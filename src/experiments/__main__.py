@@ -15,9 +15,23 @@ def main(argv=None):
     verify.add_argument('run', nargs='?', help='Exact run ID or path from the registry; omit for all')
     index = commands.add_parser('index')
     index.add_argument('--output', default='outputs/registry.json', help='Root-relative derived index path')
+    run = commands.add_parser('run', help='Execute a fixed versioned protocol')
+    run.add_argument('protocol', choices=('champion', 'stage4'))
+    run.add_argument('phase', choices=('prepare', 'train', 'evaluate', 'report'))
+    run.add_argument('--train-dir', required=True)
+    run.add_argument('--test-dir')
+    run.add_argument('--output-dir', required=True)
+    run.add_argument('--spec', type=Path)
+    run.add_argument('--resume', action='store_true')
     args = parser.parse_args(argv)
     registry = RunRegistry(args.root)
     try:
+        if args.command == 'run':
+            if args.phase in ('evaluate', 'report') and not args.test_dir:
+                raise ValueError('Evaluation/report requires --test-dir')
+            from .runner import run_phase
+            run_phase(args.protocol, args.phase, args)
+            return 0
         if args.command == 'index':
             print(registry.write_index(args.output))
             return 0

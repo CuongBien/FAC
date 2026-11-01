@@ -1,5 +1,45 @@
 {
-  "description": "Schema example for new runs. Champion settings inherit Stage 4 LAB-summary calibration; only the new decision fits are unsupervised. Existing script 21 is unchanged and does not load this file yet.",
+  "controls": {
+    "baseline": {
+      "acf": {
+        "f0_max": 400.0,
+        "f0_min": 70.0,
+        "frame_duration_ms": 25.0,
+        "hop_duration_ms": 10.0,
+        "median_size": 3,
+        "post_processors": [],
+        "pre_processors": [],
+        "reference_threshold": 0.4408,
+        "ste_silence_ratio": 0.008,
+        "use_median_filter": true
+      },
+      "amdf": {
+        "f0_max": 400.0,
+        "f0_min": 70.0,
+        "frame_duration_ms": 25.0,
+        "hop_duration_ms": 10.0,
+        "median_size": 3,
+        "post_processors": [],
+        "pre_processors": [],
+        "reference_threshold": 0.438,
+        "ste_silence_ratio": 0.008,
+        "use_median_filter": true
+      },
+      "cepstrum": {
+        "f0_max": 400.0,
+        "f0_min": 70.0,
+        "frame_duration_ms": 25.0,
+        "hop_duration_ms": 10.0,
+        "median_size": 3,
+        "post_processors": [],
+        "pre_processors": [],
+        "reference_threshold": 0.06,
+        "ste_silence_ratio": 0.008,
+        "use_median_filter": true
+      }
+    }
+  },
+  "description": "Executable fixed v1 protocol. Every numerical setting is checked; unsupported overrides are rejected.",
   "fit": {
     "input_adaptive_controls": [
       "kmeans2d_input_active",
@@ -62,7 +102,7 @@
     ]
   },
   "metric_version": "legacy-v1",
-  "name": "champion-unsupervised-active-v1",
+  "name": "champion-v1",
   "pipelines": {
     "acf": {
       "f0_max": 400.0,
@@ -186,5 +226,6 @@
       "use_median_filter": true
     }
   },
+  "protocol": "champion",
   "schema_version": 1
 }

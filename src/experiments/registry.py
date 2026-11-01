@@ -15,7 +15,9 @@ class RunRegistry:
     def scan(self):
         outputs = self.root/'outputs'
         folders = ({p.parent for p in outputs.rglob('frozen_config.json')}
-                   | {p.parent for p in (outputs/'runs').rglob('manifest.json')})
+                   | {p.parent for p in outputs.rglob('manifest.json')
+                      if 'runs' in p.relative_to(outputs).parts or (p.parent/'config.json').is_file()})
+        folders = {folder for folder in folders if '.attempts' not in folder.relative_to(outputs).parts}
         entries = []
         for folder in sorted(folders):
             relative = folder.relative_to(self.root).as_posix()

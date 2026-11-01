@@ -16,7 +16,7 @@ Có thể thay `uv run python` bằng `.\.venv\Scripts\python.exe` nếu môi tr
 uv run python -B -m unittest discover -s tests -v
 ```
 
-Có 152 test: 120 test của các đợt sửa trước, 17 test hạ tầng thí nghiệm và 15 test feature contract/cache trong `tests/test_pipeline_contracts.py`. Bằng chứng hiện tại nằm trong `outputs/refactor_phase2/`; validation cũ vẫn giữ mốc lịch sử của nó. Detector yêu cầu audio dài ít nhất một khung; CLI thoát mã 2 với thông báo rõ nếu input không đủ dài.
+Có 170 test: 120 test của các đợt sửa trước, 17 test hạ tầng thí nghiệm, 15 test pipeline contract/cache và 18 test runner trong `tests/test_runner.py`. Bằng chứng hiện tại nằm trong `outputs/refactor_phase3/`; validation cũ vẫn giữ mốc lịch sử của nó. Detector yêu cầu audio dài ít nhất một khung; CLI thoát mã 2 với thông báo rõ nếu input không đủ dài.
 
 Đối chiếu số học với mốc trước refactor và mô hình Champion đã freeze:
 
@@ -25,6 +25,14 @@ uv run python -B scripts/22_verify_pipeline_refactor.py verify
 ```
 
 Lệnh chỉ đọc dữ liệu/kết quả cũ, không đổi expected hoặc model. Đối chiếu 78 nhóm dữ liệu, 288 trường hợp/file, 93.423 dòng contour và 3.873 dòng đặc trưng train. Frozen train models không fit lại; hai control input-adaptive chạy lại phép fit từng input theo đúng giao thức của chúng. Xem [hợp đồng pipeline](PIPELINE.md).
+
+Kiểm chứng runner thực tế, tạo proof ở thư mục mới:
+
+```powershell
+uv run python -B scripts/23_verify_runner_refactor.py --output outputs/refactor_phase3-recheck
+```
+
+Lần này có fit lại ba model Champion **chỉ từ train**, không quét/chọn lại preset; chạy đầy đủ prepare/train/evaluate/report và resume, đối chiếu model, metric, contour, feature và bảng report với run cũ. Replay Stage 4 dùng model đã freeze, không lặp sweep 222 cấu hình. Xem [lifecycle và giới hạn resume](RUNNER.md).
 
 ## Dự đoán file hoặc thư mục
 

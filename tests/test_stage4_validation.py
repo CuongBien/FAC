@@ -93,8 +93,9 @@ class FreezeAndSelectionTests(unittest.TestCase):
                 return {'id': tag, 'spec': spec, 'metrics': {'final_score': score},
                         'files': [{'file': 'a.wav', 'final_score': score}]}
             output = Path(folder)/'run'
-            with patch.object(runner, 'trial', side_effect=fake_trial), \
-                 patch.object(runner, 'extract_file_features', side_effect=extract):
+            from src.experiments import calibration as backend
+            with patch.object(backend, 'trial', side_effect=fake_trial), \
+                 patch.object(backend, 'extract_file_features', side_effect=extract):
                 runner.train(SimpleNamespace(train_dir=str(train), test_dir=str(test), output_dir=str(output)))
             self.assertFalse(test.exists())
             self.assertEqual(accessed, [train]*3)

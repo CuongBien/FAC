@@ -66,9 +66,9 @@ from src.experiments.manifest import capture_dataset, capture_source
 
 `ExperimentSpec(document)` kiểm tra và giữ config; `RunStore.create(spec, datasets, source, run_id)` ghi `config.json`/`manifest.json` cho run mới. `add_json(run_id, path, value, role)` ghi artifact một lần và ghim SHA; `verify(run_id)` xác minh các artifact đã đăng ký. Ghi JSON dùng file tạm, fsync và replace; writer thứ hai bị chặn bằng lock. `RunStore` không chạy train/evaluate trong đợt 1.
 
-Cấu hình mẫu: [champion_unsupervised.json](../configs/experiments/champion_unsupervised.json). File này đã được kiểm tra schema và ghi đầy đủ cấu hình hiện hành; các runner 17/21 **chưa đọc file này**. Việc tích hợp runner vào spec/store mới thuộc đợt 3. Tương tự, scope của script 21 còn phải bảo thủ vì train/evaluate/report vẫn ở cùng một file; không giả vờ đã tách dependency hoàn toàn trước khi tách code.
+Cấu hình hiện có: [champion_unsupervised.json](../configs/experiments/champion_unsupervised.json), [stage4_calibration.json](../configs/experiments/stage4_calibration.json). Từ đợt 3, runner 17/21 đã đọc/ghim spec và dùng lifecycle chung cho run mới. Hai giao thức v1 cố định được kiểm tra đầy đủ; cấu hình chưa hỗ trợ bị từ chối. Scope runtime còn bảo thủ nhưng renderer Champion đã tách riêng. Xem [runner/resume và giới hạn](RUNNER.md).
 
-Run mới không cho ghi đè thư mục hoặc artifact đã tồn tại. Nếu process bị ngắt, phase vẫn chưa được công bố hoàn thành; cơ chế resume/freeze/evaluate đầy đủ thuộc đợt 3. Không tự cướp lock hoặc gắn nhãn complete cho một run ghi dở.
+Run mới không ghi đè artifact đã tồn tại. Từ đợt 3, manifest theo dõi prepare/train/evaluate/report; OS lock và journal bảo vệ việc công bố, resume kiểm tra input/SHA trước khi tiếp tục. Không tự cướp lock hoặc gắn nhãn complete cho run ghi dở. RunStore cấp thấp vẫn tạo manifest prepared chỉ có config; runner yêu cầu prepare hoàn tất trước train.
 
 ## Kiểm chứng đợt này
 
@@ -77,4 +77,4 @@ Run mới không cho ghi đè thư mục hoặc artifact đã tồn tại. Nếu
 - AST của aggregate, evaluate_result, selection_key, select_trial và pitch_cache không đổi. Kiểm tra cú pháp Python 3.9 trên 67 file đạt.
 - Các thư mục run cũ, WAV/LAB và preset giữ nguyên. Danh mục mới và bằng chứng refactor nằm riêng, không viết lại provenance cũ.
 
-Nguồn kiểm chứng lịch sử của đợt 1: [outputs/refactor_phase1](../outputs/refactor_phase1/README.md). **Đợt 2 đã hoàn tất**: [feature contract/engine/cache](PIPELINE.md) dùng chung trong `src/pipeline`; 152 test đạt và kết quả đối chiếu không đổi. `pitch_cache` hiện được re-export từ `pipeline.cache`, dùng `ContextVar` tương thích caller cũ; runner mới truyền đối tượng cache tường minh. Bước tiếp theo là runner chung ở đợt 3.
+Nguồn kiểm chứng lịch sử của đợt 1: [outputs/refactor_phase1](../outputs/refactor_phase1/README.md). Đợt 2 có [feature contract/engine/cache](PIPELINE.md) dùng chung; `pitch_cache` được re-export từ `pipeline.cache` bằng ContextVar để tương thích caller cũ. **Đợt 3 đã hoàn tất** với [runner chung](RUNNER.md), 170 test và [bộ bằng chứng riêng](../outputs/refactor_phase3/README.md). Bước tiếp theo là metric/đối sánh ở đợt 4.

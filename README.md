@@ -19,7 +19,7 @@ Nếu đã có môi trường `.venv`, có thể chạy trực tiếp:
 
 Xem [hướng dẫn kiểm thử](docs/TESTING.md) để chọn thuật toán, xử lý dữ liệu mới và chạy benchmark.
 
-[Kế hoạch refactor](docs/REFACTOR_PLAN.md) chia việc chuẩn hóa thí nghiệm và quản lý báo cáo thành sáu đợt. **Đã hoàn tất đợt 1–2**: tách `src/experiments/`, thêm spec/manifest/store/registry và CLI `list/verify`; tách `src/pipeline/` với engine, feature contract và cache riêng cho từng run. 152 test đạt, 288 trường hợp đối chiếu khớp chính xác. Xem [quản lý thí nghiệm](docs/EXPERIMENTS.md) và [cấu trúc pipeline](docs/PIPELINE.md).
+[Kế hoạch refactor](docs/REFACTOR_PLAN.md) chia việc chuẩn hóa thí nghiệm và quản lý báo cáo thành sáu đợt. **Đã hoàn tất đợt 1–3**: có spec/manifest/store/registry, engine/feature contract và runner chung cho script 17/21, kèm khóa OS, journal và resume theo pha. 170 test đạt; các kết quả Champion và Stage 4 được đối chiếu với mốc đã lưu. Xem [quản lý thí nghiệm](docs/EXPERIMENTS.md), [pipeline](docs/PIPELINE.md) và [runner/resume](docs/RUNNER.md).
 
 ## Dữ liệu và chỉ số
 
@@ -68,7 +68,7 @@ FAC/
 │   │   ├── decision/        # Hysteresis
 │   │   └── post_processing/ # Energy extension, Viterbi
 │   ├── analysis/            # Thresholds và evaluation
-│   ├── experiments/         # Spec, manifest, snapshot, store và registry
+│   ├── experiments/         # Spec, manifest, store, registry và runner/lifecycle
 │   └── visualization/       # Plotter dùng chung
 ├── scripts/                 # Demo và benchmark
 ├── docs/                    # Năm chương báo cáo, hướng dẫn, vấn đề cần sửa
