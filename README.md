@@ -43,7 +43,7 @@ Final Score là trung bình sai số phần trăm của **mean F0, std F0 và s�
 
 Đã truy ra mốc Cepstrum lịch sử 4,43%/7,62% là pipeline lai: quyết định bằng ACF, hậu xử lý/Viterbi bằng Cepstrum. Không dùng mốc đó làm chất lượng Cepstrum đúng thuật toán.
 
-[Báo cáo đợt 4](docs/STAGE4_RESULTS.md) có raw result, 17 giao thức không giám sát, replay nhân quả và giới hạn tổng quát hóa. [Đợt 1](docs/STAGE1_FIXES.md), [đợt 2](docs/STAGE2_FIXES.md), [đợt 3](docs/STAGE3_FIXES.md) giữ các mốc trước sửa. Các artifact lịch sử được bảo toàn.
+[Báo cáo đợt 4](docs/STAGE4_RESULTS.md) có raw result, 17 giao thức không giám sát, replay nhân quả và giới hạn tổng quát hóa. [Báo cáo Học không giám sát](docs/05_unsupervised_thresholding_analysis.md) tổng hợp toàn diện cả 8 phương pháp học không giám sát áp dụng lên chuỗi Quán quân. [Đợt 1](docs/STAGE1_FIXES.md), [đợt 2](docs/STAGE2_FIXES.md), [đợt 3](docs/STAGE3_FIXES.md) giữ các mốc trước sửa. Các artifact lịch sử được bảo toàn.
 
 LAB hiện hành chỉ có thống kê toàn file nên chưa thể fit lại Gaussian V/UV có giám sát hoặc đánh giá Accuracy/F1. MAPE không xác định dùng N/A; Final Score yêu cầu đủ ba thành phần. [Vấn đề còn lại](docs/KNOWN_ISSUES.md).
 
