@@ -1,5 +1,7 @@
 # Đợt 4 — 30/10/2026
 
+> Bộ freeze/evaluation đã được tạo lại ngày 31/10 ở commit `43b1de0`. Ngày 01/11, snapshot được phục dựng để khớp đúng provenance này, checksum preset được đồng bộ và `validation.json` được sinh lại bằng kiểm tra thực tế. Bản snapshot/runtime/validation cũ nằm trong `historical_source_snapshot/`. Các điểm Stage 4 vẫn giữ Otsu trước sửa; xem [kết quả sau sửa](../main_review_2026-11-01/README.md).
+
 Nguồn hiện hành: [docs/STAGE4_RESULTS.md](../../docs/STAGE4_RESULTS.md). Điểm là sai số thống kê toàn file, thấp hơn tốt hơn; không phải Accuracy/F1 từng khung.
 
 ## Chọn cấu hình trước test
@@ -9,7 +11,7 @@ Nguồn hiện hành: [docs/STAGE4_RESULTS.md](../../docs/STAGE4_RESULTS.md). Đ
 - `train/*_trials.json`: mọi ứng viên được khảo sát cho từng thuật toán, với cấu hình và kết quả từng file.
 - `train/plugin_sweep.json`: đủ 16 tổ hợp cho mỗi thuật toán tại tham số lịch sử.
 - `train/all_trials_per_file.csv`: 888 dòng kết quả từng file, không chỉ các nhóm top có lặp cấu hình.
-- `training_source_snapshot.tar.gz`: source đúng checksum lúc bắt đầu train. `runtime.json`: phiên bản Python/thư viện và checksum snapshot. Provenance ghi base commit và checksum từng source/WAV/LAB.
+- `training_source_snapshot.tar.gz`: 46 file nguồn khớp từng SHA trong provenance của freeze ngày 31/10, được phục dựng từ byte Git có đối chiếu LF/CRLF ngày 01/11. `runtime.json` giữ phiên bản thư viện đã ghi và bổ sung nguồn phục dựng/checksum snapshot. Không diễn giải việc sửa bằng chứng này là một lần train mới.
 
 ## Đánh giá sau khi chốt
 
@@ -20,6 +22,8 @@ Nguồn hiện hành: [docs/STAGE4_RESULTS.md](../../docs/STAGE4_RESULTS.md). Đ
 - `predictions/train/`, `predictions/test/`: mỗi tập có bốn hình, bốn CSV từng khung và summary 24 dòng cho sáu cấu hình API/CLI.
 - `figures/`: so sánh pipeline train/test, khảo sát ngưỡng trên train và bảng màu các giao thức test.
 - `summary.json`, `validation.json`: tóm tắt và kiểm tra tính nhất quán.
+
+`validation.json` hiện chỉ khẳng định những kiểm tra đã thực hiện: liên kết evaluation–freeze, snapshot/runtime, preset xuất ra và test nếu chạy `--run-tests`. Các cờ của lần kiểm chứng cũ không được sao chép thành kết luận cho lần tạo lại.
 
 CSV dự đoán CLI hiện dùng dạng dài `Method, Frame_Index, Time_Sec, Label, F0_Hz`. Mỗi thuật toán giữ đúng các tâm khung của mình; không ghép giả timeline 25 ms và 30 ms. Artifact các đợt trước giữ nguyên schema lúc tạo.
 

@@ -1,5 +1,6 @@
 """Render stage 4 tables/figures from frozen choices and recorded evaluations."""
 import argparse
+from datetime import datetime, timezone
 import json
 from pathlib import Path
 import sys
@@ -11,7 +12,25 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from src.analysis.validation import read_frozen, write_json
+from src.analysis.validation import read_evaluation_bundle, verify_source_snapshot, sha256, write_json
+
+CHAPTERS = ('01_acf_theory_and_experiments.md', '02_amdf_theory_and_experiments.md',
+            '03_cepstrum_theory_and_experiments.md', '04_test_set_benchmark_and_analysis.md',
+            '05_unsupervised_thresholding_analysis.md')
+README_MARKERS = ('<!-- STAGE4_README_START -->', '<!-- STAGE4_README_END -->')
+REPORT_MARKERS = ('<!-- STAGE4_REPORT_START -->', '<!-- STAGE4_REPORT_END -->')
+CHAPTER_MARKERS = ('<!-- STAGE4_CURRENT_START -->', '<!-- STAGE4_CURRENT_END -->')
+
+
+def replace_generated_block(source, content, start_marker, end_marker):
+    """Only replace an explicitly owned block; refuse missing/ambiguous markers."""
+    if source.count(start_marker) != 1 or source.count(end_marker) != 1:
+        raise ValueError(f'Expected exactly one generated block: {start_marker} / {end_marker}')
+    begin, end = source.index(start_marker), source.index(end_marker)
+    if end < begin:
+        raise ValueError(f'Generated block markers are reversed: {start_marker}')
+    block = start_marker+'\n'+content.rstrip()+'\n'+end_marker
+    return source[:begin]+block+source[end+len(end_marker):]
 
 
 def main():
@@ -19,11 +38,19 @@ def main():
     parser.add_argument('--output-dir', default=str(ROOT/'outputs/stage4_validation'))
     args = parser.parse_args()
     folder = Path(args.output_dir)
-    frozen = read_frozen(folder/'frozen_config.json')
-    read_frozen(folder/'frozen_models.json')
-    result = json.loads((folder/'evaluation.json').read_text(encoding='utf-8'))
+    frozen, _, result = read_evaluation_bundle(folder)
+    verify_source_snapshot(folder/'training_source_snapshot.tar.gz', frozen['provenance'])
+    runtime = json.loads((folder/'runtime.json').read_text(encoding='utf-8'))
+    if runtime['snapshot_sha256'] != sha256(folder/'training_source_snapshot.tar.gz'):
+        raise ValueError('Runtime record uses a different source snapshot')
     artifact = json.loads((folder/'cepstrum_trace.json').read_text(encoding='utf-8'))
     corrected = json.loads((folder/'legacy_with_cepstrum_branch/cepstrum_trace.json').read_text(encoding='utf-8'))
+    owned = {ROOT/'README.md': README_MARKERS, ROOT/'docs/STAGE4_RESULTS.md': REPORT_MARKERS,
+             **{ROOT/'docs'/name: CHAPTER_MARKERS for name in CHAPTERS}}
+    sources = {path: path.read_text(encoding='utf-8') for path in owned}
+    # Validate every boundary before writing figures, documents or summaries.
+    for path, markers in owned.items():
+        replace_generated_block(sources[path], '', *markers)
     pipelines = {(r['dataset'], r['method'], r['strategy']): r for r in result['pipelines']}
     protocols = {(r['dataset'], r['method'], r['strategy']): r for r in result['protocols']}
     methods = ['acf', 'amdf', 'cepstrum']
@@ -76,8 +103,7 @@ def main():
         ax.legend(fontsize=8); ax.grid(alpha=.2)
     fig.tight_layout(); fig.savefig(figures/'train_threshold_curves.png', dpi=180); plt.close(fig)
 
-    lines = ['# Đợt 4 — Kiểm chứng và hiệu chỉnh trên train', '',
-             'Ngày 30/10/2026. Kết quả sinh từ `scripts/19_report_validation.py`, cấu hình đóng băng và dữ liệu đánh giá đã lưu.', '',
+    lines = ['Ngày 30/10/2026. Kết quả sinh từ `scripts/19_report_validation.py`, cấu hình đóng băng và dữ liệu đánh giá đã lưu.', '',
              '## Phạm vi và giao thức', '',
              f"- Khảo sát {frozen['num_trials']} cấu hình, {frozen['num_pipeline_file_pairs']} lượt cấu hình/file trên bốn WAV train.",
              '- Pha 1: đủ 16 tổ hợp BP/Clip/Energy/Viterbi ở cấu hình lịch sử. Pha 2: hai tổ hợp tốt nhất cộng Champion lịch sử, khung 20/25/30 ms và lưới ngưỡng định trước.',
@@ -125,20 +151,12 @@ def main():
               '- Kết quả tốt về mean/std/count không chứng minh đúng contour hoặc hết octave errors. Việc tự gán nhãn dữ liệu cũ không thể thay bằng chứng tham chiếu.',
               '- Chưa có tập kiểm thử mới độc lập sau các vòng phát triển; chưa đủ cơ sở khẳng định preset tối ưu trên mọi giọng/môi trường.',
               '- Word, slide và phép đo T0 thủ công là các đầu ra môn học riêng, chưa được tạo trong đợt sửa code này.', '']
-    (ROOT/'docs/STAGE4_RESULTS.md').write_text('\n'.join(lines), encoding='utf-8')
+    report_path = ROOT/'docs/STAGE4_RESULTS.md'
+    report_path.write_text(replace_generated_block(sources[report_path], '\n'.join(lines), *REPORT_MARKERS), encoding='utf-8')
     # Preserve historical chapters; clearly mark their old tables and append
     # current figures directly from the recorded data, with repeatable markers.
-    start_marker, end_marker = '<!-- STAGE4_CURRENT_START -->', '<!-- STAGE4_CURRENT_END -->'
-    chapters = ['01_acf_theory_and_experiments.md', '02_amdf_theory_and_experiments.md',
-                '03_cepstrum_theory_and_experiments.md', '04_test_set_benchmark_and_analysis.md',
-                '05_unsupervised_thresholding_analysis.md']
-    for index, filename in enumerate(chapters):
+    for index, filename in enumerate(CHAPTERS):
         path = ROOT/'docs'/filename
-        source = path.read_text(encoding='utf-8')
-        banner = '> **Cập nhật 30/10/2026:** Bảng/hình gốc trong chương là kết quả lịch sử. Phần bổ sung cuối chương và [báo cáo đợt 4](STAGE4_RESULTS.md) ghi kết quả hiện hành, giao thức chọn cấu hình trên train và nguyên nhân chênh lệch Cepstrum.\n\n'
-        if banner not in source:
-            first_break = source.index('\n')+1
-            source = source[:first_break]+'\n'+banner+source[first_break:]
         supplement = ['## Kết quả kiểm chứng hiện hành — 30/10/2026', '',
                       'Nguồn: cấu hình đóng băng và `outputs/stage4_validation/evaluation.json`. Final Score là sai số thống kê toàn file; thấp hơn tốt hơn. Accuracy/F1 từng khung không xác định vì thiếu nhãn thời gian.', '']
         if index < 3:
@@ -161,7 +179,8 @@ def main():
                 supplement.append('| '+method.upper()+' | '+' | '.join(f'{v:.3f}' for v in values)+' |')
             supplement += ['', '![Kết quả hiện hành](../outputs/stage4_validation/figures/pipelines_train_test.png)']
         else:
-            supplement += ['Giao thức `train_all` gồm silence, `train_active` chỉ active train, `input_active` fit riêng từng file đầu vào. Tất cả dùng cùng frame/hop 25/10 ms, silence gate và median theo đoạn.', '',
+            supplement += ['> Đây là snapshot 17 giao thức Stage 4, gồm Otsu trước sửa ngày 01/11. Benchmark 15/16 sau sửa được liên kết trong [rà soát main](MAIN_REVIEW_FIXES.md).', '',
+                           'Giao thức `train_all` gồm silence, `train_active` chỉ active train, `input_active` fit riêng từng file đầu vào. Tất cả dùng cùng frame/hop 25/10 ms, silence gate và median theo đoạn.', '',
                            '| Giao thức | ACF test (%) | AMDF test (%) | Cepstrum test (%) |', '|---|---:|---:|---:|']
             for name in names:
                 values = [protocols['test',method,name]['metrics']['final_score'] for method in methods]
@@ -169,37 +188,26 @@ def main():
             supplement += ['', 'Các thứ hạng test là mô tả; không được dùng để chọn lại tham số.', '',
                            '![Giao thức hiện hành](../outputs/stage4_validation/figures/protocols_test.png)']
         supplement += ['', '[Chi tiết và giới hạn kiểm chứng](STAGE4_RESULTS.md).']
-        block = start_marker+'\n'+'\n'.join(supplement)+'\n'+end_marker
-        if start_marker in source:
-            begin = source.index(start_marker); end = source.index(end_marker, begin)+len(end_marker)
-            source = source[:begin]+block+source[end:]
-        else:
-            source = source.rstrip()+'\n\n'+block+'\n'
-        path.write_text(source, encoding='utf-8')
+        path.write_text(replace_generated_block(sources[path], '\n'.join(supplement), *CHAPTER_MARKERS), encoding='utf-8')
 
     readme = ROOT/'README.md'
-    source = readme.read_text(encoding='utf-8')
-    begin = source.index('## Kết quả và trạng thái kiểm chứng')
-    end = source.index('## Cấu trúc', begin)
-    current = ['## Kết quả và trạng thái kiểm chứng', '',
-               'Đã hoàn tất bốn đợt sửa và kiểm chứng; 90 test hồi quy đạt. Đợt 4 khảo sát 222 cấu hình chỉ trên train, đóng băng trước test; baseline vẫn là tham số lịch sử. Các Champion hiện dùng khung 30 ms, hop 10 ms.', '',
-               '| Champion | Ngưỡng | Train Final Score (%) | Test Final Score (%) |', '|---|---:|---:|---:|']
+    current = ['| Champion | Ngưỡng | Train Final Score (%) | Test Final Score (%) |', '|---|---:|---:|---:|']
     for method in methods:
         spec = frozen['selected'][method]
         values = [pipelines[split,method,'selected_champion']['metrics']['final_score'] for split in ['train','test']]
         current.append(f"| {method.upper()} | {spec['threshold']:g} | {values[0]:.3f} | {values[1]:.3f} |")
-    cep_before = pipelines['test', 'cepstrum', 'historical_champion']['metrics']['final_score']
-    cep_after = pipelines['test', 'cepstrum', 'selected_champion']['metrics']['final_score']
-    current += ['', f'**ACF/AMDF cải thiện trên test; Cepstrum tăng sai số từ {cep_before:.3f}% lên {cep_after:.3f}% dù giảm trên train.** Không chọn lại tham số dựa vào test. Điểm thấp hơn tốt hơn; không phải Accuracy/F1 từng khung.', '',
-                'Đã truy ra mốc Cepstrum lịch sử 4,43%/7,62% là pipeline lai: quyết định bằng ACF, hậu xử lý/Viterbi bằng Cepstrum. Không dùng mốc đó làm chất lượng Cepstrum đúng thuật toán.', '',
-                '[Báo cáo đợt 4](docs/STAGE4_RESULTS.md) có raw result, 17 giao thức không giám sát, replay nhân quả và giới hạn tổng quát hóa. [Đợt 1](docs/STAGE1_FIXES.md), [đợt 2](docs/STAGE2_FIXES.md), [đợt 3](docs/STAGE3_FIXES.md) giữ các mốc trước sửa. Các artifact lịch sử được bảo toàn.', '',
-                'LAB hiện hành chỉ có thống kê toàn file nên chưa thể fit lại Gaussian V/UV có giám sát hoặc đánh giá Accuracy/F1. MAPE không xác định dùng N/A; Final Score yêu cầu đủ ba thành phần. [Vấn đề còn lại](docs/KNOWN_ISSUES.md).', '', '']
-    source = source[:begin]+'\n'.join(current)+source[end:]
-    source = source.replace('outputs/predictions/stage1_test', 'outputs/predictions/current_test')
-    readme.write_text(source, encoding='utf-8')
+    readme.write_text(replace_generated_block(sources[readme], '\n'.join(current), *README_MARKERS), encoding='utf-8')
     write_json(folder/'summary.json', {'num_trials': frozen['num_trials'], 'num_train_pipeline_file_pairs': frozen['num_pipeline_file_pairs'],
                                        'selected': frozen['selected'], 'pipelines': [{k:r[k] for k in ('dataset','method','strategy','metrics')} for r in result['pipelines']],
                                        'num_protocols_per_method': len(names), 'test_was_not_used_for_selection': True})
+    write_json(folder/'report_generation.json', {
+        'generated_at_utc': datetime.now(timezone.utc).isoformat(),
+        'report_script_sha256': sha256(Path(__file__)),
+        'config_sha256': result['config_sha256'], 'models_sha256': result['models_sha256'],
+        'evaluation_sha256': sha256(folder/'evaluation.json'),
+        'documents_sha256_at_generation': {path.relative_to(ROOT).as_posix(): sha256(path) for path in owned},
+        'write_scope': 'Only STAGE4 marker blocks; all text outside them is preserved.',
+    })
     print('Stage 4 figures and docs/STAGE4_RESULTS.md generated')
 
 

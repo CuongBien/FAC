@@ -5,7 +5,7 @@ Deconvolves speech into vocal tract envelope (low quefrency) and pitch impulses 
 """
 from typing import Tuple
 import numpy as np
-from src.core.processing import center_frame
+from src.core.processing import center_frame, validate_pitch_range
 
 
 def compute_real_cepstrum(
@@ -94,6 +94,7 @@ def find_f0_cepstrum(
         tuple: (f0_hz: float, peak_metric: float, best_lag: int)
             If no valid peak is found, f0_hz = 0.0.
     """
+    validate_pitch_range(sample_rate, f0_min, f0_max)
     frame = center_frame(frame)
     n = len(frame)
     if n == 0 or np.mean(frame ** 2) <= 1e-12:

@@ -3,5 +3,12 @@
   "numpy": "2.5.3",
   "scipy": "1.18.1",
   "matplotlib": "3.11.2",
-  "snapshot_sha256": "8821f4dba94e58bb5f8049972726738fac0165f8e36de74c599ffa75ee75d6fe"
+  "snapshot_sha256": "09c1492056f0e07c18b8946d09a79b8144b6c23f41e6d9bdd7bb1d5ea7edfdb0",
+  "snapshot_reconstruction": {
+    "verified_at_utc": "2026-11-01T13:59:48.899082+00:00",
+    "source_revision": "a9073ff9adcba50b63eacd8e9a93fcdb89d34e7f",
+    "method": "Recorded SHA-256 matched against working tree or Git bytes (LF/CRLF).",
+    "previous_snapshot_sha256": "8821f4dba94e58bb5f8049972726738fac0165f8e36de74c599ffa75ee75d6fe",
+    "note": "Source evidence repaired; no training or score was recomputed."
+  }
 }

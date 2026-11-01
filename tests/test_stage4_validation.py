@@ -19,6 +19,7 @@ from src.pipelines import build_detector, build_champion
 from src.core.pitch_detector import PitchDetector
 from src.analysis.validation import (
     pitch_cache, freeze_json, read_frozen, select_trial, dataset_manifest, verify_dataset, json_default,
+    verify_source_snapshot,
 )
 from src.analysis.protocols import (
     fit_models, predict_strategies, predict_frozen_cluster, predict_frozen_hmm, result_from_labels,
@@ -99,6 +100,8 @@ class FreezeAndSelectionTests(unittest.TestCase):
             frozen = read_frozen(output/'frozen_config.json')
             self.assertEqual(set(frozen['selected']), {'acf', 'amdf', 'cepstrum'})
             self.assertTrue((output/'frozen_models.sha256').exists())
+            self.assertGreater(verify_source_snapshot(output/'training_source_snapshot.tar.gz', frozen['provenance']), 0)
+            self.assertTrue((output/'runtime.json').exists())
 
 
 class ComputationCacheTests(unittest.TestCase):

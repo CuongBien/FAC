@@ -4,6 +4,10 @@ from typing import Dict, List, Tuple
 import numpy as np
 
 
+_NUMBER = re.compile(r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?")
+_STATISTIC = re.compile(r"^(F0mean|F0std|F0num)\b(.*)$", re.IGNORECASE)
+
+
 def parse_lab_file(filepath: str) -> Dict:
     """Parse a .lab file containing segmentation intervals and ground truth F0 stats.
 
@@ -18,32 +22,27 @@ def parse_lab_file(filepath: str) -> Dict:
         }
     """
     segments: List[Tuple[float, float, str]] = []
-    f0_mean = None
-    f0_std = None
-    f0_num = None
+    statistics = {"f0mean": None, "f0std": None, "f0num": None}
 
-    with open(filepath, "r", encoding="utf-8") as f:
-        for raw_line in f:
+    # utf-8-sig accepts both ordinary UTF-8 and a leading Windows UTF-8 BOM.
+    with open(filepath, "r", encoding="utf-8-sig") as f:
+        for line_number, raw_line in enumerate(f, 1):
             line = raw_line.strip()
             if not line:
                 continue
 
-            # Check for F0mean
-            match_mean = re.match(r"^F0mean\s+([0-9.]+)", line, re.IGNORECASE)
-            if match_mean:
-                f0_mean = float(match_mean.group(1))
-                continue
-
-            # Check for F0std
-            match_std = re.match(r"^F0std\s+([0-9.]+)", line, re.IGNORECASE)
-            if match_std:
-                f0_std = float(match_std.group(1))
-                continue
-
-            # Check for F0num
-            match_num = re.match(r"^F0num\s+([0-9.]+)", line, re.IGNORECASE)
-            if match_num:
-                f0_num = float(match_num.group(1))
+            statistic = _STATISTIC.fullmatch(line)
+            if statistic:
+                name, remainder = statistic.groups()
+                value_text = remainder.partition("#")[0].strip()
+                if not remainder or not remainder[0].isspace() or not _NUMBER.fullmatch(value_text):
+                    raise ValueError(f"{filepath}:{line_number}: Invalid {name} numeric value")
+                value = float(value_text)
+                if not np.isfinite(value) or value < 0:
+                    raise ValueError(f"{filepath}:{line_number}: {name} must be finite and non-negative")
+                if name.lower() == "f0num" and not value.is_integer():
+                    raise ValueError(f"{filepath}:{line_number}: F0num must be an integer count")
+                statistics[name.lower()] = value
                 continue
 
             # Check for segment line: start_sec end_sec label
@@ -59,9 +58,9 @@ def parse_lab_file(filepath: str) -> Dict:
 
     return {
         "segments": segments,
-        "f0_mean": f0_mean,
-        "f0_std": f0_std,
-        "f0_num": f0_num,
+        "f0_mean": statistics["f0mean"],
+        "f0_std": statistics["f0std"],
+        "f0_num": statistics["f0num"],
     }
 
 

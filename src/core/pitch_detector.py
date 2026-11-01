@@ -6,7 +6,7 @@ from src.core.audio import load_wav, frame_signal, compute_ste
 from src.core.acf import find_f0_acf
 from src.core.amdf import find_f0_amdf
 from src.core.cepstrum import find_f0_cepstrum
-from src.core.processing import prepare_analysis_signal, silence_energy_threshold, smooth_voiced_segments
+from src.core.processing import prepare_analysis_signal, silence_energy_threshold, smooth_voiced_segments, validate_pitch_range
 from src import config
 
 
@@ -49,6 +49,7 @@ class PitchDetector:
         duration: Optional[float] = None,
     ) -> Dict:
         """Process a 1D audio signal array."""
+        validate_pitch_range(sample_rate, self.f0_min, self.f0_max)
         analysis_signal = prepare_analysis_signal(signal, sample_rate, self.frame_duration_ms)
         if duration is None:
             duration = len(signal) / sample_rate

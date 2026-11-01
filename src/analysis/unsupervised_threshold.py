@@ -23,9 +23,18 @@ def compute_otsu_threshold(values: np.ndarray, n_bins: int = 100) -> float:
     Returns:
         float: Optimal decision threshold T.
     """
+    values = np.asarray(values, dtype=float)
+    if values.ndim != 1:
+        raise ValueError("Otsu values must be one-dimensional")
+    if not isinstance(n_bins, (int, np.integer)) or n_bins < 2:
+        raise ValueError("n_bins must be an integer of at least two")
     clean_vals = values[np.isfinite(values)]
     if len(clean_vals) < 2:
         return float(np.mean(clean_vals)) if len(clean_vals) == 1 else 0.5
+    if np.min(clean_vals) == np.max(clean_vals):
+        # No two distinguishable groups; retain the observed value instead of
+        # selecting the first bin of NumPy's artificially expanded histogram.
+        return float(clean_vals[0])
 
     hist, bin_edges = np.histogram(clean_vals, bins=n_bins)
     bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2.0
@@ -47,7 +56,10 @@ def compute_otsu_threshold(values: np.ndarray, n_bins: int = 100) -> float:
     sigma_b_sq[valid] = ((mu_t * omega[valid] - mu[valid]) ** 2) / denom[valid]
 
     best_idx = int(np.argmax(sigma_b_sq))
-    return float(bin_centers[best_idx])
+    # omega[i] includes bin i. Its boundary with the other class is the right
+    # edge, not the center: returning the center splits a bin already assigned
+    # to the lower class while optimizing sigma_b_sq.
+    return float(bin_edges[best_idx + 1])
 
 
 def compute_histogram_valley_threshold(

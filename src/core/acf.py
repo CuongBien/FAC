@@ -1,7 +1,7 @@
 """Autocorrelation Function (ACF) implementation for F0 estimation and periodicity detection."""
 from typing import Tuple
 import numpy as np
-from src.core.processing import center_frame, pitch_lag_bounds, refined_f0
+from src.core.processing import center_frame, pitch_lag_bounds, refined_f0, validate_pitch_range
 
 
 def compute_acf(frame: np.ndarray, mode: str = "normalized") -> np.ndarray:
@@ -81,6 +81,7 @@ def find_f0_acf(
         tuple: (f0_hz: float, peak_value: float, best_lag: int)
             If no valid peak is found, f0_hz = 0.0.
     """
+    validate_pitch_range(sample_rate, f0_min, f0_max)
     frame = center_frame(frame)
     n = len(frame)
     if n == 0 or np.mean(frame ** 2) <= 1e-12:

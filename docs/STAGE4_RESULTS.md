@@ -1,5 +1,8 @@
 # Đợt 4 — Kiểm chứng và hiệu chỉnh trên train
 
+> Cập nhật 01/11/2026: đây là kết quả Stage 4 đã lưu. Snapshot nguồn đã được phục dựng đúng checksum của lần tạo lại ngày 31/10; bản snapshot/runtime/validation ngày 30/10 được giữ riêng. Các điểm/giao thức cũ không tự thay đổi khi sửa Otsu. Xem [rà soát main](MAIN_REVIEW_FIXES.md) và [benchmark 15/16 sau sửa](../outputs/main_review_2026-11-01/README.md).
+
+<!-- STAGE4_REPORT_START -->
 Ngày 30/10/2026. Kết quả sinh từ `scripts/19_report_validation.py`, cấu hình đóng băng và dữ liệu đánh giá đã lưu.
 
 ## Phạm vi và giao thức
@@ -85,3 +88,4 @@ Lệnh train từ chối ghi đè freeze; evaluate kiểm tra checksum và dữ 
 - Kết quả tốt về mean/std/count không chứng minh đúng contour hoặc hết octave errors. Việc tự gán nhãn dữ liệu cũ không thể thay bằng chứng tham chiếu.
 - Chưa có tập kiểm thử mới độc lập sau các vòng phát triển; chưa đủ cơ sở khẳng định preset tối ưu trên mọi giọng/môi trường.
 - Word, slide và phép đo T0 thủ công là các đầu ra môn học riêng, chưa được tạo trong đợt sửa code này.
+<!-- STAGE4_REPORT_END -->

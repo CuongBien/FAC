@@ -8,6 +8,7 @@ import argparse
 import csv
 from datetime import datetime, timezone
 import importlib.util
+from importlib.metadata import version
 import itertools
 from pathlib import Path
 import sys
@@ -25,6 +26,7 @@ from src.pipelines import build_detector
 from src.analysis.validation import (
     aggregate, evaluate_result, source_manifest, dataset_manifest, verify_dataset,
     write_json, freeze_json, read_frozen, pitch_cache, select_trial, selection_key,
+    write_source_snapshot, verify_source_snapshot, sha256,
 )
 from src.analysis.protocols import fit_models, predict_strategies, result_from_labels
 
@@ -82,6 +84,13 @@ def train(args):
     manifest = dataset_manifest(args.train_dir)
     output.mkdir(parents=True, exist_ok=True)
     provenance = source_manifest(ROOT)
+    snapshot = output/'training_source_snapshot.tar.gz'
+    write_source_snapshot(ROOT, snapshot, provenance)
+    write_json(output/'runtime.json', {
+        'python': sys.version.split()[0],
+        **{name: version(name) for name in ('numpy', 'scipy', 'matplotlib')},
+        'snapshot_sha256': sha256(snapshot),
+    })
     started = time.perf_counter()
     all_trials, winners, sweep = [], {}, []
     combos = [combo for size in range(5) for combo in itertools.combinations(('BP', 'Clip', 'Energy', 'Viterbi'), size)]
@@ -160,6 +169,7 @@ def evaluate(args):
     output = Path(args.output_dir)
     frozen = read_frozen(output/'frozen_config.json')
     models = read_frozen(output/'frozen_models.json')
+    verify_source_snapshot(output/'training_source_snapshot.tar.gz', frozen['provenance'])
     verify_dataset(args.train_dir, frozen['train_manifest'])
     if frozen['train_manifest'] != models['train_manifest']:
         raise ValueError('Frozen models/config use different training data')

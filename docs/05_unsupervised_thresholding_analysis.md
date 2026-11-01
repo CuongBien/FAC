@@ -26,13 +26,13 @@ Trong các giai đoạn phát triển ban đầu của hệ thống ước lư�
 
 ---
 
-### 2. Kiểm chứng Thực nghiệm Giả thiết Tiên nghiệm 50/50 ($P(V) \approx P(UV) \approx 0.5$)
+### 2. Thống kê voiced trên toàn tín hiệu và giới hạn của giả thiết 50/50
 Đề bài của Giảng viên đưa ra định hướng quan trọng:
 > *"với giả định là tỉ lệ khung V và UV trong tín hiệu xấp xỉ 50/50"*
 
-Để làm rõ cơ sở khoa học của giả định này, nhóm đã tiến hành khảo sát thống kê trên toàn bộ tập dữ liệu âm thanh thực tế của đề tài:
+Nhóm khảo sát số khung voiced tham chiếu so với tổng khung của tám file. Phần non-voiced bên dưới gồm cả UV và silence, nên không thể dùng như xác suất UV trong speech:
 
-| Tập dữ liệu | File âm thanh | Tổng số khung tín hiệu ($N_{\text{total}}$) | Số khung Voiced chuẩn ($F_{0,\text{num}}$) | Tỉ lệ khung Voiced ($P(V)$) | Tỉ lệ khung Non-Voiced ($P(UV)$) |
+| Tập dữ liệu | File âm thanh | Tổng số khung tín hiệu ($N_{\text{total}}$) | Số khung Voiced chuẩn ($F_{0,\text{num}}$) | Tỉ lệ Voiced / tổng khung | Tỉ lệ UV + silence / tổng khung |
 | :--- | :--- | :---: | :---: | :---: | :---: |
 | **Huấn luyện** | `phone_F1.wav` | 322 | 148 | 46.0% | 54.0% |
 | | `phone_M1.wav` | 414 | 232 | 56.0% | 44.0% |
@@ -49,7 +49,7 @@ Trong các giai đoạn phát triển ban đầu của hệ thống ước lư�
 > **Kết luận thống kê:**
 > Trong ngôn ngữ tự nhiên (tiếng Việt), người nói luôn xen kẽ giữa các nguyên âm / bán nguyên âm có dao động thanh đới (Voiced) với các phụ âm xát, phụ âm tắc và các khoảng ngắt nghỉ ngữ âm (Non-Voiced).  
 > Thống kê thực nghiệm trên toàn bộ 1,291 khung tập Huấn luyện cho thấy **$P(V) = 45.6\%$** và trên 1,305 khung tập Kiểm thử cho thấy **$P(V) = 45.7\%$**.  
-> Cả hai con số này đều **tiệm cận cực kỳ hoàn hảo với con số lý tưởng $50\%$** mà Giảng viên đặt ra trong đề bài.
+> Đây là thống kê toàn file trên dữ liệu hiện có, không phải xác nhận tỷ lệ V/UV trong speech bằng 50/50. Cần nhãn V/UV/silence theo thời gian để kiểm tra giả thiết đó.
 
 ---
 
@@ -93,7 +93,7 @@ flowchart LR
   * $\mu_0(t) = \frac{\sum_{i \le t} x_i p_i}{\omega_0(t)}$ và $\mu_1(t) = \frac{\sum_{i > t} x_i p_i}{\omega_1(t)}$ là giá trị kỳ vọng của từng nhóm.
   * $\mu_T = \omega_0 \mu_0 + \omega_1 \mu_1$ là kỳ vọng toàn phần.
 * **Mối liên hệ với giả thiết 50/50:**
-  Hàm tích xác suất $\omega_0(t) \cdot \omega_1(t) = \omega_0 (1 - \omega_0)$ đạt giá trị cực đại khi $\omega_0 = \omega_1 = 0.5$. Do đó, trọng số phương sai của Otsu hoàn toàn đồng pha với giả thiết tiên nghiệm $50/50$, tạo ra lực kéo tự nhiên đưa ngưỡng $T^*$ về vùng ranh giới chia đều hai nửa tín hiệu.
+  Hệ số $\omega_0(t) \omega_1(t)$ lớn nhất khi hai nhóm cân bằng, nhưng mục tiêu Otsu còn nhân với bình phương chênh lệch trung bình. Vì vậy, tối ưu Otsu không bắt buộc chia đôi số khung và không kiểm chứng giả thiết tiên nghiệm 50/50.
 * **Ngưỡng tối ưu:**
   $$T^* = \arg\max_{t} \sigma_B^2(t)$$
 
@@ -164,7 +164,7 @@ $$\text{FINAL SCORE} = \frac{\text{MAPE } F_0 + \text{MAPE Std} + \text{MAPE Num
 > [!TIP]
 > **Điểm nhấn đột phá trên ACF:**
 > Phương pháp **Median 50% ($T = 0.4333$)** đạt điểm số tổng hợp **Final Score = 5.22%**, **CHÍNH THỨC VƯỢT QUA CẢ PHƯƠNG PHÁP CÓ GIÁM SÁT BAYES (5.55%)**!  
-> Ngưỡng tìm được ($0.4333$) chỉ lệch chưa đầy $1.7\%$ so với ngưỡng Bayes lý thuyết ($0.4408$), chứng minh tính đúng đắn và hiệu lực tuyệt đối của giả định tiên nghiệm $50/50$ trên miền thời gian ACF.
+> Ngưỡng tìm được ($0.4333$) chỉ lệch chưa đầy $1.7\%$ so với ngưỡng Bayes lý thuyết ($0.4408$), cho thấy hai ngưỡng gần nhau trong thí nghiệm lịch sử này; sự gần nhau không chứng minh tỷ lệ V/UV thực tế bằng 50/50.
 
 ---
 
@@ -243,7 +243,7 @@ Dưới đây là các biểu đồ phân bố phân giải cao được sinh ra
 
 ### 2. Kết luận giải đáp yêu cầu của Giảng viên
 1. **Tính khả thi của Học không giám sát:** Hoàn toàn có thể phân loại Voiced / Unvoiced chính xác cao mà **không cần bất kỳ nhãn `.lab` nào**.
-2. **Giá trị của giả thiết tiên nghiệm $50/50$:** Không chỉ là một giả định lý thuyết, tỉ lệ $P(V) \approx 45.6\% - 45.7\%$ là một đặc trưng tự nhiên của chuỗi tiếng nói liên tục. Khi đưa giả định này vào thuật toán (thông qua Phân vị Median $P_{50}$ hoặc tính đối xứng của phương sai Otsu $\omega_0 \omega_1$), hệ thống đạt được hiệu năng ngang bằng, thậm chí vượt trội mô hình phân loại Bayes có giám sát phụ thuộc nhãn con người.
+2. **Giới hạn của giả thiết tiên nghiệm $50/50$:** Tỉ lệ voiced 45,6%–45,7% là thống kê của tám file, tính trên cả silence; không suy rộng thành tỷ lệ V/UV speech. Median và GMM dùng giả định cân bằng trong mô hình; Otsu không ràng buộc hai nhóm bằng nhau. Thứ hạng Final Score trong thí nghiệm lịch sử không chứng minh giả thiết đúng hoặc thay thế phép đo phân loại theo nhãn thời gian.
 3. **Mã nguồn và script kiểm chứng:** Tất cả mã nguồn giải thuật đã được module hóa tại [`src/analysis/unsupervised_threshold.py`](../src/analysis/unsupervised_threshold.py) và script thực nghiệm kiểm chứng tự động tại [`scripts/15_evaluate_unsupervised_thresholds.py`](../scripts/15_evaluate_unsupervised_thresholds.py).
 
 
@@ -375,89 +375,37 @@ Toàn bộ 7 chiến lược (Supervised Bayes, Median 50%, Otsu, GMM-EM 1D, Đa
 
 * **Hình 1 (GMM-EM Continuous):** Đường cong mật độ xác suất liên tục $p(x)$ phân rã sắc nét thành 2 thành phần Voiced và Unvoiced cân bằng 50/50, cho giao điểm Bayes $T^*$ mượt mà không bị răng cưa binning.
 * **Hình 2 (Multi-Feature 2D):** Không gian $(\text{Periodicity}, \text{ZCR})$ tách biệt 2 cụm V và UV thành hai hòn đảo rõ ràng; việc đưa thêm trục ZCR giúp phân định triệt để các phụ âm xát vô thanh có năng lượng lớn.
-* **Hình 3 (2-State HMM Viterbi):** Đồ thị sóng âm chứng minh thuật toán Viterbi khử sạch 100% các xung gai rung giật trạng thái đơn lẻ vốn thường xuất hiện ở ngưỡng tĩnh 1D.
+* **Hình 3 (2-State HMM Viterbi):** Đồ thị minh họa thay đổi chuỗi trạng thái sau Viterbi; chưa có nhãn thời gian để định lượng số lỗi đã loại bỏ.
 * **Hình 4 (Xếp hạng Final Score):** Biểu đồ cột tổng quan minh họa vị thế dẫn đầu vượt bậc của GMM-EM 1D và Đa đặc trưng 2D trên cả 3 thuật toán Bài Tập 2.
 
 ---
 
-## IV. BẢNG TỔNG HỢP TOÀN DIỆN CẢ 8 PHƯƠNG PHÁP HỌC KHÔNG GIÁM SÁT KHI TÍCH HỢP VÀO CHUỖI QUÁN QUÂN (CHAMPION PIPELINE)
+## IV. TÁM PHƯƠNG PHÁP TRONG PIPELINE CHAMPION — KẾT QUẢ ĐÃ LƯU
 
-Để giải đáp triệt để câu hỏi: *"Các phương pháp học không giám sát có thể nâng cấp thêm cho chuỗi Quán quân hoàn chỉnh (đã có bộ tiền xử lý Bandpass/Clipping và hậu xử lý Energy/Viterbi) hay không?"*, nhóm đã thực hiện tích hợp trực tiếp **toàn bộ 8 phương pháp** (4 phương pháp từ Histogram/Phân cụm 1D và 4 phương pháp Nâng cao) vào cấu hình Quán quân chính thức trên tập Kiểm thử (`TinHieuKiemThu`).
+Cập nhật 01/11/2026: benchmark 21 đã tích hợp đủ tám phương pháp, fit trên đúng đặc trưng Champion 30/10 ms của train, đóng băng trước test và lưu 288 kết quả từng file. [Báo cáo đầy đủ và bảng tám cột](CHAMPION_UNSUPERVISED_RESULTS.md); [artifact và mô hình](../outputs/champion_unsupervised_2026-11-01/README.md).
 
-Mọi phương pháp đều được đánh giá qua bảng chuẩn 8 cột thống nhất của đề tài:
-* $\Delta F_0$: Sai số tuyệt đối trung bình tần số cơ bản (Hz).
-* $\text{MAPE } F_0$: Sai số tương đối trung bình tần số cơ bản (%).
-* $\Delta\text{Std}$: Sai số tuyệt đối độ lệch chuẩn tần số cơ bản (Hz).
-* $\text{MAPE Std}$: Sai số tương đối độ lệch chuẩn tần số cơ bản (%).
-* $\Delta\text{Num}$: Sai số tuyệt đối số lượng khung hữu thanh (Khung).
-* $\text{MAPE Num}$: Sai số tương đối số lượng khung hữu thanh (%).
-* $\text{FINAL SCORE}$: Điểm lỗi tổng hợp $= (\text{MAPE } F_0 + \text{MAPE Std} + \text{MAPE Num}) / 3$ (Càng thấp càng tối ưu).
+Tám mô hình chính fit trên active train sau tiền xử lý. Các phương pháp giữ chung median/Energy/Viterbi; guard periodicity của Energy cố định theo Champion. Hai bản 2D/HMM fit từng input được tách riêng. Champion vốn đã hiệu chỉnh bằng thống kê LAB train, nên chỉ phần quyết định mới là không giám sát.
 
----
+| Nhóm | Phương pháp | ACF test (%) | AMDF test (%) | Cepstrum test (%) |
+|---|---|---:|---:|---:|
+| control | Baseline không plugin | 5.822 | 6.357 | 48.185 |
+| control | Champion đã chốt | 2.385 | 2.755 | 22.942 |
+| train_fitted | Median | 6.673 | 7.787 | 18.017 |
+| train_fitted | Otsu | 3.380 | 2.875 | 27.837 |
+| train_fitted | Valley | 28.652 | 11.740 | 34.718 |
+| train_fitted | K-Means 1D | 3.617 | 2.875 | 27.797 |
+| train_fitted | GMM 1D | 5.003 | 4.928 | 18.797 |
+| train_fitted | K-Means 2D | 14.920 | 2.735 | 28.047 |
+| train_fitted | HMM | 5.535 | 4.647 | 20.717 |
+| train_fitted | Ngưỡng động | 4.367 | 3.535 | 16.480 |
+| input_adaptive | 2D fit từng input | 8.852 | 3.170 | 10.375 |
+| input_adaptive | HMM fit từng input | 8.303 | 7.045 | 14.482 |
 
-### 1. Thuật toán ACF (Chuỗi Quán quân: Bandpass 70–900 Hz + Energy + Viterbi)
-*Khung phân tích 30 ms, bước nhảy 10 ms. Mốc đối sánh Quán quân quét lưới Stage 4: $T = 0.4500$, Final Score = **2.39%**.*
+ACF chưa có cải thiện so với Champion; AMDF 2D gần ngang Champion. Cepstrum ngưỡng động giảm lỗi test nhưng tăng lỗi train, nên không thay preset theo thứ hạng test. Bản 2D Cepstrum 10,375% fit trên từng input, không được gắn nhãn là mô hình train cố định.
 
-| STT | Phương pháp học không giám sát | Cơ chế / Ngưỡng $T$ | $\Delta F_0$ (Hz) | $\text{MAPE } F_0$ (%) | $\Delta\text{Std}$ (Hz) | $\text{MAPE Std}$ (%) | $\Delta\text{Num}$ (Khung) | $\text{MAPE Num}$ (%) | **FINAL SCORE (%)** | Đánh giá so với Quán quân gốc |
-|:---:|:---|:---:|---:|---:|---:|---:|---:|---:|---:|:---|
-| **1** | **Ngưỡng Động Thích Nghi Ngữ Cảnh** | **Adaptive STE** | **1.61** | **1.00** | **0.94** | **2.72** | **5.5** | **2.80** | **2.17%** | 🔥 **Vượt trội nhất (Kỷ lục mới)!** |
-| **2** | **Otsu (Cực đại phương sai)** | **$T = 0.4559$** | **1.87** | **1.17** | **0.87** | **2.40** | **6.0** | **3.24** | **2.27%** | 🔥 **Tối ưu hơn Quán quân gốc** |
-| **3** | **K-Means (Phân cụm 1D)** | **$T = 0.4599$** | **1.89** | **1.19** | **0.81** | **1.96** | **6.8** | **3.76** | **2.30%** | 🔥 **Tối ưu hơn Quán quân gốc** |
-| — | *Quán quân Quét lưới (Stage 4)* | *$T = 0.4500$* | *1.80* | *1.12* | *0.90* | *2.60* | *6.0* | *3.43* | ***2.39%*** | *Mốc chuẩn Quán quân* |
-| — | *Baseline lịch sử (BT2)* | *$T = 0.4408$* | *1.80* | *1.12* | *0.93* | *2.70* | *6.2* | *3.65* | ***2.49%*** | *Chuẩn tham số cũ* |
-| 4 | Median (Tiên nghiệm 50/50) | $T = 0.4293$ | 1.81 | 1.12 | 0.97 | 2.86 | 6.5 | 3.94 | **2.64%** | Khá |
-| 5 | 1D GMM-EM (50/50 Liên tục) | $T = 0.4294$ | 1.81 | 1.12 | 0.97 | 2.86 | 6.5 | 3.94 | **2.64%** | Khá (trùng điểm phân vị) |
-| 6 | 2-State HMM (Baum-Welch + Viterbi) | Viterbi Decoding | 2.97 | 1.86 | 5.16 | 12.86 | 16.0 | 10.20 | **8.30%** | Trễ biên chuyển tiếp |
-| 7 | Đa đặc trưng 2D (Periodicity + ZCR) | Phân cụm 2D | 3.89 | 2.42 | 4.65 | 10.67 | 25.8 | 14.80 | **9.30%** | Nhiễu do đặc trưng ZCR |
-| 8 | Đáy Thung Lũng (Valley Minimum) | $T = 0.2568$ | 3.10 | 2.02 | 5.44 | 33.16 | 14.0 | 10.34 | **15.17%** | Ngưỡng quá thấp, lọt tạp âm |
+Các bảng bổ sung ở commit `5a9273f` vẫn nằm trong [bản lưu chưa kiểm chứng](../archive/2026-11-01-main-review/champion_unsupervised_unverified.md). Giao thức mới không được gọi là tái lập giao thức cũ chưa lưu của các số 14,31% / 14,40% / 2,17%. Các giá trị 2,49% / 2,98% / 22,71% từng gọi “Baseline lịch sử” thực chất là Champion dùng ngưỡng lịch sử, vẫn có plugin và khung 30 ms.
 
----
-
-### 2. Thuật toán AMDF (Chuỗi Quán quân: Energy + Viterbi)
-*Khung phân tích 30 ms, bước nhảy 10 ms. Mốc đối sánh Quán quân quét lưới Stage 4: $T = 0.5000$, Final Score = **2.76%**.*
-
-| STT | Phương pháp học không giám sát | Cơ chế / Ngưỡng $T$ | $\Delta F_0$ (Hz) | $\text{MAPE } F_0$ (%) | $\Delta\text{Std}$ (Hz) | $\text{MAPE Std}$ (%) | $\Delta\text{Num}$ (Khung) | $\text{MAPE Num}$ (%) | **FINAL SCORE (%)** | Đánh giá so với Quán quân gốc |
-|:---:|:---|:---:|---:|---:|---:|---:|---:|---:|---:|:---|
-| — | ***Quán quân Quét lưới (Stage 4)*** | ***$T = 0.5000$*** | ***0.56*** | ***0.33*** | ***1.30*** | ***3.76*** | ***7.2*** | ***4.18*** | ***2.76%*** | 🏆 **Tối ưu nhất toàn diện** |
-| **1** | **1D GMM-EM (50/50 Liên tục)** | **$T = 0.4239$** | **0.75** | **0.47** | **1.21** | **2.88** | **9.8** | **5.28** | **2.88%** | 🔥 **Sát nút Quán quân gốc** |
-| **2** | **Ngưỡng Động Thích Nghi Ngữ Cảnh** | **Adaptive STE** | **0.53** | **0.31** | **1.37** | **3.98** | **8.0** | **4.43** | **2.91%** | 🔥 **Tương đương Quán quân gốc** |
-| — | *Baseline lịch sử (BT2)* | *$T = 0.4380$* | *0.76* | *0.48* | *1.28* | *3.41* | *9.5* | *5.06* | ***2.98%*** | *Khá* |
-| 3 | Median (Tiên nghiệm 50/50) | $T = 0.4565$ | 0.70 | 0.43 | 1.28 | 3.41 | 9.5 | 5.15 | **3.00%** | Khá |
-| 4 | Đa đặc trưng 2D (Periodicity + ZCR) | Phân cụm 2D | 0.49 | 0.29 | 1.37 | 4.08 | 9.2 | 5.16 | **3.17%** | Khá |
-| 5 | Đáy Thung Lũng (Valley Minimum) | $T = 0.4033$ | 0.57 | 0.34 | 1.09 | 2.69 | 12.5 | 7.03 | **3.35%** | Trung bình |
-| 6 | K-Means (Phân cụm 1D) | $T = 0.4006$ | 0.59 | 0.36 | 0.97 | 2.30 | 13.5 | 7.80 | **3.49%** | Trung bình |
-| 7 | Otsu (Cực đại phương sai) | $T = 0.3950$ | 0.67 | 0.42 | 0.93 | 2.25 | 14.8 | 8.50 | **3.72%** | Trung bình |
-| 8 | 2-State HMM (Baum-Welch + Viterbi) | Viterbi Decoding | 2.67 | 1.73 | 1.40 | 5.41 | 21.5 | 14.00 | **7.04%** | Mất khung biên âm thanh |
-
----
-
-### 3. Thuật toán Cepstrum (Chuỗi Quán quân: Bandpass + Center Clipping 40% + Energy + Viterbi)
-*Khung phân tích 30 ms, bước nhảy 10 ms. Mốc đối sánh Quán quân quét lưới Stage 4: $T = 0.1000$, Final Score = **22.94%**.*
-
-| STT | Phương pháp học không giám sát | Cơ chế / Ngưỡng $T$ | $\Delta F_0$ (Hz) | $\text{MAPE } F_0$ (%) | $\Delta\text{Std}$ (Hz) | $\text{MAPE Std}$ (%) | $\Delta\text{Num}$ (Khung) | $\text{MAPE Num}$ (%) | **FINAL SCORE (%)** | Đánh giá so với Quán quân gốc |
-|:---:|:---|:---:|---:|---:|---:|---:|---:|---:|---:|:---|
-| **1** | **2-State HMM (Baum-Welch + Viterbi)** | **Viterbi Decoding** | **5.88** | **3.71** | **0.93** | **2.50** | **53.0** | **36.73** | **14.31%** | 🔥 **Vượt trội Quán quân gốc!** |
-| **2** | **1D GMM-EM (fit trên đặc trưng BP+Clip)** | **$T = 0.1261$** | **3.57** | **2.35** | **3.26** | **13.75** | **37.8** | **27.10** | **14.40%** | 🔥 **Vượt trội Quán quân gốc!** |
-| **3** | **Đa đặc trưng 2D (Periodicity + ZCR)** | **Phân cụm 2D** | **5.72** | **3.50** | **6.22** | **25.59** | **29.0** | **17.85** | **15.65%** | 🔥 **Vượt trội Quán quân gốc!** |
-| **4** | **Ngưỡng Động Thích Nghi Ngữ Cảnh** | **Adaptive STE** | **3.52** | **2.38** | **6.09** | **33.22** | **18.8** | **13.04** | **16.21%** | 🔥 **Vượt trội Quán quân gốc!** |
-| 5 | Median (Tiên nghiệm 50/50) | $T = 0.0779$ | 4.00 | 2.79 | 9.35 | 50.98 | 10.2 | 8.09 | **20.62%** | Tốt hơn Quán quân gốc |
-| — | *Baseline lịch sử (BT2)* | *$T = 0.0600$* | *4.06* | *2.87* | *9.86* | *55.58* | *13.2* | *9.68* | ***22.71%*** | *Tương đương Quán quân* |
-| — | *Quán quân Quét lưới (Stage 4)* | *$T = 0.1000$* | *6.12* | *4.13* | *9.62* | *51.62* | *18.8* | *13.09* | ***22.94%*** | *Mốc chuẩn Quán quân* |
-| 6 | 1D GMM-EM (fit trên Cepstrum thô) | $T = 0.1024$ | 5.37 | 3.74 | 9.62 | 51.48 | 20.2 | 14.21 | **23.14%** | Tương đương Quán quân |
-| 7 | Otsu (Cực đại phương sai) | $T = 0.1903$ | 8.90 | 5.71 | 1.91 | 9.52 | 82.2 | 58.13 | **24.46%** | Ngưỡng quá cao |
-| 8 | K-Means (Phân cụm 1D) | $T = 0.1945$ | 9.35 | 5.95 | 1.99 | 9.86 | 83.8 | 59.17 | **25.00%** | Ngưỡng quá cao |
-| 9 | Đáy Thung Lũng (Valley Minimum) | $T = 0.2556$ | 13.19 | 8.07 | 6.23 | 21.51 | 107.2 | 74.97 | **34.85%** | Lệch nặng do phân phối lệch |
-
----
-
-### 4. Kết Luận Khoa Học Thực Nghiệm:
-1. **Sức mạnh cộng hưởng giữa Tiền/Hậu xử lý và Học không giám sát:**
-   * Các kỹ thuật học không giám sát không chỉ hoạt động tốt ở mô hình độc lập mà khi kết hợp vào chuỗi Quán quân hoàn chỉnh còn phát huy sức mạnh vượt bậc.
-   * Trên **ACF**, giải pháp **Ngưỡng Động Adaptive STE (2.17%)**, **Otsu (2.27%)** và **K-Means (2.30%)** đã chính thức vượt qua Quán quân quét lưới thủ công (**2.39%**).
-   * Trên **AMDF**, Quán quân quét lưới ($T=0.5000$, **2.76%**) giữ vị trí số một, theo sát là **1D GMM-EM (2.88%)** và **Ngưỡng Động Adaptive STE (2.91%)**.
-   * Trên **Cepstrum**, sự phối hợp giữa bộ lọc dải thông + xén biên trung tâm với mô hình xác suất nâng cao như **2-State HMM (14.31%)** và **1D GMM-EM (14.40%)** đã giảm tới hơn $8.5\%$ điểm lỗi so với cấu hình Quán quân lưới cố định (**22.94%**).
-2. **Khẳng định tính đúng đắn của giả thiết tiên nghiệm 50/50:**
-   * Các phương pháp bám sát giả thiết $P(V) \approx 50\%$ (Median, Otsu, GMM-EM 50/50) đều nằm trong nhóm dẫn đầu, chứng minh giả thiết mà Giảng viên đặt ra là hoàn toàn chính xác và có giá trị thực tiễn rất cao.
+Benchmark 15/16 [sau sửa Otsu](../outputs/main_review_2026-11-01/README.md) là đối chứng không plugin 25 ms, tách khỏi benchmark Champion này. Otsu không ràng buộc hai nhóm bằng nhau; tỷ lệ voiced trên toàn file có cả silence không xác nhận tỷ lệ V/UV speech 50/50. LAB chưa có nhãn thời gian nên Final Score không chứng minh Accuracy/F1 hoặc đúng contour.
 
 ---
 
@@ -465,6 +413,8 @@ Mọi phương pháp đều được đánh giá qua bảng chuẩn 8 cột th�
 ## Kết quả kiểm chứng hiện hành — 30/10/2026
 
 Nguồn: cấu hình đóng băng và `outputs/stage4_validation/evaluation.json`. Final Score là sai số thống kê toàn file; thấp hơn tốt hơn. Accuracy/F1 từng khung không xác định vì thiếu nhãn thời gian.
+
+> Đây là snapshot 17 giao thức Stage 4, gồm Otsu trước sửa ngày 01/11. Benchmark 15/16 sau sửa được liên kết trong [rà soát main](MAIN_REVIEW_FIXES.md).
 
 Giao thức `train_all` gồm silence, `train_active` chỉ active train, `input_active` fit riêng từng file đầu vào. Tất cả dùng cùng frame/hop 25/10 ms, silence gate và median theo đoạn.
 

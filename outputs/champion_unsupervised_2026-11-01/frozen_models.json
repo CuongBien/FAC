@@ -1,0 +1,699 @@
+{
+  "schema_version": 1,
+  "frozen_at_utc": "2026-11-01T14:26:28.001720+00:00",
+  "train_manifest": {
+    "phone_F1.wav": {
+      "wav_sha256": "4209a6ffe642f93b89554000fa7766135faf7c6cd97ce99b912b44af5e39db12",
+      "lab_sha256": "a107510954481966571f3b047c9c61cc7cfba92d5e160800bebbe26765885192"
+    },
+    "phone_M1.wav": {
+      "wav_sha256": "f6ec4c441948ea9e749ddfdf2ec88b5400261c2f7249c54baf42e00b485eab22",
+      "lab_sha256": "e535f875046910a3a0cd712f403b59dc68fbb823d2973f0f5f8c072f960a283e"
+    },
+    "studio_F1.wav": {
+      "wav_sha256": "60deec10a9a1db91546503977892d17f34111d7090482b893dc46ebe09ec6fc5",
+      "lab_sha256": "41a4fbb4dd1935a31b131d1bcfa025dd3d31223a5803f864d14d8afdde6989e5"
+    },
+    "studio_M1.wav": {
+      "wav_sha256": "7ad0e8baff2c69e65f680842a7cda33744358111f7662d9b6d17702b2077be78",
+      "lab_sha256": "082f5c3ba7232c45b4c786a2c7c2658c171c76d24a67f16f7d4e0e462e19b65b"
+    }
+  },
+  "provenance": {
+    "base_commit": "5a9273fd08f00b5fefde2b9bdeaeaf60bc5c7eda",
+    "branch": "codex/fix-main-review",
+    "source_sha256": {
+      "predict.py": "0217e91cff52e89ebee37f5e66174f9f9d0b2df9984d7f7e983c25199f45338b",
+      "scripts/01_demo_frames.py": "676ec02331200cf77d460f520c1c6e63751611f44d23f95ba787c330897ed797",
+      "scripts/02_train_threshold.py": "347d368f09c65170eb217ba2d074b42f854bd65ec65453965b3ffc5064aa6fa2",
+      "scripts/03_compare_params.py": "4f66f76d2cf148617286c811b6a97d334d90065ba26f1d7e1d2d84509773b6a7",
+      "scripts/04_run_testing.py": "38f5e09b5c45d417a47231fbe8b0556d9f9806e04abaad20a8f06f202d0b6586",
+      "scripts/05_compare_plugins.py": "f83711e97a5d462e5d4772a2e78b3f0d581623aed80c8baf08d3c5f5ae203031",
+      "scripts/14_compare_acf_amdf_cepstrum.py": "48b072b1283f41b0c635562f7cd63b915ed3f1dd7b8021aa439c6f5fb70e256a",
+      "scripts/15_evaluate_unsupervised_thresholds.py": "41e6ba6f1aaba81e5e8a61508475866544949411b546ef50a8f734675ade75f5",
+      "scripts/16_evaluate_advanced_unsupervised.py": "99f9692d7cc4d491c91fee922bbd15ccebd7ed327a9d633ade95a520fa246ad0",
+      "scripts/17_validate_and_calibrate.py": "3bc1ec6f458b9b1397a2228b332ec54b2eb4e365c48c542450464ea31155f28a",
+      "scripts/18_trace_legacy_cepstrum.py": "f2b5b4a2cb3237e58c5564dbc1553cad1f1ec4af965476322b76366f0e2d37e2",
+      "scripts/19_report_validation.py": "77647a9a1dba67dc52bb261b2c063e8a91102d6c887330d6ca3953384f6ae45c",
+      "scripts/20_verify_validation_artifacts.py": "1af15c95043501fb9b8007f3c945b85433fcc75ce9486ca2638c767098ab9fa6",
+      "scripts/21_benchmark_champion_unsupervised.py": "a7aedcc986901947c52c46ca5e6b5c18e3310b09b704dc9694d812bac29fee69",
+      "scripts/visualize_amdf_effects.py": "a2bcd389538fea9df99fb5224b1e0a25bcff809c3445d7dd0340280f49a169f4",
+      "scripts/visualize_preprocessing_effects.py": "4d5532543614fc2983bf49bbb58c6fbfda0f200bf8d90c8ae29ddef289344bc9",
+      "src/__init__.py": "a996403fcbbc481ab32e47fb7aa82714eff1cb4ed6c1fa0472b93972822391d9",
+      "src/analysis/__init__.py": "cc672963eb6a16432f9c5fd1f4e6b669d17903b8a1676aaf29ac331347e5ef71",
+      "src/analysis/advanced_unsupervised.py": "813b9edc2f6c9394d33d8455051c4040757c3790e1748f7fdee035ed090a3506",
+      "src/analysis/champion_unsupervised.py": "7ad05a3a57df8ab8ad177cd82b9d55b32e397eca1bb5ea2e767243cb3ea5b54c",
+      "src/analysis/evaluation.py": "482a48e080494d7f70f048c92db468218cfe8fd07066b4995f9ba71c5da517d8",
+      "src/analysis/protocols.py": "4d43fd2f85672d441554fe60148895a3acedeab573ae32f43c34979d45421fbb",
+      "src/analysis/threshold.py": "0b69794a525fa6b67c4409017be46b5087c64939ffc303343a9edafd45ac62a4",
+      "src/analysis/unsupervised_threshold.py": "6527bffd6f85f8bf2b2250bb65222162c92d331746f04ff6e86c426f211dcb84",
+      "src/analysis/validation.py": "79b9b1c8993fc6642a5fddb4de5144d8956160b0933f25cc78c55c5da599eb2c",
+      "src/calibrated_presets.py": "694389dc8f73ede112a95d3c33f22af0be854d4d5eacc33b1cb7f31edbf873fe",
+      "src/config.py": "e6e02dc47186db4baa3210d5b62e5767b4b81cddfa5516539326aface1e357b5",
+      "src/core/__init__.py": "ed24445f6c97e3eefd9da6807fcce20445bc8562e0639fbe337e7007cfb1745e",
+      "src/core/acf.py": "4bab34f0f89ce85687fc0c2bef5a61337bea81d307faa18ab31a51815e785ae8",
+      "src/core/amdf.py": "bf7a4dca8669026c5be22001a49f5a6a7dd5dc115035e189deaf8fb4408e2eac",
+      "src/core/audio.py": "a79ddb11ee6d5744c83e2d2e6c5964864a307293549c07e3075cdf399e84e23f",
+      "src/core/cepstrum.py": "33546f8e50e126a8e91efc90606d177f78eb370c8f2eb2738fa428100b6c1b80",
+      "src/core/lab_parser.py": "9128f6ccee3f841c8bf5df64e5f755ae622f4c96ced00aa72fbae98828ff646a",
+      "src/core/pitch_detector.py": "fdaa2571481864806628edcd97cb0e2227432ec3f506831cbba3523fa7969896",
+      "src/core/processing.py": "12430291fead171a452dddec24b052721f9517a2dd03ab0affe0137db45a6db4",
+      "src/pipelines.py": "136a7f803321530349c75ecd82dc0f338e27e045052fbb0d0d80f0a50c21d98d",
+      "src/plugins/__init__.py": "3222e095ade352d0bc952c51cb4bf86a3c87c4af47e2c2f116858e43b5ebb9fe",
+      "src/plugins/base.py": "415df46f2245b1fca8b3fd683ead6ed6e35653900c30f32413cac7b2e5e8e0ff",
+      "src/plugins/decision/__init__.py": "46673c1935e0b39403dcd637e8d9d7a7177e8701360ef911e6b750f990ca78a9",
+      "src/plugins/decision/hysteresis.py": "c85132922bacb00a27a894ba063bbf86b376995f8d739d07aec2026ffbd78240",
+      "src/plugins/plugin_detector.py": "87280801688a65c3fb6679e7d70194cd4c46331337d4bf2187ef7c38eba23c79",
+      "src/plugins/post_processing/__init__.py": "1a412bbf5130f94afd37ec1078035359902f0adf1e8371832face74b4e7477d9",
+      "src/plugins/post_processing/energy_extension.py": "4856b1c01f61f08e241f2117aa273f16d7ca8b632a9eaa904bebdb6bfdbe86ef",
+      "src/plugins/post_processing/viterbi_tracking.py": "1b5b92dc3029afaac23e9ff5c9cad281bc946b81f038f10f0eabf5f693e2304a",
+      "src/plugins/pre_processing/__init__.py": "5895ad598c07f051ff6b783ee4676a16e541bbe072dfa075d5e19d1df90a1a4e",
+      "src/plugins/pre_processing/bandpass_filter.py": "7e53da9759556bd437c287c57e3fbff54787871bbc3a06ab20cd198f4ca24bbd",
+      "src/plugins/pre_processing/center_clipping.py": "c1e9b624e15a230ddb96bec99bba63d8434b2a7f6ae97d12af9feac2330f25d1",
+      "src/visualization/__init__.py": "1113c12f4f98721360ffc65ccf3ba54558d8d35344c86e77f19f80fd680c8c58",
+      "src/visualization/plotter.py": "e5f83785968ac9a36ef2ff97437f4d20b7bb9049da07f07415cc9e9d4a815203"
+    }
+  },
+  "models": {
+    "acf": {
+      "method": "acf",
+      "feature_spec": {
+        "method": "acf",
+        "plugins": [
+          "BP"
+        ],
+        "frame_duration_ms": 30.0,
+        "hop_duration_ms": 10.0,
+        "clipping_ratio": 0.4,
+        "f0_min": 70.0,
+        "f0_max": 400.0,
+        "ste_silence_ratio": 0.008,
+        "bandpass_low": 70.0,
+        "bandpass_high": 900.0
+      },
+      "thresholds": {
+        "otsu": 0.5725636259135187,
+        "valley": 0.7802288640189566,
+        "median": 0.6922299636161493,
+        "kmeans": 0.5741006077927666,
+        "gmm": {
+          "threshold": 0.6485252353605513,
+          "mu0": 0.5328995573820722,
+          "std0": 0.18036861133313084,
+          "mu1": 0.7599680860375317,
+          "std1": 0.07635765469632547,
+          "weight0": 0.5,
+          "weight1": 0.5,
+          "log_likelihood": 291.392690977313,
+          "threshold_status": "between_means",
+          "converged": true,
+          "num_iter": 16
+        }
+      },
+      "cluster_2d": {
+        "centroid_v": [
+          0.6872256443689001,
+          0.021518269665610122
+        ],
+        "centroid_uv": [
+          0.6016972774280763,
+          0.05087191452781528
+        ],
+        "centroid_v_normalized": [
+          0.19923108442641016,
+          -0.7015438058467133
+        ],
+        "centroid_uv_normalized": [
+          -0.28346481497434095,
+          0.9981524002304324
+        ],
+        "status": "ok",
+        "converged": true,
+        "num_iter": 10,
+        "p_mean": 0.6519241029305024,
+        "p_std": 0.17718892380690213,
+        "z_mean": 0.03363388636139132,
+        "z_std": 0.017269936096376073
+      },
+      "hmm": {
+        "A": [
+          [
+            0.85,
+            0.15
+          ],
+          [
+            0.15,
+            0.85
+          ]
+        ],
+        "pi": [
+          0.5,
+          0.5
+        ],
+        "means": [
+          0.4843526166853241,
+          0.764721046801597
+        ],
+        "variances": [
+          0.023209736417418098,
+          0.005281552829682548
+        ],
+        "v_state": 1,
+        "segments": [
+          [
+            53,
+            114
+          ],
+          [
+            118,
+            134
+          ],
+          [
+            142,
+            162
+          ],
+          [
+            163,
+            165
+          ],
+          [
+            183,
+            184
+          ],
+          [
+            190,
+            220
+          ],
+          [
+            226,
+            234
+          ],
+          [
+            239,
+            251
+          ],
+          [
+            264,
+            273
+          ],
+          [
+            368,
+            462
+          ],
+          [
+            463,
+            468
+          ],
+          [
+            471,
+            492
+          ],
+          [
+            498,
+            533
+          ],
+          [
+            536,
+            598
+          ],
+          [
+            605,
+            617
+          ],
+          [
+            633,
+            652
+          ],
+          [
+            655,
+            675
+          ],
+          [
+            804,
+            846
+          ],
+          [
+            848,
+            858
+          ],
+          [
+            861,
+            902
+          ],
+          [
+            903,
+            915
+          ],
+          [
+            916,
+            921
+          ],
+          [
+            927,
+            952
+          ],
+          [
+            1113,
+            1149
+          ],
+          [
+            1154,
+            1181
+          ],
+          [
+            1183,
+            1194
+          ],
+          [
+            1203,
+            1226
+          ]
+        ],
+        "status": "ok",
+        "converged": true,
+        "num_iter": 13,
+        "log_likelihood": 439.7029227362456,
+        "fixed_transitions": true,
+        "mu_v": 0.764721046801597,
+        "std_v": 0.07267429277043257,
+        "mu_uv": 0.4843526166853241,
+        "std_uv": 0.15234742012065086
+      },
+      "num_train_active": 659,
+      "num_train_frames": 1291
+    },
+    "amdf": {
+      "method": "amdf",
+      "feature_spec": {
+        "method": "amdf",
+        "plugins": [],
+        "frame_duration_ms": 30.0,
+        "hop_duration_ms": 10.0,
+        "clipping_ratio": 0.4,
+        "f0_min": 70.0,
+        "f0_max": 400.0,
+        "ste_silence_ratio": 0.008,
+        "bandpass_low": 70.0,
+        "bandpass_high": 900.0
+      },
+      "thresholds": {
+        "otsu": 0.3595316586284222,
+        "valley": 0.19147046587682984,
+        "median": 0.2287169929891649,
+        "kmeans": 0.36125087396166944,
+        "gmm": {
+          "threshold": 0.27480296461709675,
+          "mu0": 0.16675013566964317,
+          "std0": 0.06797583134014484,
+          "mu1": 0.4074580076077122,
+          "std1": 0.18692758184962122,
+          "weight0": 0.5,
+          "weight1": 0.5,
+          "log_likelihood": 302.44222129647864,
+          "threshold_status": "between_means",
+          "converged": true,
+          "num_iter": 13
+        }
+      },
+      "cluster_2d": {
+        "centroid_v": [
+          0.2048266754138266,
+          0.05775431854479139
+        ],
+        "centroid_uv": [
+          0.5813737305404061,
+          0.17603624497370102
+        ],
+        "centroid_v_normalized": [
+          -0.41033633675979203,
+          -0.23995827333138453
+        ],
+        "centroid_uv_normalized": [
+          1.6538747008333605,
+          0.967160063503592
+        ],
+        "status": "ok",
+        "converged": true,
+        "num_iter": 10,
+        "p_mean": 0.2796789731704001,
+        "p_std": 0.18241693715853263,
+        "z_mean": 0.08126711423855043,
+        "z_std": 0.09798701818998197
+      },
+      "hmm": {
+        "A": [
+          [
+            0.85,
+            0.15
+          ],
+          [
+            0.15,
+            0.85
+          ]
+        ],
+        "pi": [
+          0.5,
+          0.5
+        ],
+        "means": [
+          0.1778349064678312,
+          0.5016941922582104
+        ],
+        "variances": [
+          0.005797161836797689,
+          0.021276675209980313
+        ],
+        "v_state": 0,
+        "segments": [
+          [
+            53,
+            114
+          ],
+          [
+            118,
+            134
+          ],
+          [
+            142,
+            162
+          ],
+          [
+            163,
+            165
+          ],
+          [
+            183,
+            184
+          ],
+          [
+            190,
+            220
+          ],
+          [
+            226,
+            234
+          ],
+          [
+            239,
+            251
+          ],
+          [
+            264,
+            273
+          ],
+          [
+            368,
+            462
+          ],
+          [
+            463,
+            468
+          ],
+          [
+            471,
+            492
+          ],
+          [
+            498,
+            533
+          ],
+          [
+            536,
+            598
+          ],
+          [
+            605,
+            617
+          ],
+          [
+            633,
+            652
+          ],
+          [
+            655,
+            675
+          ],
+          [
+            804,
+            846
+          ],
+          [
+            848,
+            858
+          ],
+          [
+            861,
+            902
+          ],
+          [
+            903,
+            915
+          ],
+          [
+            916,
+            921
+          ],
+          [
+            927,
+            952
+          ],
+          [
+            1113,
+            1149
+          ],
+          [
+            1154,
+            1181
+          ],
+          [
+            1183,
+            1194
+          ],
+          [
+            1203,
+            1226
+          ]
+        ],
+        "status": "ok",
+        "converged": true,
+        "num_iter": 17,
+        "log_likelihood": 457.987566406606,
+        "fixed_transitions": true,
+        "mu_v": 0.1778349064678312,
+        "std_v": 0.07613909532426616,
+        "mu_uv": 0.5016941922582104,
+        "std_uv": 0.14586526389096313
+      },
+      "num_train_active": 659,
+      "num_train_frames": 1291
+    },
+    "cepstrum": {
+      "method": "cepstrum",
+      "feature_spec": {
+        "method": "cepstrum",
+        "plugins": [
+          "BP",
+          "Clip"
+        ],
+        "frame_duration_ms": 30.0,
+        "hop_duration_ms": 10.0,
+        "clipping_ratio": 0.4,
+        "f0_min": 70.0,
+        "f0_max": 400.0,
+        "ste_silence_ratio": 0.008,
+        "bandpass_low": 70.0,
+        "bandpass_high": 900.0
+      },
+      "thresholds": {
+        "otsu": 0.2540980685682122,
+        "valley": 0.3120264460547997,
+        "median": 0.1454727658563198,
+        "kmeans": 0.25112662867660596,
+        "gmm": {
+          "threshold": 0.17910038080732332,
+          "mu0": 0.11398911835314074,
+          "std0": 0.03951891394518385,
+          "mu1": 0.2532630311796102,
+          "std1": 0.13073412520283767,
+          "weight0": 0.5,
+          "weight1": 0.5,
+          "log_likelihood": 620.0985232434123,
+          "threshold_status": "between_means",
+          "converged": true,
+          "num_iter": 16
+        }
+      },
+      "cluster_2d": {
+        "centroid_v": [
+          0.13048658599061955,
+          0.013109782104731127
+        ],
+        "centroid_uv": [
+          0.2899544913912637,
+          0.034956896143314195
+        ],
+        "centroid_v_normalized": [
+          -0.414625847848731,
+          -0.5088838700568765
+        ],
+        "centroid_uv_normalized": [
+          0.9515663208128393,
+          1.1678884817805302
+        ],
+        "status": "ok",
+        "converged": true,
+        "num_iter": 9,
+        "p_mean": 0.17888352237928237,
+        "p_std": 0.11672435917772206,
+        "z_mean": 0.01974016572797334,
+        "z_std": 0.013029266623249727
+      },
+      "hmm": {
+        "A": [
+          [
+            0.85,
+            0.15
+          ],
+          [
+            0.15,
+            0.85
+          ]
+        ],
+        "pi": [
+          0.5,
+          0.5
+        ],
+        "means": [
+          0.11326896626935566,
+          0.2809978370542276
+        ],
+        "variances": [
+          0.001639421711492927,
+          0.015149257266528646
+        ],
+        "v_state": 1,
+        "segments": [
+          [
+            53,
+            114
+          ],
+          [
+            118,
+            134
+          ],
+          [
+            142,
+            162
+          ],
+          [
+            163,
+            165
+          ],
+          [
+            183,
+            184
+          ],
+          [
+            190,
+            220
+          ],
+          [
+            226,
+            234
+          ],
+          [
+            239,
+            251
+          ],
+          [
+            264,
+            273
+          ],
+          [
+            368,
+            462
+          ],
+          [
+            463,
+            468
+          ],
+          [
+            471,
+            492
+          ],
+          [
+            498,
+            533
+          ],
+          [
+            536,
+            598
+          ],
+          [
+            605,
+            617
+          ],
+          [
+            633,
+            652
+          ],
+          [
+            655,
+            675
+          ],
+          [
+            804,
+            846
+          ],
+          [
+            848,
+            858
+          ],
+          [
+            861,
+            902
+          ],
+          [
+            903,
+            915
+          ],
+          [
+            916,
+            921
+          ],
+          [
+            927,
+            952
+          ],
+          [
+            1113,
+            1149
+          ],
+          [
+            1154,
+            1181
+          ],
+          [
+            1183,
+            1194
+          ],
+          [
+            1203,
+            1226
+          ]
+        ],
+        "status": "ok",
+        "converged": true,
+        "num_iter": 7,
+        "log_likelihood": 741.4552254047986,
+        "fixed_transitions": true,
+        "mu_v": 0.2809978370542276,
+        "std_v": 0.1230823190654476,
+        "mu_uv": 0.11326896626935566,
+        "std_uv": 0.040489772924689596
+      },
+      "num_train_active": 659,
+      "num_train_frames": 1291
+    }
+  }
+}

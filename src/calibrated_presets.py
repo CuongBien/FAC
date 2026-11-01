@@ -1,6 +1,6 @@
 """Train-selected presets frozen before stage 4 test evaluation; see docs/STAGE4_RESULTS.md."""
 
-FROZEN_CONFIG_SHA256 = '34c1c6ba11a1c76ed82747fa11977fe5f8f1d0749eec4fec69acd9c58e610645'
+FROZEN_CONFIG_SHA256 = '83dfda76c5a2ce34846a8c4eff9132296e2c09846e4d8e2cf44bbac5be884dc5'
 
 CHAMPIONS = {'acf': {'plugins': ['BP', 'Energy', 'Viterbi'],
          'threshold': 0.45,

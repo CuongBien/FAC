@@ -1,0 +1,7 @@
+{
+  "python": "3.12.14",
+  "numpy": "2.5.3",
+  "scipy": "1.18.1",
+  "matplotlib": "3.11.2",
+  "snapshot_sha256": "82d48ebfba2f64b7dd54de3ef52e5e4151c1a5e909c1f77378d2e1d6a10a369c"
+}

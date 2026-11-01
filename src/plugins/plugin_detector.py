@@ -16,6 +16,7 @@ from src.core.processing import (
     prepare_analysis_signal,
     silence_energy_threshold,
     smooth_voiced_segments,
+    validate_pitch_range,
 )
 from .base import (
     BasePlugin,
@@ -77,6 +78,13 @@ class PluginPitchDetector:
         self.post_processors.clear()
         return self
 
+    def pre_processing_configuration(self):
+        return [{"name": p.name, "parameters": {
+            key: value for key, value in vars(p).items()
+            if key not in ("name", "stage") and not key.startswith("_")
+            and isinstance(value, (int, float, str, bool))
+        }} for p in self.pre_processors]
+
     def process_file(self, wav_path: str) -> Dict:
         """Process a WAV file and return F0 contour, frame times, and labels."""
         sr, signal, duration = load_wav(wav_path)
@@ -90,6 +98,7 @@ class PluginPitchDetector:
         duration: Optional[float] = None,
     ) -> Dict:
         """Process an in-memory 1D audio array through the 3-stage plugin pipeline."""
+        validate_pitch_range(sample_rate, self.base_detector.f0_min, self.base_detector.f0_max)
         analysis_signal = prepare_analysis_signal(
             signal, sample_rate, self.base_detector.frame_duration_ms
         )
@@ -253,11 +262,49 @@ class PluginPitchDetector:
             "num_frames": num_frames,
             "method": method,
             "applied_plugins": [p.name for p in self.plugins],
+            "pre_processing_configuration": self.pre_processing_configuration(),
         }
 
-        # =========================================================================
-        # STAGE 3: POST-PROCESSING (Boundary extension & Viterbi tracking)
-        # =========================================================================
+        return self._finalize_results(initial_result)
+
+    def process_feature_labels(self, features: Dict, labels: np.ndarray) -> Dict:
+        """Apply native median and post-processing to aligned external decisions.
+
+        Features must come from the same method, framing and pre-processing.
+        The detector's threshold remains the fixed Energy periodicity guard;
+        external scalar/vector decision thresholds do not silently alter it.
+        """
+        base = self.base_detector
+        expected_pre = [p.name for p in self.pre_processors]
+        feature_pre = features.get("feature_pre_processors")
+        if (features.get("method") != base.method
+                or features.get("frame_duration_ms") != base.frame_duration_ms
+                or features.get("hop_duration_ms") != base.hop_duration_ms
+                or features.get("f0_min") != base.f0_min
+                or features.get("f0_max") != base.f0_max
+                or feature_pre != expected_pre
+                or features.get("pre_processing_configuration") != self.pre_processing_configuration()):
+            raise ValueError("Features do not match detector method/framing/pre-processing")
+        count = len(features["frame_times"])
+        labels = np.array(labels, dtype=object, copy=True)
+        if labels.shape != (count,) or not np.all(np.isin(labels, ["v", "uv", "sil"])):
+            raise ValueError("External labels must align with frames and use v/uv/sil")
+        active = np.asarray(features["ste"]) >= features["ste_thresh"]
+        labels[~active] = "sil"
+        candidate = np.asarray(features["candidate_f0"])
+        valid = np.isfinite(candidate) & (candidate >= base.f0_min) & (candidate <= base.f0_max)
+        labels[(labels == "v") & ~valid] = "uv"
+        raw = np.where(labels == "v", candidate, 0.)
+        contour = smooth_voiced_segments(raw, labels, base.median_size) if base.use_median_filter else raw.copy()
+        result = {**features, "labels": labels, "f0_raw": raw, "f0_contour": contour,
+                  "threshold": base.threshold, "use_median_filter": base.use_median_filter,
+                  "median_size": base.median_size, "applied_plugins": [p.name for p in self.plugins]}
+        for plugin in self.post_processors:
+            plugin.reset()
+        return self._finalize_results(result)
+
+    def _finalize_results(self, initial_result: Dict) -> Dict:
+        """Shared native post-processing and statistics for every decision rule."""
         result = initial_result
         for p in self.post_processors:
             result = p.post_process_results(result)

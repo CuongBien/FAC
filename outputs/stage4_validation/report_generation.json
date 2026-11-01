@@ -1,0 +1,17 @@
+{
+  "generated_at_utc": "2026-11-01T14:57:35.365286+00:00",
+  "report_script_sha256": "e2822f4726a00bbf70b8171e9deb83a08f32e883f720e98e396e171f45425254",
+  "config_sha256": "83dfda76c5a2ce34846a8c4eff9132296e2c09846e4d8e2cf44bbac5be884dc5",
+  "models_sha256": "132f49c80d3f0973424a237a4a7cf83bab82f14f1dd03663f3af720b6f09084f",
+  "evaluation_sha256": "6cb3ec647409e04bb7527730c903a89703f6745878dbc0af4abcaa67684661ae",
+  "documents_sha256_at_generation": {
+    "README.md": "564c44d8609526375b4835b85ff321aa273aa307187ddf21bc67cee022f13315",
+    "docs/STAGE4_RESULTS.md": "7b00b4abf596fa1fff37b30a86fc2fba9178eb46bc4a77f747a5f00e04b58496",
+    "docs/01_acf_theory_and_experiments.md": "5cf884463098912918f6244d3d207f141fcb7d36abc2dccdcaa8764c0903f81b",
+    "docs/02_amdf_theory_and_experiments.md": "779b773c4acbee0f48d1cc347ad4a56c70606e251215e0500921f2dfee7667c2",
+    "docs/03_cepstrum_theory_and_experiments.md": "0609e2d7452af7e33f70bacc34982ecba9692c223b48ee4cbc80a771c3331438",
+    "docs/04_test_set_benchmark_and_analysis.md": "75dc0ce3792c55c7bb03890bbe2a7adaacfefcef14fa323107d4e83b4d2a771d",
+    "docs/05_unsupervised_thresholding_analysis.md": "1da93954954351d9ae22f41afb147661e96517721fc6f5eed00d78b3d1bc0700"
+  },
+  "write_scope": "Only STAGE4 marker blocks; all text outside them is preserved."
+}

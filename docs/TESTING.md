@@ -16,7 +16,7 @@ Có thể thay `uv run python` bằng `.\.venv\Scripts\python.exe` nếu môi tr
 uv run python -B -m unittest discover -s tests -v
 ```
 
-Có 90 test: 27 test [đợt 1](STAGE1_FIXES.md), 26 test [đợt 2](STAGE2_FIXES.md), 26 test [đợt 3](STAGE3_FIXES.md) và 11 test [đợt 4](STAGE4_RESULTS.md) về chọn trên train, freeze, cache, giao thức và timeline riêng. Detector yêu cầu audio dài ít nhất một khung; CLI thoát mã 2 với thông báo rõ nếu input không đủ dài.
+Có 120 test: 90 test thuộc bốn đợt trước, 10 test tại `tests/test_main_review.py`, 8 test tại `tests/test_champion_unsupervised.py` và 12 test tại `tests/test_final_edge_cases.py` về LAB/BOM, phạm vi F0 và bảo toàn tài liệu khi sinh báo cáo. Số test thực chạy được ghi trong `outputs/stage4_validation/validation.json`. Detector yêu cầu audio dài ít nhất một khung; CLI thoát mã 2 với thông báo rõ nếu input không đủ dài.
 
 ## Dự đoán file hoặc thư mục
 
@@ -45,9 +45,11 @@ uv run python predict.py -i TinHieuKiemThu -m acf -o outputs/predictions/acf
 
 Các Champion đã chọn trên train dùng frame/hop 30/10 ms: ACF = BP + Energy + Viterbi, T=0,45; AMDF = Energy + Viterbi, T=0,50; Cepstrum = BP + Clip + Energy + Viterbi, T=0,10. Baseline vẫn dùng frame/hop 25/10 ms và ngưỡng lịch sử. Tên Champion chỉ preset chọn trên train; Cepstrum tăng sai số test sau hiệu chỉnh. Xem [đợt 4](STAGE4_RESULTS.md).
 
-`outputs/predictions/train/` và `test/` đang giữ lần chạy trước đợt 1. Đổi `-o` thành thư mục mới (ví dụ `outputs/predictions/stage1_test`) để giữ các bản đối chiếu này.
+`outputs/predictions/train/` và `test/` đã được tạo lại ở commit `43b1de0`. Đổi `-o` sang thư mục mới để giữ các bản đối chiếu đã có.
 
 Nếu có LAB cùng tên, CLI tính sai lệch mean/std/count. Nếu không có LAB, CLI vẫn dự đoán và xuất thống kê. LAB hiện hành không có segments nên Accuracy/F1 để trống.
+
+LAB hỗ trợ UTF-8 có/không BOM, số thập phân hoặc số mũ (`F0mean 1.8e2`). Giá trị thống kê phải hữu hạn, không âm; F0num là số nguyên. Trường thiếu vẫn để N/A, còn trường có giá trị sai định dạng báo lỗi kèm dòng thay vì đọc một phần số. Có thể đặt chú thích `#` sau giá trị.
 
 ## Đọc kết quả
 
@@ -93,9 +95,30 @@ uv run python scripts/17_validate_and_calibrate.py train --output-dir outputs/st
 uv run python scripts/17_validate_and_calibrate.py evaluate --output-dir outputs/stage4_recheck
 ```
 
-Train chỉ đọc `--train-dir`, ghi hai freeze cùng SHA-256 trước khi evaluate. Evaluate kiểm tra dữ liệu train/checksum và dùng đúng cấu hình đã chọn. Dùng thư mục mới khi chạy lại; không ghi đè freeze/evaluation cũ. `src/calibrated_presets.py` chứa preset hiện hành và checksum lựa chọn, không cần đọc artifact ngoài package khi chạy CLI.
+Train chỉ đọc `--train-dir`, tự ghi snapshot nguồn và runtime lúc bắt đầu, ghi hai freeze cùng SHA-256 trước khi evaluate. Evaluate kiểm tra snapshot, dữ liệu train/checksum và dùng đúng cấu hình đã chọn. Dùng thư mục mới khi chạy lại; không ghi đè freeze/evaluation cũ. `src/calibrated_presets.py` chứa preset hiện hành và checksum lựa chọn, không cần đọc artifact ngoài package khi chạy CLI.
+
+Kiểm tra bộ bằng chứng đang gắn với preset hiện hành:
+
+```powershell
+uv run python -B scripts/20_verify_validation_artifacts.py
+uv run python -B scripts/20_verify_validation_artifacts.py --run-tests --write-report
+```
+
+Lệnh đầu chỉ đọc. Lệnh thứ hai chạy test và ghi lại `validation.json` từ các kiểm tra thực tế. Script 19 từ chối sinh báo cáo nếu evaluation không liên kết đúng freeze hoặc snapshot/runtime không khớp. Nó chỉ sửa các khối STAGE4 đã đánh dấu, kiểm tra đủ bảy tài liệu trước khi ghi đầu ra; giữ các marker khi biên tập nội dung bên ngoài. Thêm `--repair-source-snapshot` chỉ khi cần sửa snapshot sai: công cụ giữ bản cũ trước khi phục dựng byte đúng SHA từ Git; không train lại hay thay điểm. Xem [nhật ký sửa main](MAIN_REVIEW_FIXES.md) và [ba lỗi biên](FINAL_EDGE_CASE_FIXES.md).
 
 Script 05 vẫn xuất các nhóm top như trước, đồng thời thêm `*_raw.json` đủ 16 cấu hình và `*_per_file.csv`; mỗi raw result có base commit, branch và checksum source. [Kết quả đợt 4](../outputs/stage4_validation/README.md) lưu 888 lượt hiệu chỉnh, 72 dòng pipeline và 408 dòng giao thức theo file.
+
+## Tám phương pháp trong pipeline Champion
+
+```powershell
+uv run python -B scripts/21_benchmark_champion_unsupervised.py train --output-dir outputs/champion_unsupervised_recheck
+uv run python -B scripts/21_benchmark_champion_unsupervised.py evaluate --output-dir outputs/champion_unsupervised_recheck
+uv run python -B scripts/21_benchmark_champion_unsupervised.py report --output-dir outputs/champion_unsupervised_recheck
+```
+
+Train chỉ fit active train sau đúng BP/Clipping và frame 30 ms; không dùng LAB để fit. Hai freeze và snapshot được ghi trước evaluate. Evaluate từ chối source/cấu hình/dữ liệu train đã đổi; không ghi đè evaluation cũ. Report chỉ ghi bảng/hình trong thư mục run, không sửa preset. Dùng thư mục mới khi chạy lại.
+
+Tám dòng chính dùng mô hình train. Hai dòng `input_active` fit 2D/HMM từng input, có JSON mô hình riêng. Các quyết định dùng chung Energy guard cố định và Viterbi native. Đây là phần quyết định không giám sát bên trong Champion đã hiệu chỉnh trước đây, không phải toàn bộ pipeline học không dùng tham chiếu. [Báo cáo và bảng tám cột](CHAMPION_UNSUPERVISED_RESULTS.md), [artifact đã chạy](../outputs/champion_unsupervised_2026-11-01/README.md).
 
 ## Nội dung lịch sử
 

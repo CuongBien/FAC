@@ -196,7 +196,7 @@ def process_single_file(
                     ax1.axvspan(start_s, end_s, color="#2ca02c", alpha=0.10, label="Khoảng Hữu thanh Chuẩn (GT)" if "Khoảng Hữu thanh Chuẩn (GT)" not in ax1.get_legend_handles_labels()[1] else "")
             if ref_f0 is not None and ref_f0 > 0:
                 ax1.axhline(ref_f0, color="black", linestyle="--", linewidth=1.5, label=f"GT F0mean = {format_metric(ref_f0, '.1f')} Hz")
-                if ref_std > 0:
+                if ref_std is not None and ref_std > 0:
                     ax1.axhspan(max(0, ref_f0 - ref_std), ref_f0 + ref_std, color="black", alpha=0.06, label=f"GT Dải chuẩn F0mean ± F0std ({format_metric(ref_f0, '.1f')} ± {format_metric(ref_std, '.1f')} Hz)")
 
         for n, contour in f0_contours.items():

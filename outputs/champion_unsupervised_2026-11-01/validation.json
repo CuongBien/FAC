@@ -1,0 +1,18 @@
+{
+  "source_files_verified": 49,
+  "file_cases": 288,
+  "groups": {
+    "control": 48,
+    "train_fitted": 192,
+    "input_adaptive": 48
+  },
+  "frame_rows_verified": 93423,
+  "native_champion_replays_matched": 24,
+  "stage4_control_file_metrics_matched": 48,
+  "train_feature_files": 12,
+  "input_adaptive_model_files": 24,
+  "frozen_source_and_datasets_match": true,
+  "report_checksums_match": true,
+  "python_39_ast_files": 55,
+  "regression_tests_passed": 108
+}

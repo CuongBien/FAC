@@ -31,19 +31,23 @@ Final Score là trung bình sai số phần trăm của **mean F0, std F0 và s�
 
 ## Kết quả và trạng thái kiểm chứng
 
-Đã hoàn tất bốn đợt sửa và kiểm chứng; 90 test hồi quy đạt. Đợt 4 khảo sát 222 cấu hình chỉ trên train, đóng băng trước test; baseline vẫn là tham số lịch sử. Các Champion hiện dùng khung 30 ms, hop 10 ms.
+Đã hoàn tất bốn đợt sửa và [rà soát main ngày 01/11/2026](docs/MAIN_REVIEW_FIXES.md): sửa Otsu, xử lý LAB thiếu thống kê và kiểm chứng artifact. Đợt 4 khảo sát 222 cấu hình chỉ trên train, đóng băng trước test; baseline vẫn là tham số lịch sử. Các Champion hiện dùng khung 30 ms, hop 10 ms.
 
+Đã hoàn tất [benchmark tám phương pháp không giám sát với Champion](docs/CHAMPION_UNSUPERVISED_RESULTS.md): 288 kết quả từng file, mô hình đóng băng trước test. Sau [ba sửa lỗi biên cuối](docs/FINAL_EDGE_CASE_FIXES.md), **120/120 test đạt** và cả 288 kết quả vẫn khớp chính xác. Cepstrum ngưỡng động đạt 16,480% test; 2D fit từng input đạt 10,375% nhưng thuộc nhóm thích nghi riêng. Các preset bên dưới được giữ nguyên.
+
+<!-- STAGE4_README_START -->
 | Champion | Ngưỡng | Train Final Score (%) | Test Final Score (%) |
 |---|---:|---:|---:|
 | ACF | 0.45 | 2.215 | 2.385 |
 | AMDF | 0.5 | 2.078 | 2.755 |
 | CEPSTRUM | 0.1 | 11.390 | 22.942 |
+<!-- STAGE4_README_END -->
 
 **ACF/AMDF cải thiện trên test; Cepstrum tăng sai số từ 21.203% lên 22.942% dù giảm trên train.** Không chọn lại tham số dựa vào test. Điểm thấp hơn tốt hơn; không phải Accuracy/F1 từng khung.
 
 Đã truy ra mốc Cepstrum lịch sử 4,43%/7,62% là pipeline lai: quyết định bằng ACF, hậu xử lý/Viterbi bằng Cepstrum. Không dùng mốc đó làm chất lượng Cepstrum đúng thuật toán.
 
-[Báo cáo đợt 4](docs/STAGE4_RESULTS.md) có raw result, 17 giao thức không giám sát, replay nhân quả và giới hạn tổng quát hóa. [Báo cáo Học không giám sát](docs/05_unsupervised_thresholding_analysis.md) tổng hợp toàn diện cả 8 phương pháp học không giám sát áp dụng lên chuỗi Quán quân. [Đợt 1](docs/STAGE1_FIXES.md), [đợt 2](docs/STAGE2_FIXES.md), [đợt 3](docs/STAGE3_FIXES.md) giữ các mốc trước sửa. Các artifact lịch sử được bảo toàn.
+[Báo cáo đợt 4](docs/STAGE4_RESULTS.md) có raw result, 17 giao thức không giám sát, replay nhân quả và giới hạn tổng quát hóa. [Chương V](docs/05_unsupervised_thresholding_analysis.md) có bảng tích hợp Champion mới và phân biệt với các mốc lịch sử chưa đủ bằng chứng. [Đợt 1](docs/STAGE1_FIXES.md), [đợt 2](docs/STAGE2_FIXES.md), [đợt 3](docs/STAGE3_FIXES.md) giữ các mốc trước sửa. Các artifact lịch sử được bảo toàn.
 
 LAB hiện hành chỉ có thống kê toàn file nên chưa thể fit lại Gaussian V/UV có giám sát hoặc đánh giá Accuracy/F1. MAPE không xác định dùng N/A; Final Score yêu cầu đủ ba thành phần. [Vấn đề còn lại](docs/KNOWN_ISSUES.md).
 

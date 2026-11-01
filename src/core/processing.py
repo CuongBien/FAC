@@ -38,12 +38,17 @@ def silence_energy_threshold(ste, ratio):
     return max(ENERGY_FLOOR, ratio * maximum)
 
 
-def pitch_lag_bounds(sample_rate, f0_min, f0_max, last_lag):
-    """Integer search anchors inside the requested physical pitch range."""
+def validate_pitch_range(sample_rate, f0_min, f0_max):
+    """Reject invalid configuration even when audio is empty or silent."""
     if not (np.isfinite(sample_rate) and np.isfinite(f0_min) and np.isfinite(f0_max)):
         raise ValueError("Pitch range and sample rate must be finite")
     if not (0 < f0_min < f0_max <= sample_rate / 2):
         raise ValueError("Pitch range must satisfy 0 < f0_min < f0_max <= Nyquist")
+
+
+def pitch_lag_bounds(sample_rate, f0_min, f0_max, last_lag):
+    """Integer search anchors inside the requested physical pitch range."""
+    validate_pitch_range(sample_rate, f0_min, f0_max)
     return max(1, int(np.ceil(sample_rate / f0_max))), min(last_lag, int(np.floor(sample_rate / f0_min)))
 
 
