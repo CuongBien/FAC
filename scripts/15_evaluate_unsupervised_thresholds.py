@@ -32,9 +32,10 @@ from src.analysis.unsupervised_threshold import (
     compute_median_threshold,
     compute_kmeans_threshold,
 )
-from src.analysis.evaluation import (
-    evaluate_against_ground_truth, round_metric, mean_metric, format_metric,
-)
+from src.metrics.evaluation import evaluate_against_ground_truth
+from src.metrics.numeric import round_metric
+from src.metrics.formatting import format_metric
+from src.metrics.aggregation import table_metrics
 from src import config
 from src.core.audio import load_wav
 from src.pipeline.features import extract_raw_features
@@ -110,36 +111,16 @@ def evaluate_pipeline_across_files(
         median_size=3,
     )
 
-    all_diff_mean = []
-    all_mape_f0 = []
-    all_diff_std = []
-    all_mape_std = []
-    all_diff_num = []
-    all_mape_num = []
-    all_final_score = []
+    evaluations = []
 
     for wav_path in wav_files:
         lab_path = wav_path.rsplit(".", 1)[0] + ".lab"
         res = detector.process_file(wav_path)
         eval_res = evaluate_against_ground_truth(res, lab_path)
 
-        all_diff_mean.append(eval_res["abs_error_mean"])
-        all_mape_f0.append(eval_res["mape_f0"])
-        all_diff_std.append(eval_res["abs_error_std"])
-        all_mape_std.append(eval_res["mape_std"])
-        all_diff_num.append(eval_res["abs_error_num"])
-        all_mape_num.append(eval_res["mape_num"])
-        all_final_score.append(eval_res["final_score"])
+        evaluations.append(eval_res)
 
-    return {
-        "diff_f0": mean_metric(all_diff_mean, 2),
-        "mape_f0": mean_metric(all_mape_f0, 2),
-        "diff_std": mean_metric(all_diff_std, 2),
-        "mape_std": mean_metric(all_mape_std, 2),
-        "diff_num": mean_metric(all_diff_num, 2),
-        "mape_num": mean_metric(all_mape_num, 2),
-        "final_score": mean_metric(all_final_score, 2),
-    }
+    return table_metrics(evaluations)
 
 
 def plot_unsupervised_comparison(

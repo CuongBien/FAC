@@ -3,7 +3,7 @@ import os
 from typing import Optional
 import matplotlib.pyplot as plt
 import numpy as np
-from src.analysis.evaluation import format_metric
+from src.metrics.formatting import format_metric
 
 
 def plot_frame_acf_comparison(

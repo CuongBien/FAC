@@ -20,9 +20,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from src import config
 from src.core.pitch_detector import PitchDetector
-from src.analysis.evaluation import (
-    evaluate_against_ground_truth, format_metric,
-)
+from src.metrics.evaluation import evaluate_against_ground_truth
+from src.metrics.formatting import format_metric
 from src.visualization.plotter import plot_parameter_comparison
 
 

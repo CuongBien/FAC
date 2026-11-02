@@ -37,9 +37,10 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 from src.core.audio import load_wav
 from src.core.pitch_detector import PitchDetector
 from src.pipelines import build_baseline, build_champion
-from src.analysis.evaluation import (
-    evaluate_against_ground_truth, round_metric, mean_metric, format_metric, csv_value,
-)
+from src.metrics.evaluation import evaluate_against_ground_truth
+from src.metrics.aggregation import aggregate_rows, ROUNDED_MACRO
+from src.metrics.numeric import round_metric, mean_metric
+from src.metrics.formatting import format_metric, csv_value
 
 
 def get_champion_detectors() -> Dict[str, PitchDetector]:
@@ -337,13 +338,14 @@ def main():
 
             rows = [all_summary[f][sys_name] for f in all_summary]
             if all("abs_error_mean" in row for row in rows):
+                summary = aggregate_rows([{**row, 'final_score': row.get('composite_score')} for row in rows], ROUNDED_MACRO)
                 for label, key in [("Sai số tuyệt đối F0mean TB (Hz)", "abs_error_mean"),
                                    ("MAPE F0mean TB (%)", "mape_f0"),
                                    ("Sai số tuyệt đối F0std TB (Hz)", "abs_error_std"),
                                    ("MAPE F0std TB (%)", "mape_std"),
                                    ("MAPE F0num TB (%)", "mape_num")]:
-                    print(f"  - {label}: {format_metric(mean_metric(row.get(key) for row in rows))}")
-                score = mean_metric(row.get("composite_score") for row in rows)
+                    print(f"  - {label}: {format_metric(summary[key])}")
+                score = summary['final_score']
                 print(f"  >>> FINAL SCORE (%; TB đủ 3 MAPE, thấp hơn tốt hơn): {format_metric(score)} <<<")
                 for label, key in [("Voiced F1", "voiced_f1"), ("V/UV Accuracy", "accuracy")]:
                     values = [row[key] for row in rows if row.get(key) is not None]

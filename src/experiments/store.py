@@ -138,6 +138,9 @@ def verify_run(folder, manifest=None):
             raise ValueError('Evaluation does not use the pinned freeze')
         if evaluation.get('test_manifest') != _legacy_dataset(stages['evaluate']['inputs']['test_dataset']):
             raise ValueError('Evaluation test data does not match its stage inputs')
+        if 'metrics.json' in manifest['artifacts']:
+            from .metric_artifacts import verify_metric_artifact
+            verify_metric_artifact(folder, manifest)
     if 'report' in stages:
         report = json.loads((folder/'report_manifest.json').read_bytes())
         if report['evaluation_sha256'] != manifest['artifacts']['evaluation.json']['sha256']:

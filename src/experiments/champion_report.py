@@ -2,7 +2,7 @@
 from pathlib import Path
 import numpy as np
 from src.analysis.champion_unsupervised import PRIMARY, ADAPTIVE
-from src.analysis.evaluation import format_metric
+from src.metrics.formatting import format_metric
 from src.experiments.legacy import read_evaluation_bundle, read_frozen
 from src.experiments.snapshots import verify_source_snapshot
 from src.experiments.manifest import sha256

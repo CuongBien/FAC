@@ -1,6 +1,6 @@
 # Danh mục kết quả
 
-Danh mục tự dựng: [registry.json](registry.json). `python -B -m src.experiments list` liệt kê run và `verify` kiểm chứng mà không chạy mô hình. [Refactor đợt 3](refactor_phase3/README.md) có 170 test và native lifecycle bundle; các [đợt 1](refactor_phase1/README.md), [đợt 2](refactor_phase2/README.md) và run cũ được giữ nguyên. Xem [quản lý thí nghiệm](../docs/EXPERIMENTS.md), [pipeline](../docs/PIPELINE.md), [runner/resume](../docs/RUNNER.md).
+Danh mục tự dựng: [registry.json](registry.json). `python -B -m src.experiments list` liệt kê run và `verify` kiểm chứng mà không chạy mô hình. [Refactor đợt 4](refactor_phase4/README.md) có 189 test và đối chiếu metric v1; các [đợt 1](refactor_phase1/README.md), [đợt 2](refactor_phase2/README.md), [đợt 3](refactor_phase3/README.md) và run cũ được giữ nguyên. Xem [quản lý thí nghiệm](../docs/EXPERIMENTS.md), [pipeline](../docs/PIPELINE.md), [runner](../docs/RUNNER.md), [metric](../docs/METRICS.md).
 
 Kết quả hiện hành sau hiệu chỉnh: [stage4_validation/](stage4_validation/README.md), với cấu hình chốt trên train trước test. [Báo cáo đợt 4](../docs/STAGE4_RESULTS.md) giải thích cải thiện ACF/AMDF, suy giảm Cepstrum và lỗi pipeline lai trong artifact lịch sử.
 

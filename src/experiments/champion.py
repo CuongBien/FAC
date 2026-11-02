@@ -17,7 +17,8 @@ from src.analysis.champion_unsupervised import (
     fit_champion_models, predict_decisions,
 )
 from src.analysis.protocols import threshold_labels
-from src.analysis.validation import evaluate_result, aggregate
+from src.metrics.evaluation import evaluate_result
+from src.metrics.aggregation import aggregate
 from src.pipeline.cache import PitchCache
 from src.pipeline.champion import extract_file_features
 from src.experiments.manifest import source_manifest, dataset_manifest, verify_dataset, sha256

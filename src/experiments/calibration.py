@@ -17,8 +17,10 @@ from src import config
 from src.pipelines import build_detector
 from src.pipeline.cache import PitchCache
 from src.pipeline.features import extract_file_features
+from src.metrics.evaluation import evaluate_result
+from src.metrics.aggregation import aggregate
 from src.analysis.validation import (
-    aggregate, evaluate_result, select_trial, selection_key,
+    select_trial, selection_key,
 )
 from src.experiments.manifest import source_manifest, dataset_manifest, verify_dataset, sha256
 from src.experiments.serialization import write_json

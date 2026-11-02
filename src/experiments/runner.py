@@ -146,6 +146,8 @@ class RunService:
         def compute(work):
             backend.evaluate(SimpleNamespace(train_dir=str(train_dir), test_dir=str(test_dir),
                                               output_dir=str(work)), context=context)
+            from .metric_artifacts import write_metric_artifact
+            write_metric_artifact(work, context.manifest, inputs)
             if self._inputs(train_dir, 'evaluate', test_dir)[0] != inputs:
                 raise ValueError('Evaluation inputs changed during execution')
         return execute_stage(self.folder, 'evaluate', inputs, compute, resume=resume)

@@ -15,3 +15,7 @@ outputs/refactor_phase2/** -text
 tests/test_runner.py text eol=lf
 scripts/23_verify_runner_refactor.py text eol=lf
 outputs/refactor_phase3/** -text
+src/metrics/** text eol=lf
+tests/test_metrics.py text eol=lf
+scripts/24_verify_metric_refactor.py text eol=lf
+outputs/refactor_phase4/** -text

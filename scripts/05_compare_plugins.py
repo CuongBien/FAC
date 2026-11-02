@@ -33,6 +33,7 @@ if sys.platform.startswith("win"):
 # Ensure src package is importable
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from src.metrics.aggregation import sweep_metrics
 from src import config
 from src.core.pitch_detector import PitchDetector
 from src.plugins import (
@@ -42,9 +43,9 @@ from src.plugins import (
     EnergyExtensionPlugin,
     ViterbiTrackingPlugin,
 )
-from src.analysis.evaluation import (
-    evaluate_against_ground_truth, mean_metric, format_metric, csv_value, rank_metric,
-)
+from src.metrics.evaluation import evaluate_against_ground_truth
+from src.metrics.numeric import rank_metric
+from src.metrics.formatting import format_metric, csv_value
 from src.experiments.serialization import write_json
 from src.experiments.manifest import source_manifest
 
@@ -137,9 +138,6 @@ def run_evaluation(
 
         detector = PluginPitchDetector(base_detector=base_det, plugins=plugins) if plugins else base_det
 
-        errs, mape_f0s = [], []
-        std_errs, mape_stds = [], []
-        num_errs, mape_nums, scores = [], [], []
         per_file = {}
 
         for f_id in files:
@@ -150,26 +148,12 @@ def run_evaluation(
             ev = evaluate_against_ground_truth(res, lab_path)
             per_file[f_id] = ev
 
-            errs.append(ev["abs_error_mean"])
-            mape_f0s.append(ev["mape_f0"])
-            std_errs.append(ev.get("abs_error_std"))
-            mape_stds.append(ev.get("mape_std"))
-            num_errs.append(ev.get("abs_error_num"))
-            mape_nums.append(ev.get("mape_num"))
-            scores.append(ev.get("final_score"))
-
         name = "Baseline" if not combo else " + ".join(combo)
         all_results.append({
             "config_name": name,
             "combo": list(combo),
             "threshold": round(float(thresh), 4),
-            "average_error_hz": mean_metric(errs, 2),
-            "average_mape_f0_pct": mean_metric(mape_f0s, 2),
-            "average_std_error": mean_metric(std_errs, 2),
-            "average_mape_std_pct": mean_metric(mape_stds, 2),
-            "average_num_error": mean_metric(num_errs, 2),
-            "average_mape_num_pct": mean_metric(mape_nums, 2),
-            "final_composite_score_pct": mean_metric(scores, 2),
+            **sweep_metrics(per_file.values()),
             "files": per_file,
         })
 

@@ -77,4 +77,6 @@ Run mới không ghi đè artifact đã tồn tại. Từ đợt 3, manifest the
 - AST của aggregate, evaluate_result, selection_key, select_trial và pitch_cache không đổi. Kiểm tra cú pháp Python 3.9 trên 67 file đạt.
 - Các thư mục run cũ, WAV/LAB và preset giữ nguyên. Danh mục mới và bằng chứng refactor nằm riêng, không viết lại provenance cũ.
 
-Nguồn kiểm chứng lịch sử của đợt 1: [outputs/refactor_phase1](../outputs/refactor_phase1/README.md). Đợt 2 có [feature contract/engine/cache](PIPELINE.md) dùng chung; `pitch_cache` được re-export từ `pipeline.cache` bằng ContextVar để tương thích caller cũ. **Đợt 3 đã hoàn tất** với [runner chung](RUNNER.md), 170 test và [bộ bằng chứng riêng](../outputs/refactor_phase3/README.md). Bước tiếp theo là metric/đối sánh ở đợt 4.
+Nguồn kiểm chứng lịch sử của đợt 1: [outputs/refactor_phase1](../outputs/refactor_phase1/README.md). Đợt 2 có [feature contract/engine/cache](PIPELINE.md) dùng chung; `pitch_cache` được re-export từ `pipeline.cache` bằng ContextVar để tương thích caller cũ. Đợt 3 có [runner chung](RUNNER.md), 170 test tại thời điểm đó và [bộ bằng chứng riêng](../outputs/refactor_phase3/README.md).
+
+**Đợt 4 đã hoàn tất:** [metric v1/đối sánh](METRICS.md) thuộc `src/metrics`, 189 test và [bằng chứng riêng](../outputs/refactor_phase4/README.md). Run mới có sidecar metric với context/dataset/file population; run cũ không được sửa. Format thuộc scope report, không tham gia tính metric. Bước tiếp theo là reporting ở đợt 5.

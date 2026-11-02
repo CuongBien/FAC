@@ -225,6 +225,8 @@ class RunnerTests(unittest.TestCase):
             service.train(self.train)
         renderer = source/'src/experiments/champion_report.py'
         renderer.write_bytes(renderer.read_bytes()+b'\n# renderer-only change\n')
+        formatting = source/'src/metrics/formatting.py'
+        formatting.write_bytes(formatting.read_bytes()+b'\n# presentation-only change\n')
         with patch.object(champion, 'train', side_effect=AssertionError('refit')):
             service.train(self.train, resume=True)
         core = source/'src/core/acf.py'

@@ -21,11 +21,12 @@ if sys.platform.startswith("win"):
 # Ensure src package is importable
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from src.metrics.aggregation import aggregate_rows, ROUNDED_MACRO
 from src import config
 from src.core.pitch_detector import PitchDetector
-from src.analysis.evaluation import (
-    evaluate_against_ground_truth, round_metric, mean_metric, format_metric, csv_value,
-)
+from src.metrics.evaluation import evaluate_against_ground_truth
+from src.metrics.numeric import round_metric, mean_metric
+from src.metrics.formatting import format_metric, csv_value
 from src.visualization.plotter import plot_signal_and_f0_contour
 from src.plugins import (
     PluginPitchDetector,
@@ -249,13 +250,14 @@ def run_testing(
         })
 
     # 6. Tính trung bình sai số toàn tập kiểm thử
-    avg_abs_err_mean = mean_metric([r["abs_error_mean"] for r in results_all])
-    avg_mape_f0 = mean_metric([r["mape_f0"] for r in results_all])
-    avg_abs_err_std = mean_metric([r["abs_error_std"] for r in results_all])
-    avg_mape_std = mean_metric([r["mape_std"] for r in results_all])
-    avg_abs_err_num = mean_metric([r["abs_error_num"] for r in results_all])
-    avg_mape_num = mean_metric([r["mape_num"] for r in results_all])
-    avg_score = mean_metric([r["final_score"] for r in results_all])
+    summary = aggregate_rows(results_all, ROUNDED_MACRO)
+    avg_abs_err_mean = summary['abs_error_mean']
+    avg_mape_f0 = summary['mape_f0']
+    avg_abs_err_std = summary['abs_error_std']
+    avg_mape_std = summary['mape_std']
+    avg_abs_err_num = summary['abs_error_num']
+    avg_mape_num = summary['mape_num']
+    avg_score = summary['final_score']
 
     acc_valid = [r["accuracy"] for r in results_all if r["accuracy"] is not None]
     f1_valid = [r["voiced_f1"] for r in results_all if r["voiced_f1"] is not None]

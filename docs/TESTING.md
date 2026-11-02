@@ -16,7 +16,7 @@ Có thể thay `uv run python` bằng `.\.venv\Scripts\python.exe` nếu môi tr
 uv run python -B -m unittest discover -s tests -v
 ```
 
-Có 170 test: 120 test của các đợt sửa trước, 17 test hạ tầng thí nghiệm, 15 test pipeline contract/cache và 18 test runner trong `tests/test_runner.py`. Bằng chứng hiện tại nằm trong `outputs/refactor_phase3/`; validation cũ vẫn giữ mốc lịch sử của nó. Detector yêu cầu audio dài ít nhất một khung; CLI thoát mã 2 với thông báo rõ nếu input không đủ dài.
+Có 189 test: 120 test các đợt sửa trước, 17 test hạ tầng thí nghiệm, 15 test pipeline, 18 test runner và 19 test metric/đối sánh trong `tests/test_metrics.py`. Bằng chứng hiện tại nằm trong `outputs/refactor_phase4/`; validation cũ giữ mốc lịch sử của nó. Detector yêu cầu audio dài ít nhất một khung; CLI thoát mã 2 với thông báo rõ nếu input không đủ dài.
 
 Đối chiếu số học với mốc trước refactor và mô hình Champion đã freeze:
 
@@ -33,6 +33,14 @@ uv run python -B scripts/23_verify_runner_refactor.py --output outputs/refactor_
 ```
 
 Lần này có fit lại ba model Champion **chỉ từ train**, không quét/chọn lại preset; chạy đầy đủ prepare/train/evaluate/report và resume, đối chiếu model, metric, contour, feature và bảng report với run cũ. Replay Stage 4 dùng model đã freeze, không lặp sweep 222 cấu hình. Xem [lifecycle và giới hạn resume](RUNNER.md).
+
+Đối chiếu metric đợt 4 với mốc trước refactor:
+
+```powershell
+uv run python -B scripts/24_verify_metric_refactor.py verify
+```
+
+So 89 vector, 72 nhóm tổng hợp, 48 baseline/Champion và 288 bộ metric từ contour cũ; không fit lại model. Xem [hợp đồng rounding và kiểm tra metadata](METRICS.md).
 
 ## Dự đoán file hoặc thư mục
 

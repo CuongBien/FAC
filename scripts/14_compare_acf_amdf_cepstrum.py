@@ -31,10 +31,11 @@ if sys.platform.startswith("win"):
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.core.pitch_detector import PitchDetector
+from src.metrics.aggregation import suite_metrics
 from src.pipelines import build_baseline, build_champion
-from src.analysis.evaluation import (
-    evaluate_against_ground_truth, round_metric, mean_metric, format_metric, csv_value,
-)
+from src.metrics.evaluation import evaluate_against_ground_truth
+from src.metrics.numeric import round_metric
+from src.metrics.formatting import format_metric, csv_value
 
 
 def build_bt2_detectors():
@@ -65,8 +66,6 @@ def evaluate_suite(configs_dict, test_dir="TinHieuKiemThu"):
 
     for name, factory in configs_dict.items():
         det = factory()
-        errs, std_errs = [], []
-        mapes_f0, mapes_std, mapes_num, num_errs = [], [], [], []
         file_metrics = {}
 
         for f_id in files:
@@ -77,18 +76,6 @@ def evaluate_suite(configs_dict, test_dir="TinHieuKiemThu"):
             ev = evaluate_against_ground_truth(res, lab_path)
 
             file_metrics[f_id] = ev
-            errs.append(ev["abs_error_mean"])
-            std_errs.append(ev["abs_error_std"])
-            mapes_f0.append(ev["mape_f0"])
-            mapes_std.append(ev["mape_std"])
-            mapes_num.append(ev.get("mape_num"))
-            num_errs.append(ev.get("abs_error_num"))
-
-        mean_mape_f0 = mean_metric(mapes_f0, digits=None)
-        mean_mape_std = mean_metric(mapes_std, digits=None)
-        mean_mape_num = mean_metric(mapes_num, digits=None)
-        final_composite = mean_metric([mean_mape_f0, mean_mape_std, mean_mape_num], digits=None)
-
         domain = "Quefrency (Homomorphic)" if "Cepstrum" in name else ("Time (L1 Difference)" if "AMDF" in name else "Time (L2 Correlation)")
 
         rec = {
@@ -101,13 +88,7 @@ def evaluate_suite(configs_dict, test_dir="TinHieuKiemThu"):
             },
             "domain": domain,
             "dataset": test_dir,
-            "average_error_hz": mean_metric(errs, 2),
-            "average_std_error": mean_metric(std_errs, 2),
-            "average_num_error": mean_metric(num_errs, 2) if num_errs else None,
-            "mape_f0_pct": round_metric(mean_mape_f0, 2),
-            "mape_std_pct": round_metric(mean_mape_std, 2),
-            "mape_num_pct": round_metric(mean_mape_num, 2) if mean_mape_num is not None else None,
-            "final_composite_score_pct": round_metric(final_composite, 2),
+            **suite_metrics(file_metrics.values()),
             "files": {
                 f: {
                     "abs_error_mean": round_metric(file_metrics[f]["abs_error_mean"], 2),

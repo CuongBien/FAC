@@ -6,6 +6,8 @@ import importlib.util
 import io
 import json
 from pathlib import Path
+import subprocess
+import sys
 from types import SimpleNamespace
 import tempfile
 import unittest
@@ -169,6 +171,33 @@ class BenchmarkIntegrationTests(unittest.TestCase):
             runner.report(args)
             self.assertEqual(sha256(output/'frozen_models.json'), frozen_hash)
             result = json.loads((output/'evaluation.json').read_text(encoding='utf-8'))
+            from src.metrics.comparison import read_series, compare_series
+            from src.experiments.metric_artifacts import verify_metric_artifact
+            from src.experiments.store import verify_run
+            metric_metadata = json.loads((output/'metrics.json').read_bytes())
+            self.assertEqual(metric_metadata['contract']['metric_version'], 'legacy-v1')
+            self.assertEqual(len(metric_metadata['series']), 72)
+            gmm = read_series(output, 'test/acf/gmm')
+            self.assertEqual(gmm.to_dict()['context']['fit']['population'], 'train_active')
+            self.assertTrue(all(value['delta'] == 0 for value in compare_series(gmm, gmm)['aggregate'].values()))
+            baseline = read_series(output, 'test/acf/baseline')
+            with self.assertRaisesRegex(ValueError, 'feature_contract'):
+                compare_series(baseline, gmm)
+            command = [sys.executable, '-B', '-m', 'src.metrics', str(output), 'test/acf/gmm', str(output)]
+            cli = subprocess.run(command+['test/acf/hmm'], cwd=ROOT, capture_output=True, text=True, timeout=60)
+            self.assertEqual(cli.returncode, 0, cli.stderr)
+            self.assertEqual(json.loads(cli.stdout)['metric_version'], 'legacy-v1')
+            refused = subprocess.run(command+['test/acf/baseline'], cwd=ROOT, capture_output=True, text=True, timeout=60)
+            self.assertEqual(refused.returncode, 2)
+            self.assertIn('feature_contract', refused.stderr)
+            self.assertNotIn('Traceback', refused.stderr)
+            saved_metrics = (output/'metrics.json').read_bytes()
+            pinned = verify_run(output)
+            metric_metadata['series'][0]['context']['feature_contract']['frame_duration_ms'] = 99.
+            (output/'metrics.json').write_text(json.dumps(metric_metadata), encoding='utf-8')
+            with self.assertRaisesRegex(ValueError, 'context/values'):
+                verify_metric_artifact(output, pinned)
+            (output/'metrics.json').write_bytes(saved_metrics)
             self.assertEqual(result['native_champion_replays_matched'], 6)
             self.assertEqual(len(result['pipelines']), 12)
             self.assertEqual(len(result['protocols']), 60)

@@ -28,6 +28,7 @@ if sys.platform.startswith("win"):
 # Ensure src package is importable
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from src.metrics.aggregation import table_metrics, ADVANCED_MACRO
 from src import config
 from src.core.audio import load_wav
 from src.pipeline.features import extract_raw_features
@@ -39,9 +40,9 @@ from src.analysis.advanced_unsupervised import (
     train_and_decode_2state_hmm,
     compute_sliding_window_adaptive_threshold,
 )
-from src.analysis.evaluation import (
-    evaluate_against_ground_truth, round_metric, mean_metric, format_metric, csv_value,
-)
+from src.metrics.evaluation import evaluate_against_ground_truth
+from src.metrics.numeric import round_metric
+from src.metrics.formatting import format_metric, csv_value
 
 
 def extract_features_for_file(
@@ -98,15 +99,7 @@ def evaluate_custom_prediction(
 
 def aggregate_pipeline_metrics(eval_list: List[Dict]) -> Dict[str, float]:
     """Average 8-column metrics across test files."""
-    return {
-        "diff_f0": mean_metric([e["abs_error_mean"] for e in eval_list], 2),
-        "mape_f0": mean_metric([e["mape_f0"] for e in eval_list], 2),
-        "diff_std": mean_metric([e["abs_error_std"] for e in eval_list], 2),
-        "mape_std": mean_metric([e["mape_std"] for e in eval_list], 2),
-        "diff_num": mean_metric([e["abs_error_num"] for e in eval_list], 1),
-        "mape_num": mean_metric([e["mape_num"] for e in eval_list], 2),
-        "final_score": mean_metric([e["final_score"] for e in eval_list], 2),
-    }
+    return table_metrics(eval_list, ADVANCED_MACRO)
 
 
 def run_advanced_benchmark(output_dir="outputs"):
