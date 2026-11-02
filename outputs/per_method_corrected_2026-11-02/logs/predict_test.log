@@ -1,0 +1,322 @@
+
+################################################################################
+  HỆ THỐNG ĐO CAO ĐỘ PITCH TRACKING - CHẾ ĐỘ KIỂM THỬ TỔNG HỢP
+  Tổng số file cần phân tích: 4
+  Các thuật toán tham gia: ACF Champion, AMDF Champion, Cepstrum Champion, ACF Baseline, AMDF Baseline, Cepstrum Baseline
+  Thư mục xuất báo cáo: D:\FAC\outputs\per_method_corrected_2026-11-02\predictions\test
+################################################################################
+
+================================================================================
+  ĐANG PHÂN TÍCH: phone_F2.wav (Thời lượng: 4.80s | Fs: 16000 Hz)
+  [*] Đã tìm thấy nhãn Ground Truth: phone_F2.lab
+================================================================================
+
+--- ACF CHAMPION ---
+  * Tần số F0 dự đoán (Pred) : 150.98 Hz ± 31.38 Hz (Mean ± Std)
+  * Tỉ lệ Hữu thanh (V)       : 42.5% (203/478 khung)
+  * Nhãn chuẩn .lab (GT)      : 150.20 Hz ± 30.70 Hz (F0mean ± F0std)
+  * Sai số F0mean (|ΔMean|)   : 0.78 Hz (MAPE F0mean: 0.52%)
+  * Sai số F0std  (|ΔStd|)    : 0.68 Hz (MAPE F0std : 2.22%)
+  * Số khung Voiced (F0num)   : Pred=203 vs Ref=219 (Lệch: 16 khung | MAPE F0num: 7.31%)
+  * ĐIỂM LỖI TỔNG HỢP (Composite Score): 3.35% (TB các MAPE)
+
+--- AMDF CHAMPION ---
+  * Tần số F0 dự đoán (Pred) : 150.07 Hz ± 30.86 Hz (Mean ± Std)
+  * Tỉ lệ Hữu thanh (V)       : 42.1% (201/478 khung)
+  * Nhãn chuẩn .lab (GT)      : 150.20 Hz ± 30.70 Hz (F0mean ± F0std)
+  * Sai số F0mean (|ΔMean|)   : 0.13 Hz (MAPE F0mean: 0.09%)
+  * Sai số F0std  (|ΔStd|)    : 0.16 Hz (MAPE F0std : 0.51%)
+  * Số khung Voiced (F0num)   : Pred=201 vs Ref=219 (Lệch: 18 khung | MAPE F0num: 8.22%)
+  * ĐIỂM LỖI TỔNG HỢP (Composite Score): 2.94% (TB các MAPE)
+
+--- CEPSTRUM CHAMPION ---
+  * Tần số F0 dự đoán (Pred) : 156.19 Hz ± 35.54 Hz (Mean ± Std)
+  * Tỉ lệ Hữu thanh (V)       : 41.4% (198/478 khung)
+  * Nhãn chuẩn .lab (GT)      : 150.20 Hz ± 30.70 Hz (F0mean ± F0std)
+  * Sai số F0mean (|ΔMean|)   : 5.99 Hz (MAPE F0mean: 3.99%)
+  * Sai số F0std  (|ΔStd|)    : 4.84 Hz (MAPE F0std : 15.76%)
+  * Số khung Voiced (F0num)   : Pred=198 vs Ref=219 (Lệch: 21 khung | MAPE F0num: 9.59%)
+  * ĐIỂM LỖI TỔNG HỢP (Composite Score): 9.78% (TB các MAPE)
+
+--- ACF BASELINE ---
+  * Tần số F0 dự đoán (Pred) : 152.87 Hz ± 31.57 Hz (Mean ± Std)
+  * Tỉ lệ Hữu thanh (V)       : 38.1% (182/478 khung)
+  * Nhãn chuẩn .lab (GT)      : 150.20 Hz ± 30.70 Hz (F0mean ± F0std)
+  * Sai số F0mean (|ΔMean|)   : 2.67 Hz (MAPE F0mean: 1.78%)
+  * Sai số F0std  (|ΔStd|)    : 0.87 Hz (MAPE F0std : 2.85%)
+  * Số khung Voiced (F0num)   : Pred=182 vs Ref=219 (Lệch: 37 khung | MAPE F0num: 16.89%)
+  * ĐIỂM LỖI TỔNG HỢP (Composite Score): 7.17% (TB các MAPE)
+
+--- AMDF BASELINE ---
+  * Tần số F0 dự đoán (Pred) : 149.91 Hz ± 33.06 Hz (Mean ± Std)
+  * Tỉ lệ Hữu thanh (V)       : 38.3% (183/478 khung)
+  * Nhãn chuẩn .lab (GT)      : 150.20 Hz ± 30.70 Hz (F0mean ± F0std)
+  * Sai số F0mean (|ΔMean|)   : 0.29 Hz (MAPE F0mean: 0.20%)
+  * Sai số F0std  (|ΔStd|)    : 2.36 Hz (MAPE F0std : 7.69%)
+  * Số khung Voiced (F0num)   : Pred=183 vs Ref=219 (Lệch: 36 khung | MAPE F0num: 16.44%)
+  * ĐIỂM LỖI TỔNG HỢP (Composite Score): 8.11% (TB các MAPE)
+
+--- CEPSTRUM BASELINE ---
+  * Tần số F0 dự đoán (Pred) : 167.02 Hz ± 53.15 Hz (Mean ± Std)
+  * Tỉ lệ Hữu thanh (V)       : 46.9% (224/478 khung)
+  * Nhãn chuẩn .lab (GT)      : 150.20 Hz ± 30.70 Hz (F0mean ± F0std)
+  * Sai số F0mean (|ΔMean|)   : 16.82 Hz (MAPE F0mean: 11.20%)
+  * Sai số F0std  (|ΔStd|)    : 22.45 Hz (MAPE F0std : 73.13%)
+  * Số khung Voiced (F0num)   : Pred=224 vs Ref=219 (Lệch: 5 khung | MAPE F0num: 2.28%)
+  * ĐIỂM LỖI TỔNG HỢP (Composite Score): 28.87% (TB các MAPE)
+
+[+] Đã lưu bảng số liệu F0 chi tiết từng khung: D:\FAC\outputs\per_method_corrected_2026-11-02\predictions\test\phone_F2_pitch_prediction.csv
+[+] Đã lưu ảnh biểu đồ trực quan: D:\FAC\outputs\per_method_corrected_2026-11-02\predictions\test\phone_F2_pitch_contour.png
+
+================================================================================
+  ĐANG PHÂN TÍCH: phone_M2.wav (Thời lượng: 2.80s | Fs: 16000 Hz)
+  [*] Đã tìm thấy nhãn Ground Truth: phone_M2.lab
+================================================================================
+
+--- ACF CHAMPION ---
+  * Tần số F0 dự đoán (Pred) : 132.19 Hz ± 15.83 Hz (Mean ± Std)
+  * Tỉ lệ Hữu thanh (V)       : 44.6% (124/278 khung)
+  * Nhãn chuẩn .lab (GT)      : 130.20 Hz ± 15.40 Hz (F0mean ± F0std)
+  * Sai số F0mean (|ΔMean|)   : 1.99 Hz (MAPE F0mean: 1.53%)
+  * Sai số F0std  (|ΔStd|)    : 0.43 Hz (MAPE F0std : 2.79%)
+  * Số khung Voiced (F0num)   : Pred=124 vs Ref=123 (Lệch: 1 khung | MAPE F0num: 0.81%)
+  * ĐIỂM LỖI TỔNG HỢP (Composite Score): 1.71% (TB các MAPE)
+
+--- AMDF CHAMPION ---
+  * Tần số F0 dự đoán (Pred) : 130.07 Hz ± 16.23 Hz (Mean ± Std)
+  * Tỉ lệ Hữu thanh (V)       : 46.4% (129/278 khung)
+  * Nhãn chuẩn .lab (GT)      : 130.20 Hz ± 15.40 Hz (F0mean ± F0std)
+  * Sai số F0mean (|ΔMean|)   : 0.13 Hz (MAPE F0mean: 0.10%)
+  * Sai số F0std  (|ΔStd|)    : 0.83 Hz (MAPE F0std : 5.36%)
+  * Số khung Voiced (F0num)   : Pred=129 vs Ref=123 (Lệch: 6 khung | MAPE F0num: 4.88%)
+  * ĐIỂM LỖI TỔNG HỢP (Composite Score): 3.45% (TB các MAPE)
+
+--- CEPSTRUM CHAMPION ---
+  * Tần số F0 dự đoán (Pred) : 139.64 Hz ± 41.04 Hz (Mean ± Std)
+  * Tỉ lệ Hữu thanh (V)       : 45.0% (125/278 khung)
+  * Nhãn chuẩn .lab (GT)      : 130.20 Hz ± 15.40 Hz (F0mean ± F0std)
+  * Sai số F0mean (|ΔMean|)   : 9.44 Hz (MAPE F0mean: 7.25%)
+  * Sai số F0std  (|ΔStd|)    : 25.64 Hz (MAPE F0std : 166.52%)
+  * Số khung Voiced (F0num)   : Pred=125 vs Ref=123 (Lệch: 2 khung | MAPE F0num: 1.63%)
+  * ĐIỂM LỖI TỔNG HỢP (Composite Score): 58.46% (TB các MAPE)
+
+--- ACF BASELINE ---
+  * Tần số F0 dự đoán (Pred) : 132.00 Hz ± 15.20 Hz (Mean ± Std)
+  * Tỉ lệ Hữu thanh (V)       : 38.8% (108/278 khung)
+  * Nhãn chuẩn .lab (GT)      : 130.20 Hz ± 15.40 Hz (F0mean ± F0std)
+  * Sai số F0mean (|ΔMean|)   : 1.80 Hz (MAPE F0mean: 1.39%)
+  * Sai số F0std  (|ΔStd|)    : 0.20 Hz (MAPE F0std : 1.30%)
+  * Số khung Voiced (F0num)   : Pred=108 vs Ref=123 (Lệch: 15 khung | MAPE F0num: 12.20%)
+  * ĐIỂM LỖI TỔNG HỢP (Composite Score): 4.96% (TB các MAPE)
+
+--- AMDF BASELINE ---
+  * Tần số F0 dự đoán (Pred) : 129.84 Hz ± 16.63 Hz (Mean ± Std)
+  * Tỉ lệ Hữu thanh (V)       : 42.4% (118/278 khung)
+  * Nhãn chuẩn .lab (GT)      : 130.20 Hz ± 15.40 Hz (F0mean ± F0std)
+  * Sai số F0mean (|ΔMean|)   : 0.36 Hz (MAPE F0mean: 0.27%)
+  * Sai số F0std  (|ΔStd|)    : 1.23 Hz (MAPE F0std : 7.99%)
+  * Số khung Voiced (F0num)   : Pred=118 vs Ref=123 (Lệch: 5 khung | MAPE F0num: 4.07%)
+  * ĐIỂM LỖI TỔNG HỢP (Composite Score): 4.11% (TB các MAPE)
+
+--- CEPSTRUM BASELINE ---
+  * Tần số F0 dự đoán (Pred) : 166.66 Hz ± 64.71 Hz (Mean ± Std)
+  * Tỉ lệ Hữu thanh (V)       : 52.5% (146/278 khung)
+  * Nhãn chuẩn .lab (GT)      : 130.20 Hz ± 15.40 Hz (F0mean ± F0std)
+  * Sai số F0mean (|ΔMean|)   : 36.46 Hz (MAPE F0mean: 28.00%)
+  * Sai số F0std  (|ΔStd|)    : 49.31 Hz (MAPE F0std : 320.18%)
+  * Số khung Voiced (F0num)   : Pred=146 vs Ref=123 (Lệch: 23 khung | MAPE F0num: 18.70%)
+  * ĐIỂM LỖI TỔNG HỢP (Composite Score): 122.29% (TB các MAPE)
+
+[+] Đã lưu bảng số liệu F0 chi tiết từng khung: D:\FAC\outputs\per_method_corrected_2026-11-02\predictions\test\phone_M2_pitch_prediction.csv
+[+] Đã lưu ảnh biểu đồ trực quan: D:\FAC\outputs\per_method_corrected_2026-11-02\predictions\test\phone_M2_pitch_contour.png
+
+================================================================================
+  ĐANG PHÂN TÍCH: studio_F2.wav (Thời lượng: 3.15s | Fs: 44100 Hz)
+  [*] Đã tìm thấy nhãn Ground Truth: studio_F2.lab
+================================================================================
+
+--- ACF CHAMPION ---
+  * Tần số F0 dự đoán (Pred) : 201.64 Hz ± 45.45 Hz (Mean ± Std)
+  * Tỉ lệ Hữu thanh (V)       : 43.6% (136/312 khung)
+  * Nhãn chuẩn .lab (GT)      : 198.60 Hz ± 47.80 Hz (F0mean ± F0std)
+  * Sai số F0mean (|ΔMean|)   : 3.04 Hz (MAPE F0mean: 1.53%)
+  * Sai số F0std  (|ΔStd|)    : 2.35 Hz (MAPE F0std : 4.91%)
+  * Số khung Voiced (F0num)   : Pred=136 vs Ref=139 (Lệch: 3 khung | MAPE F0num: 2.16%)
+  * ĐIỂM LỖI TỔNG HỢP (Composite Score): 2.87% (TB các MAPE)
+
+--- AMDF CHAMPION ---
+  * Tần số F0 dự đoán (Pred) : 199.65 Hz ± 43.92 Hz (Mean ± Std)
+  * Tỉ lệ Hữu thanh (V)       : 42.9% (134/312 khung)
+  * Nhãn chuẩn .lab (GT)      : 198.60 Hz ± 47.80 Hz (F0mean ± F0std)
+  * Sai số F0mean (|ΔMean|)   : 1.05 Hz (MAPE F0mean: 0.53%)
+  * Sai số F0std  (|ΔStd|)    : 3.88 Hz (MAPE F0std : 8.11%)
+  * Số khung Voiced (F0num)   : Pred=134 vs Ref=139 (Lệch: 5 khung | MAPE F0num: 3.60%)
+  * ĐIỂM LỖI TỔNG HỢP (Composite Score): 4.08% (TB các MAPE)
+
+--- CEPSTRUM CHAMPION ---
+  * Tần số F0 dự đoán (Pred) : 202.62 Hz ± 49.58 Hz (Mean ± Std)
+  * Tỉ lệ Hữu thanh (V)       : 36.2% (113/312 khung)
+  * Nhãn chuẩn .lab (GT)      : 198.60 Hz ± 47.80 Hz (F0mean ± F0std)
+  * Sai số F0mean (|ΔMean|)   : 4.02 Hz (MAPE F0mean: 2.02%)
+  * Sai số F0std  (|ΔStd|)    : 1.78 Hz (MAPE F0std : 3.73%)
+  * Số khung Voiced (F0num)   : Pred=113 vs Ref=139 (Lệch: 26 khung | MAPE F0num: 18.71%)
+  * ĐIỂM LỖI TỔNG HỢP (Composite Score): 8.15% (TB các MAPE)
+
+--- ACF BASELINE ---
+  * Tần số F0 dự đoán (Pred) : 199.05 Hz ± 43.46 Hz (Mean ± Std)
+  * Tỉ lệ Hữu thanh (V)       : 40.3% (126/313 khung)
+  * Nhãn chuẩn .lab (GT)      : 198.60 Hz ± 47.80 Hz (F0mean ± F0std)
+  * Sai số F0mean (|ΔMean|)   : 0.45 Hz (MAPE F0mean: 0.23%)
+  * Sai số F0std  (|ΔStd|)    : 4.34 Hz (MAPE F0std : 9.08%)
+  * Số khung Voiced (F0num)   : Pred=126 vs Ref=139 (Lệch: 13 khung | MAPE F0num: 9.35%)
+  * ĐIỂM LỖI TỔNG HỢP (Composite Score): 6.22% (TB các MAPE)
+
+--- AMDF BASELINE ---
+  * Tần số F0 dự đoán (Pred) : 199.88 Hz ± 45.04 Hz (Mean ± Std)
+  * Tỉ lệ Hữu thanh (V)       : 40.6% (127/313 khung)
+  * Nhãn chuẩn .lab (GT)      : 198.60 Hz ± 47.80 Hz (F0mean ± F0std)
+  * Sai số F0mean (|ΔMean|)   : 1.28 Hz (MAPE F0mean: 0.65%)
+  * Sai số F0std  (|ΔStd|)    : 2.76 Hz (MAPE F0std : 5.78%)
+  * Số khung Voiced (F0num)   : Pred=127 vs Ref=139 (Lệch: 12 khung | MAPE F0num: 8.63%)
+  * ĐIỂM LỖI TỔNG HỢP (Composite Score): 5.02% (TB các MAPE)
+
+--- CEPSTRUM BASELINE ---
+  * Tần số F0 dự đoán (Pred) : 206.06 Hz ± 46.30 Hz (Mean ± Std)
+  * Tỉ lệ Hữu thanh (V)       : 35.5% (111/313 khung)
+  * Nhãn chuẩn .lab (GT)      : 198.60 Hz ± 47.80 Hz (F0mean ± F0std)
+  * Sai số F0mean (|ΔMean|)   : 7.46 Hz (MAPE F0mean: 3.75%)
+  * Sai số F0std  (|ΔStd|)    : 1.50 Hz (MAPE F0std : 3.14%)
+  * Số khung Voiced (F0num)   : Pred=111 vs Ref=139 (Lệch: 28 khung | MAPE F0num: 20.14%)
+  * ĐIỂM LỖI TỔNG HỢP (Composite Score): 9.01% (TB các MAPE)
+
+[+] Đã lưu bảng số liệu F0 chi tiết từng khung: D:\FAC\outputs\per_method_corrected_2026-11-02\predictions\test\studio_F2_pitch_prediction.csv
+[+] Đã lưu ảnh biểu đồ trực quan: D:\FAC\outputs\per_method_corrected_2026-11-02\predictions\test\studio_F2_pitch_contour.png
+
+================================================================================
+  ĐANG PHÂN TÍCH: studio_M2.wav (Thời lượng: 2.38s | Fs: 44100 Hz)
+  [*] Đã tìm thấy nhãn Ground Truth: studio_M2.lab
+================================================================================
+
+--- ACF CHAMPION ---
+  * Tần số F0 dự đoán (Pred) : 156.10 Hz ± 30.15 Hz (Mean ± Std)
+  * Tỉ lệ Hữu thanh (V)       : 50.8% (120/236 khung)
+  * Nhãn chuẩn .lab (GT)      : 154.70 Hz ± 30.30 Hz (F0mean ± F0std)
+  * Sai số F0mean (|ΔMean|)   : 1.40 Hz (MAPE F0mean: 0.90%)
+  * Sai số F0std  (|ΔStd|)    : 0.15 Hz (MAPE F0std : 0.48%)
+  * Số khung Voiced (F0num)   : Pred=120 vs Ref=116 (Lệch: 4 khung | MAPE F0num: 3.45%)
+  * ĐIỂM LỖI TỔNG HỢP (Composite Score): 1.61% (TB các MAPE)
+
+--- AMDF CHAMPION ---
+  * Tần số F0 dự đoán (Pred) : 155.62 Hz ± 30.62 Hz (Mean ± Std)
+  * Tỉ lệ Hữu thanh (V)       : 49.2% (116/236 khung)
+  * Nhãn chuẩn .lab (GT)      : 154.70 Hz ± 30.30 Hz (F0mean ± F0std)
+  * Sai số F0mean (|ΔMean|)   : 0.92 Hz (MAPE F0mean: 0.60%)
+  * Sai số F0std  (|ΔStd|)    : 0.32 Hz (MAPE F0std : 1.07%)
+  * Số khung Voiced (F0num)   : Pred=116 vs Ref=116 (Lệch: 0 khung | MAPE F0num: 0.00%)
+  * ĐIỂM LỖI TỔNG HỢP (Composite Score): 0.55% (TB các MAPE)
+
+--- CEPSTRUM CHAMPION ---
+  * Tần số F0 dự đoán (Pred) : 159.73 Hz ± 36.50 Hz (Mean ± Std)
+  * Tỉ lệ Hữu thanh (V)       : 38.1% (90/236 khung)
+  * Nhãn chuẩn .lab (GT)      : 154.70 Hz ± 30.30 Hz (F0mean ± F0std)
+  * Sai số F0mean (|ΔMean|)   : 5.03 Hz (MAPE F0mean: 3.25%)
+  * Sai số F0std  (|ΔStd|)    : 6.20 Hz (MAPE F0std : 20.46%)
+  * Số khung Voiced (F0num)   : Pred=90 vs Ref=116 (Lệch: 26 khung | MAPE F0num: 22.41%)
+  * ĐIỂM LỖI TỔNG HỢP (Composite Score): 15.38% (TB các MAPE)
+
+--- ACF BASELINE ---
+  * Tần số F0 dự đoán (Pred) : 156.93 Hz ± 33.31 Hz (Mean ± Std)
+  * Tỉ lệ Hữu thanh (V)       : 47.5% (112/236 khung)
+  * Nhãn chuẩn .lab (GT)      : 154.70 Hz ± 30.30 Hz (F0mean ± F0std)
+  * Sai số F0mean (|ΔMean|)   : 2.23 Hz (MAPE F0mean: 1.44%)
+  * Sai số F0std  (|ΔStd|)    : 3.01 Hz (MAPE F0std : 9.92%)
+  * Số khung Voiced (F0num)   : Pred=112 vs Ref=116 (Lệch: 4 khung | MAPE F0num: 3.45%)
+  * ĐIỂM LỖI TỔNG HỢP (Composite Score): 4.94% (TB các MAPE)
+
+--- AMDF BASELINE ---
+  * Tần số F0 dự đoán (Pred) : 156.31 Hz ± 36.39 Hz (Mean ± Std)
+  * Tỉ lệ Hữu thanh (V)       : 47.5% (112/236 khung)
+  * Nhãn chuẩn .lab (GT)      : 154.70 Hz ± 30.30 Hz (F0mean ± F0std)
+  * Sai số F0mean (|ΔMean|)   : 1.61 Hz (MAPE F0mean: 1.04%)
+  * Sai số F0std  (|ΔStd|)    : 6.09 Hz (MAPE F0std : 20.10%)
+  * Số khung Voiced (F0num)   : Pred=112 vs Ref=116 (Lệch: 4 khung | MAPE F0num: 3.45%)
+  * ĐIỂM LỖI TỔNG HỢP (Composite Score): 8.19% (TB các MAPE)
+
+--- CEPSTRUM BASELINE ---
+  * Tần số F0 dự đoán (Pred) : 168.42 Hz ± 47.82 Hz (Mean ± Std)
+  * Tỉ lệ Hữu thanh (V)       : 33.9% (80/236 khung)
+  * Nhãn chuẩn .lab (GT)      : 154.70 Hz ± 30.30 Hz (F0mean ± F0std)
+  * Sai số F0mean (|ΔMean|)   : 13.72 Hz (MAPE F0mean: 8.87%)
+  * Sai số F0std  (|ΔStd|)    : 17.52 Hz (MAPE F0std : 57.82%)
+  * Số khung Voiced (F0num)   : Pred=80 vs Ref=116 (Lệch: 36 khung | MAPE F0num: 31.03%)
+  * ĐIỂM LỖI TỔNG HỢP (Composite Score): 32.57% (TB các MAPE)
+
+[+] Đã lưu bảng số liệu F0 chi tiết từng khung: D:\FAC\outputs\per_method_corrected_2026-11-02\predictions\test\studio_M2_pitch_prediction.csv
+[+] Đã lưu ảnh biểu đồ trực quan: D:\FAC\outputs\per_method_corrected_2026-11-02\predictions\test\studio_M2_pitch_contour.png
+
+[+] Đã xuất file thống kê tổng hợp (F0mean, F0std, F0num & Composite Score): D:\FAC\outputs\per_method_corrected_2026-11-02\predictions\test\evaluation_summary_metrics.csv
+
+================================================================================
+  TỔNG KẾT TRUNG BÌNH TOÀN BỘ TẬP KIỂM THỬ (F0 MEAN, F0 STD & F0 NUM - KÈM MAPE)
+================================================================================
+
+* ACF Champion:
+  - Tần số F0 dự đoán trung bình  : 160.23 Hz ± 30.70 Hz (Mean ± Std)
+  - Tỉ lệ phân đoạn Voiced TB     : 45.38%
+  - Sai số tuyệt đối F0mean TB (Hz): 1.80
+  - MAPE F0mean TB (%): 1.12
+  - Sai số tuyệt đối F0std TB (Hz): 0.90
+  - MAPE F0std TB (%): 2.60
+  - MAPE F0num TB (%): 3.43
+  >>> FINAL SCORE (%; TB đủ 3 MAPE, thấp hơn tốt hơn): 2.39 <<<
+
+* AMDF Champion:
+  - Tần số F0 dự đoán trung bình  : 158.85 Hz ± 30.41 Hz (Mean ± Std)
+  - Tỉ lệ phân đoạn Voiced TB     : 45.14%
+  - Sai số tuyệt đối F0mean TB (Hz): 0.56
+  - MAPE F0mean TB (%): 0.33
+  - Sai số tuyệt đối F0std TB (Hz): 1.30
+  - MAPE F0std TB (%): 3.76
+  - MAPE F0num TB (%): 4.18
+  >>> FINAL SCORE (%; TB đủ 3 MAPE, thấp hơn tốt hơn): 2.76 <<<
+
+* Cepstrum Champion:
+  - Tần số F0 dự đoán trung bình  : 164.54 Hz ± 40.66 Hz (Mean ± Std)
+  - Tỉ lệ phân đoạn Voiced TB     : 40.19%
+  - Sai số tuyệt đối F0mean TB (Hz): 6.12
+  - MAPE F0mean TB (%): 4.13
+  - Sai số tuyệt đối F0std TB (Hz): 9.62
+  - MAPE F0std TB (%): 51.62
+  - MAPE F0num TB (%): 13.09
+  >>> FINAL SCORE (%; TB đủ 3 MAPE, thấp hơn tốt hơn): 22.94 <<<
+
+* ACF Baseline:
+  - Tần số F0 dự đoán trung bình  : 160.21 Hz ± 30.88 Hz (Mean ± Std)
+  - Tỉ lệ phân đoạn Voiced TB     : 41.16%
+  - Sai số tuyệt đối F0mean TB (Hz): 1.79
+  - MAPE F0mean TB (%): 1.21
+  - Sai số tuyệt đối F0std TB (Hz): 2.10
+  - MAPE F0std TB (%): 5.79
+  - MAPE F0num TB (%): 10.47
+  >>> FINAL SCORE (%; TB đủ 3 MAPE, thấp hơn tốt hơn): 5.82 <<<
+
+* AMDF Baseline:
+  - Tần số F0 dự đoán trung bình  : 158.99 Hz ± 32.78 Hz (Mean ± Std)
+  - Tỉ lệ phân đoạn Voiced TB     : 42.19%
+  - Sai số tuyệt đối F0mean TB (Hz): 0.89
+  - MAPE F0mean TB (%): 0.54
+  - Sai số tuyệt đối F0std TB (Hz): 3.11
+  - MAPE F0std TB (%): 10.39
+  - MAPE F0num TB (%): 8.15
+  >>> FINAL SCORE (%; TB đủ 3 MAPE, thấp hơn tốt hơn): 6.36 <<<
+
+* Cepstrum Baseline:
+  - Tần số F0 dự đoán trung bình  : 177.04 Hz ± 52.99 Hz (Mean ± Std)
+  - Tỉ lệ phân đoạn Voiced TB     : 42.19%
+  - Sai số tuyệt đối F0mean TB (Hz): 18.62
+  - MAPE F0mean TB (%): 12.96
+  - Sai số tuyệt đối F0std TB (Hz): 22.70
+  - MAPE F0std TB (%): 113.57
+  - MAPE F0num TB (%): 18.04
+  >>> FINAL SCORE (%; TB đủ 3 MAPE, thấp hơn tốt hơn): 48.18 <<<
+================================================================================

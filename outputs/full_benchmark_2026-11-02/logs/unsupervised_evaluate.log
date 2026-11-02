@@ -1,0 +1,7 @@
+EVALUATED train acf 7 strategies
+EVALUATED train amdf 7 strategies
+EVALUATED train cepstrum 7 strategies
+EVALUATED test acf 7 strategies
+EVALUATED test amdf 7 strategies
+EVALUATED test cepstrum 7 strategies
+EVALUATION COMPLETE; no models or presets were changed

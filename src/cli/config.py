@@ -6,12 +6,12 @@ import sys
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('protocol', choices=('champion', 'stage4'))
+    parser.add_argument('protocol', choices=('champion',))
     parser.add_argument('--output', type=Path, help='Create this new JSON file; default is stdout')
     args = parser.parse_args(argv)
     from src.experiments.resources import source_path
     root = Path(__file__).resolve().parents[2]
-    name = 'configs/experiments/'+('champion_unsupervised' if args.protocol == 'champion' else 'stage4_calibration')+'.json'
+    name = 'configs/experiments/champion_unsupervised.json'
     try:
         data = source_path(root, name).read_bytes()
         if args.output:

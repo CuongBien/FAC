@@ -1,4 +1,4 @@
-"""Train-selected presets frozen before stage 4 test evaluation; see docs/STAGE4_RESULTS.md."""
+"""Original train-selected Champion presets; see docs/METHODS.md."""
 
 FROZEN_CONFIG_SHA256 = '83dfda76c5a2ce34846a8c4eff9132296e2c09846e4d8e2cf44bbac5be884dc5'
 

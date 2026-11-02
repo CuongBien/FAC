@@ -57,7 +57,7 @@ class BasePlugin:
         is_voiced: bool,
         context: Dict[str, Any],
     ) -> Tuple[bool, float]:
-        """Hook executed during frame-by-frame V/UV decision (e.g., hysteresis thresholding).
+        """Hook executed during frame-by-frame V/UV decision.
 
         Args:
             frame_idx: Index of current frame.
@@ -92,7 +92,7 @@ class PreProcessingPlugin(BasePlugin):
 
 
 class DecisionPlugin(BasePlugin):
-    """Base class for plugins operating in the Decision Stage (hysteresis, adaptive thresholds)."""
+    """Base class for plugins operating in the Decision Stage (optional frame decisions)."""
     stage: PluginStage = PluginStage.DECISION
 
     def __init__(self, name: str = "DecisionPlugin"):

@@ -1,34 +1,4 @@
-"""Statistical analysis and evaluation tools for pitch detection."""
-from .threshold import extract_training_distributions, find_gaussian_threshold
-from .unsupervised_threshold import (
-    compute_otsu_threshold,
-    compute_histogram_valley_threshold,
-    compute_median_threshold,
-    compute_kmeans_threshold,
-    compute_all_unsupervised_thresholds,
-)
-from .advanced_unsupervised import (
-    compute_gmm_em_1d,
-    compute_zcr,
-    cluster_multifeature_2d,
-    train_and_decode_2state_hmm,
-    compute_sliding_window_adaptive_threshold,
-)
+"""Selected unsupervised decisions and independent SSL analysis modules."""
+from .unsupervised_threshold import compute_otsu_threshold, compute_kmeans_threshold, compute_all_unsupervised_thresholds
+from .advanced_unsupervised import cluster_multifeature_2d, compute_sliding_window_adaptive_threshold
 from .evaluation import evaluate_against_ground_truth, compute_error_metrics
-
-__all__ = [
-    "extract_training_distributions",
-    "find_gaussian_threshold",
-    "compute_otsu_threshold",
-    "compute_histogram_valley_threshold",
-    "compute_median_threshold",
-    "compute_kmeans_threshold",
-    "compute_all_unsupervised_thresholds",
-    "compute_gmm_em_1d",
-    "compute_zcr",
-    "cluster_multifeature_2d",
-    "train_and_decode_2state_hmm",
-    "compute_sliding_window_adaptive_threshold",
-    "evaluate_against_ground_truth",
-    "compute_error_metrics",
-]

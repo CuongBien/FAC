@@ -1,4 +1,4 @@
-"""Shared prepare/freeze/evaluate lifecycle for the two fixed v1 protocols."""
+"""Shared prepare/freeze/evaluate lifecycle for the selected unsupervised protocol."""
 import argparse
 from dataclasses import dataclass
 import hashlib
@@ -159,17 +159,14 @@ def _backend(protocol):
     if protocol == 'champion':
         from . import champion
         return champion
-    if protocol == 'stage4':
-        from . import calibration
-        return calibration
     raise ValueError('Unknown experiment protocol')
 
 
 def run_phase(protocol, phase, args):
-    """Compatibility service for script 17/21 argument objects."""
+    """Compatibility service for script 21 argument objects."""
     service = RunService(args.output_dir, source_root=getattr(args, 'root', ROOT))
     resume = getattr(args, 'resume', False)
-    if protocol not in ('champion', 'stage4') or phase not in ('prepare', 'train', 'evaluate', 'report'):
+    if protocol != 'champion' or phase not in ('prepare', 'train', 'evaluate', 'report'):
         raise ValueError('Unknown run protocol/phase')
     if (service.folder/'manifest.json').exists():
         stored_spec = ExperimentSpec(json.loads((service.folder/'config.json').read_bytes()))
@@ -214,8 +211,7 @@ def legacy_cli(protocol, argv=None):
     parser.add_argument('phase', choices=phases)
     parser.add_argument('--train-dir', default=str(ROOT/'TinHieuHuanLuyen'))
     parser.add_argument('--test-dir', default=str(ROOT/'TinHieuKiemThu'))
-    parser.add_argument('--output-dir', default=str(ROOT/'outputs'/('stage4_validation' if protocol == 'stage4'
-                                                                else 'champion_unsupervised_2026-11-01')))
+    parser.add_argument('--output-dir', default=str(ROOT/'outputs'/'selected_unsupervised'))
     parser.add_argument('--spec', type=Path, help='Explicit fixed v1 protocol JSON; unsupported overrides are rejected')
     parser.add_argument('--report-dir', type=Path, help='Separate immutable report revision destination')
     parser.add_argument('--resume', action='store_true', help='Verify completed stages or recover an interrupted phase')

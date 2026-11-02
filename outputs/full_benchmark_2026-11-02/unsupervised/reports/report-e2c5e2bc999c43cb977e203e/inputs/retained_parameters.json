@@ -1,0 +1,230 @@
+{
+  "acf": {
+    "method": "acf",
+    "feature_spec": {
+      "method": "acf",
+      "plugins": [
+        "BP"
+      ],
+      "frame_duration_ms": 30.0,
+      "hop_duration_ms": 10.0,
+      "clipping_ratio": 0.4,
+      "f0_min": 70.0,
+      "f0_max": 400.0,
+      "ste_silence_ratio": 0.008,
+      "bandpass_low": 70.0,
+      "bandpass_high": 900.0
+    },
+    "feature_contract": {
+      "schema_version": 1,
+      "method": "acf",
+      "frame_duration_ms": 30.0,
+      "hop_duration_ms": 10.0,
+      "f0_min": 70.0,
+      "f0_max": 400.0,
+      "ste_silence_ratio": 0.008,
+      "profile": "plugins",
+      "pre_processing": [
+        {
+          "name": "BandpassPreFilter",
+          "parameters": {
+            "high_cutoff": 900.0,
+            "low_cutoff": 70.0,
+            "order": 2
+          }
+        }
+      ],
+      "signal_source": "file_dc_removed",
+      "energy_source": "before_signal_plugins_dc_centered_frames",
+      "pitch_population": "active",
+      "center_before_pitch": true,
+      "zcr_source": "centered_pitch_active",
+      "window": "rectangular",
+      "cepstrum_window": "hamming",
+      "cepstrum_n_fft": 2048
+    },
+    "fit_population": "train_active",
+    "thresholds": {
+      "otsu": 0.5725636259135187,
+      "kmeans": 0.5741006077927666
+    },
+    "cluster_2d": {
+      "centroid_v": [
+        0.6872256443689001,
+        0.021518269665610122
+      ],
+      "centroid_uv": [
+        0.6016972774280763,
+        0.05087191452781528
+      ],
+      "centroid_v_normalized": [
+        0.19923108442641016,
+        -0.7015438058467133
+      ],
+      "centroid_uv_normalized": [
+        -0.28346481497434095,
+        0.9981524002304324
+      ],
+      "status": "ok",
+      "converged": true,
+      "num_iter": 10,
+      "p_mean": 0.6519241029305024,
+      "p_std": 0.17718892380690213,
+      "z_mean": 0.03363388636139132,
+      "z_std": 0.017269936096376073
+    },
+    "num_train_active": 659,
+    "num_train_frames": 1291
+  },
+  "amdf": {
+    "method": "amdf",
+    "feature_spec": {
+      "method": "amdf",
+      "plugins": [],
+      "frame_duration_ms": 30.0,
+      "hop_duration_ms": 10.0,
+      "clipping_ratio": 0.4,
+      "f0_min": 70.0,
+      "f0_max": 400.0,
+      "ste_silence_ratio": 0.008,
+      "bandpass_low": 70.0,
+      "bandpass_high": 900.0
+    },
+    "feature_contract": {
+      "schema_version": 1,
+      "method": "amdf",
+      "frame_duration_ms": 30.0,
+      "hop_duration_ms": 10.0,
+      "f0_min": 70.0,
+      "f0_max": 400.0,
+      "ste_silence_ratio": 0.008,
+      "profile": "plugins",
+      "pre_processing": [],
+      "signal_source": "file_dc_removed",
+      "energy_source": "before_signal_plugins_dc_centered_frames",
+      "pitch_population": "active",
+      "center_before_pitch": true,
+      "zcr_source": "centered_pitch_active",
+      "window": "rectangular",
+      "cepstrum_window": "hamming",
+      "cepstrum_n_fft": 2048
+    },
+    "fit_population": "train_active",
+    "thresholds": {
+      "otsu": 0.3595316586284222,
+      "kmeans": 0.36125087396166944
+    },
+    "cluster_2d": {
+      "centroid_v": [
+        0.2048266754138266,
+        0.05775431854479139
+      ],
+      "centroid_uv": [
+        0.5813737305404061,
+        0.17603624497370102
+      ],
+      "centroid_v_normalized": [
+        -0.41033633675979203,
+        -0.23995827333138453
+      ],
+      "centroid_uv_normalized": [
+        1.6538747008333605,
+        0.967160063503592
+      ],
+      "status": "ok",
+      "converged": true,
+      "num_iter": 10,
+      "p_mean": 0.2796789731704001,
+      "p_std": 0.18241693715853263,
+      "z_mean": 0.08126711423855043,
+      "z_std": 0.09798701818998197
+    },
+    "num_train_active": 659,
+    "num_train_frames": 1291
+  },
+  "cepstrum": {
+    "method": "cepstrum",
+    "feature_spec": {
+      "method": "cepstrum",
+      "plugins": [
+        "BP",
+        "Clip"
+      ],
+      "frame_duration_ms": 30.0,
+      "hop_duration_ms": 10.0,
+      "clipping_ratio": 0.4,
+      "f0_min": 70.0,
+      "f0_max": 400.0,
+      "ste_silence_ratio": 0.008,
+      "bandpass_low": 70.0,
+      "bandpass_high": 900.0
+    },
+    "feature_contract": {
+      "schema_version": 1,
+      "method": "cepstrum",
+      "frame_duration_ms": 30.0,
+      "hop_duration_ms": 10.0,
+      "f0_min": 70.0,
+      "f0_max": 400.0,
+      "ste_silence_ratio": 0.008,
+      "profile": "plugins",
+      "pre_processing": [
+        {
+          "name": "BandpassPreFilter",
+          "parameters": {
+            "high_cutoff": 900.0,
+            "low_cutoff": 70.0,
+            "order": 2
+          }
+        },
+        {
+          "name": "CenterClipping",
+          "parameters": {
+            "clipping_ratio": 0.4,
+            "mode": "standard"
+          }
+        }
+      ],
+      "signal_source": "file_dc_removed",
+      "energy_source": "before_signal_plugins_dc_centered_frames",
+      "pitch_population": "active",
+      "center_before_pitch": true,
+      "zcr_source": "centered_pitch_active",
+      "window": "rectangular",
+      "cepstrum_window": "hamming",
+      "cepstrum_n_fft": 2048
+    },
+    "fit_population": "train_active",
+    "thresholds": {
+      "otsu": 0.2540980685682122,
+      "kmeans": 0.25112662867660596
+    },
+    "cluster_2d": {
+      "centroid_v": [
+        0.13048658599061955,
+        0.013109782104731127
+      ],
+      "centroid_uv": [
+        0.2899544913912637,
+        0.034956896143314195
+      ],
+      "centroid_v_normalized": [
+        -0.414625847848731,
+        -0.5088838700568765
+      ],
+      "centroid_uv_normalized": [
+        0.9515663208128393,
+        1.1678884817805302
+      ],
+      "status": "ok",
+      "converged": true,
+      "num_iter": 9,
+      "p_mean": 0.17888352237928237,
+      "p_std": 0.11672435917772206,
+      "z_mean": 0.01974016572797334,
+      "z_std": 0.013029266623249727
+    },
+    "num_train_active": 659,
+    "num_train_frames": 1291
+  }
+}

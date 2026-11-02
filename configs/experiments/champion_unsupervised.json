@@ -1,215 +1,137 @@
 {
+  "schema_version": 1,
+  "protocol": "champion",
+  "name": "selected-unsupervised-v2",
+  "metric_version": "legacy-v1",
   "controls": {
     "baseline": {
       "acf": {
-        "f0_max": 400.0,
-        "f0_min": 70.0,
         "frame_duration_ms": 25.0,
         "hop_duration_ms": 10.0,
-        "median_size": 3,
-        "post_processors": [],
-        "pre_processors": [],
-        "reference_threshold": 0.4408,
+        "f0_min": 70.0,
+        "f0_max": 400.0,
         "ste_silence_ratio": 0.008,
-        "use_median_filter": true
+        "use_median_filter": true,
+        "median_size": 3,
+        "reference_threshold": 0.4408,
+        "pre_processors": [],
+        "post_processors": []
       },
       "amdf": {
-        "f0_max": 400.0,
-        "f0_min": 70.0,
         "frame_duration_ms": 25.0,
         "hop_duration_ms": 10.0,
-        "median_size": 3,
-        "post_processors": [],
-        "pre_processors": [],
-        "reference_threshold": 0.438,
+        "f0_min": 70.0,
+        "f0_max": 400.0,
         "ste_silence_ratio": 0.008,
-        "use_median_filter": true
+        "use_median_filter": true,
+        "median_size": 3,
+        "reference_threshold": 0.438,
+        "pre_processors": [],
+        "post_processors": []
       },
       "cepstrum": {
-        "f0_max": 400.0,
-        "f0_min": 70.0,
         "frame_duration_ms": 25.0,
         "hop_duration_ms": 10.0,
-        "median_size": 3,
-        "post_processors": [],
-        "pre_processors": [],
-        "reference_threshold": 0.06,
+        "f0_min": 70.0,
+        "f0_max": 400.0,
         "ste_silence_ratio": 0.008,
-        "use_median_filter": true
+        "use_median_filter": true,
+        "median_size": 3,
+        "reference_threshold": 0.06,
+        "pre_processors": [],
+        "post_processors": []
       }
     }
   },
-  "description": "Executable fixed v1 protocol. Every numerical setting is checked; unsupported overrides are rejected.",
-  "fit": {
-    "input_adaptive_controls": [
-      "kmeans2d_input_active",
-      "hmm_input_active"
-    ],
-    "mode": "frozen",
-    "parameters": {
-      "dynamic": {
-        "alpha": 0.3,
-        "context": "within active segments; STE normalized within each segment; offline window",
-        "window_frames": 50
-      },
-      "energy_guard": "fixed_champion_threshold_for_every_strategy",
-      "gmm": {
-        "max_iter": 150,
-        "prior": 0.5,
-        "tol": 1e-05
-      },
-      "histogram": {
-        "n_bins": 100,
-        "valley_smooth_sigma": 2.0
-      },
-      "hmm": {
-        "A": [
-          [
-            0.85,
-            0.15
-          ],
-          [
-            0.15,
-            0.85
-          ]
-        ],
-        "learn_transitions": false,
-        "max_iter": 40,
-        "prior": 0.5,
-        "tol": 0.0001
-      },
-      "kmeans": {
-        "clusters": 2,
-        "max_iter": 100,
-        "tol": 1e-05
-      },
-      "kmeans2d": {
-        "max_iter": 100,
-        "tol": 1e-05
-      },
-      "zcr_source": "DC-centered pitch_frames after bandpass/center clipping"
-    },
-    "population": "train_active",
-    "strategies": [
-      "median",
-      "otsu",
-      "valley",
-      "kmeans",
-      "gmm",
-      "kmeans2d",
-      "hmm",
-      "dynamic"
-    ]
-  },
-  "metric_version": "legacy-v1",
-  "name": "champion-v1",
   "pipelines": {
     "acf": {
-      "f0_max": 400.0,
-      "f0_min": 70.0,
       "frame_duration_ms": 30.0,
       "hop_duration_ms": 10.0,
+      "f0_min": 70.0,
+      "f0_max": 400.0,
+      "ste_silence_ratio": 0.008,
+      "use_median_filter": true,
       "median_size": 3,
-      "post_processors": [
-        {
-          "name": "EnergyEdgeExtension",
-          "parameters": {
-            "max_pitch_diff": 40.0,
-            "min_voiced_len": 3,
-            "ste_multiplier": 1.5,
-            "threshold_discount": 0.2
-          }
-        },
-        {
-          "name": "ViterbiTracking",
-          "parameters": {
-            "f0_max": 400.0,
-            "f0_min": 70.0,
-            "max_candidates": 5,
-            "w_freq": 3.0,
-            "w_octave": 4.0
-          }
-        }
-      ],
+      "reference_threshold": 0.45,
       "pre_processors": [
         {
           "name": "BandpassPreFilter",
           "parameters": {
-            "high_cutoff": 900.0,
             "low_cutoff": 70.0,
+            "high_cutoff": 900.0,
             "order": 2
           }
         }
       ],
-      "reference_threshold": 0.45,
-      "ste_silence_ratio": 0.008,
-      "use_median_filter": true
+      "post_processors": [
+        {
+          "name": "EnergyEdgeExtension",
+          "parameters": {
+            "threshold_discount": 0.2,
+            "min_voiced_len": 3,
+            "max_pitch_diff": 40.0,
+            "ste_multiplier": 1.5
+          }
+        },
+        {
+          "name": "ViterbiTracking",
+          "parameters": {
+            "w_freq": 3.0,
+            "w_octave": 4.0,
+            "max_candidates": 5,
+            "f0_min": 70.0,
+            "f0_max": 400.0
+          }
+        }
+      ]
     },
     "amdf": {
-      "f0_max": 400.0,
-      "f0_min": 70.0,
       "frame_duration_ms": 30.0,
       "hop_duration_ms": 10.0,
+      "f0_min": 70.0,
+      "f0_max": 400.0,
+      "ste_silence_ratio": 0.008,
+      "use_median_filter": true,
       "median_size": 3,
+      "reference_threshold": 0.5,
+      "pre_processors": [],
       "post_processors": [
         {
           "name": "EnergyEdgeExtension",
           "parameters": {
-            "max_pitch_diff": 40.0,
+            "threshold_discount": 0.2,
             "min_voiced_len": 3,
-            "ste_multiplier": 1.5,
-            "threshold_discount": 0.2
+            "max_pitch_diff": 40.0,
+            "ste_multiplier": 1.5
           }
         },
         {
           "name": "ViterbiTracking",
           "parameters": {
-            "f0_max": 400.0,
-            "f0_min": 70.0,
-            "max_candidates": 5,
             "w_freq": 3.0,
-            "w_octave": 4.0
+            "w_octave": 4.0,
+            "max_candidates": 5,
+            "f0_min": 70.0,
+            "f0_max": 400.0
           }
         }
-      ],
-      "pre_processors": [],
-      "reference_threshold": 0.5,
-      "ste_silence_ratio": 0.008,
-      "use_median_filter": true
+      ]
     },
     "cepstrum": {
-      "f0_max": 400.0,
-      "f0_min": 70.0,
       "frame_duration_ms": 30.0,
       "hop_duration_ms": 10.0,
+      "f0_min": 70.0,
+      "f0_max": 400.0,
+      "ste_silence_ratio": 0.008,
+      "use_median_filter": true,
       "median_size": 3,
-      "post_processors": [
-        {
-          "name": "EnergyEdgeExtension",
-          "parameters": {
-            "max_pitch_diff": 40.0,
-            "min_voiced_len": 3,
-            "ste_multiplier": 1.5,
-            "threshold_discount": 0.2
-          }
-        },
-        {
-          "name": "ViterbiTracking",
-          "parameters": {
-            "f0_max": 400.0,
-            "f0_min": 70.0,
-            "max_candidates": 5,
-            "w_freq": 3.0,
-            "w_octave": 4.0
-          }
-        }
-      ],
+      "reference_threshold": 0.1,
       "pre_processors": [
         {
           "name": "BandpassPreFilter",
           "parameters": {
-            "high_cutoff": 900.0,
             "low_cutoff": 70.0,
+            "high_cutoff": 900.0,
             "order": 2
           }
         },
@@ -221,11 +143,60 @@
           }
         }
       ],
-      "reference_threshold": 0.1,
-      "ste_silence_ratio": 0.008,
-      "use_median_filter": true
+      "post_processors": [
+        {
+          "name": "EnergyEdgeExtension",
+          "parameters": {
+            "threshold_discount": 0.2,
+            "min_voiced_len": 3,
+            "max_pitch_diff": 40.0,
+            "ste_multiplier": 1.5
+          }
+        },
+        {
+          "name": "ViterbiTracking",
+          "parameters": {
+            "w_freq": 3.0,
+            "w_octave": 4.0,
+            "max_candidates": 5,
+            "f0_min": 70.0,
+            "f0_max": 400.0
+          }
+        }
+      ]
     }
   },
-  "protocol": "champion",
-  "schema_version": 1
+  "fit": {
+    "mode": "frozen",
+    "population": "train_active",
+    "strategies": [
+      "otsu",
+      "kmeans",
+      "kmeans2d",
+      "dynamic"
+    ],
+    "input_adaptive_controls": [
+      "kmeans2d_input_active"
+    ],
+    "parameters": {
+      "histogram": {
+        "n_bins": 100
+      },
+      "kmeans": {
+        "clusters": 2,
+        "max_iter": 100,
+        "tol": 1e-05
+      },
+      "kmeans2d": {
+        "max_iter": 100,
+        "tol": 1e-05
+      },
+      "dynamic": {
+        "base": "otsu",
+        "window_frames": 50,
+        "alpha": 0.3,
+        "context": "within active segments; offline centered window"
+      }
+    }
+  }
 }

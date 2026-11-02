@@ -1,4 +1,0 @@
-File,Method,Ref_F0mean,Pred_F0mean,Abs_Err_F0mean,MAPE_F0mean_pct,Ref_F0std,Pred_F0std,Abs_Err_F0std,MAPE_F0std_pct,Ref_F0num,Pred_F0num,Abs_Err_F0num,MAPE_F0num_pct,Composite_Score_pct,Voiced_Ratio_pct,V_UV_Accuracy,Voiced_F1
-phone_F1.wav,ACF Champion,215.6,217.12,1.52,0.71,20.6,20.96,0.36,1.75,148,136,12,8.11,3.52,42.24,,
-phone_F1.wav,AMDF Champion,215.6,215.88,0.28,0.13,20.6,20.92,0.32,1.55,148,137,11,7.43,3.04,42.55,,
-phone_F1.wav,Cepstrum Champion,215.6,215.83,0.23,0.11,20.6,21.25,0.65,3.16,148,147,1,0.68,1.32,45.65,,

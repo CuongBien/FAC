@@ -1,0 +1,16 @@
+================================================================================
+ ĐANG CHẠY BENCHMARK ĐỐI SÁNH TẤT CẢ GIẢI PHÁP SELF-SUPERVISED LEARNING (SSL)
+================================================================================
+
+=========================================================================================================
+ BẢNG ĐỐI SÁNH KẾT QUẢ CÁC GIẢI PHÁP SELF-SUPERVISED LEARNING (SSL) TRÊN TINHIEUKIEMTHU
+ (Tất cả giải pháp dùng ranh giới xác suất tự nhiên Bayes P >= 0.5 | Không dùng nhãn ground-truth)
+=========================================================================================================
+Phương pháp SSL                     | ΔF0 (Hz) | MAPE F0  | ΔStd(Hz) | MAPE Std  | ΔNum   | MAPE Num  | FINAL SCORE
+---------------------------------------------------------------------------------------------------------
+🥇 Pitch-Shift original (ACF)        |     1.64 |    1.11% |     1.79 |     5.48% |   24.2 |    15.04% |      7.214%
+=========================================================================================================
+
+[+] Đã lưu báo cáo JSON: outputs\reports\27_ssl_benchmark_results.json
+[+] Đã lưu bảng số liệu CSV: outputs\reports\27_ssl_benchmark_results.csv
+[+] Đã lưu biểu đồ trực quan 300 DPI: outputs\figures\27_ssl_benchmark_summary.png

@@ -1,0 +1,9 @@
+.D:\FAC\src\core\audio.py:18: WavFileWarning: Chunk (non-data) not understood, skipping it.
+  sr, data = wavfile.read(filepath)
+.................................................................................FROZEN C:\Users\ADMINI~1\AppData\Local\Temp\tmp9ty8e456\run active train frames: 18
+Training diagnostic: {'epoch': 0, 'loss': 0.1694806041944325, 'equivariance': 0.05003229950550017, 'reconstruction': 1.0021648116211472, 'confidence': 0.6934006410787497, 'shift_mae_semitones': 3.403564560882045} -> {'epoch': 2, 'loss': 0.16198744738148607, 'equivariance': 0.050672258716911424, 'reconstruction': 0.9920050234980262, 'confidence': 0.6171493748967332, 'shift_mae_semitones': 3.8090962627831404}
+....
+----------------------------------------------------------------------
+Ran 86 tests in 31.647s
+
+OK

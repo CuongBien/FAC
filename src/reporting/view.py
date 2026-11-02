@@ -12,7 +12,7 @@ class ReportView:
 
     def __post_init__(self, document):
         value = json.loads(canonical_json(document))
-        if value.get('schema_version') != 1 or value.get('protocol') not in ('champion', 'stage4'):
+        if value.get('schema_version') != 1 or value.get('protocol') != 'champion':
             raise ValueError('Unsupported report view')
         if not {'source', 'frozen', 'models', 'evaluation', 'extras'} <= value.keys():
             raise ValueError('Incomplete report view')

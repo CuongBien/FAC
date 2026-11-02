@@ -1,7 +1,0 @@
-name,domain,dataset,average_error_hz,mape_f0_pct,average_std_error,mape_std_pct,average_num_error,mape_num_pct,final_composite_score_pct
-"1. ACF Baseline","Time (L2 Correlation)","TinHieuHuanLuyen",3.04,2.06,4.67,27.07,19.25,12.53,13.89
-"2. ACF Champion (BP+Energy+Viterbi)","Time (L2 Correlation)","TinHieuHuanLuyen",1.12,0.6,0.96,4.72,1.75,1.32,2.21
-"3. AMDF Baseline","Time (L1 Difference)","TinHieuHuanLuyen",1.64,0.97,1.92,10.23,15.0,9.07,6.76
-"4. AMDF Champion (Energy+Viterbi)","Time (L1 Difference)","TinHieuHuanLuyen",1.36,0.78,0.72,3.29,3.5,2.17,2.08
-"5. Cepstrum Baseline","Quefrency (Homomorphic)","TinHieuHuanLuyen",13.72,11.06,22.02,105.85,18.25,16.71,44.54
-"6. Cepstrum Champion (BP+Clip+Energy+Viterbi)","Quefrency (Homomorphic)","TinHieuHuanLuyen",2.34,1.46,3.85,17.57,20.5,15.14,11.39

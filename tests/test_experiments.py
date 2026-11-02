@@ -46,7 +46,7 @@ def legacy_fixture(root):
     provenance = {'base_commit': 'recorded', 'source_sha256': {'source.py': sha256(root/'source.py')}}
     # Fix original byte identity to CRLF regardless of the test host platform.
     for name, value in {
-        'frozen_config': {'selected': {'acf': {'threshold': .45}}, 'provenance': provenance,
+        'frozen_config': {'experiment': {'champions': {'acf': {'threshold': .45}}}, 'provenance': provenance,
                           'train_manifest': {}, 'frozen_at_utc': '2026-11-01T00:00:00+00:00'},
         'frozen_models': {'train_manifest': {}},
     }.items():

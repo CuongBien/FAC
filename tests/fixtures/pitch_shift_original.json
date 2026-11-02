@@ -1,0 +1,5 @@
+{
+  "canonical_source_sha256": "6f8d5d9e2aee843f50b407daeb9cf31c61c05734cb5a72419ad752ca2eb112a2",
+  "previous_canonical_source_sha256": "395169270e470044a3efffba7deecc07a04c0541a7b3b80df4a0eca385cd2565",
+  "change": "Module title only; original executable AST unchanged."
+}

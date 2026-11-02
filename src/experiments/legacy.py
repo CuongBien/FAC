@@ -57,7 +57,7 @@ def pinned_bytes(path, expected, text=False):
 
 
 def inspect_legacy_run(folder):
-    """Verify archived Stage 4/Champion evidence without importing algorithms."""
+    """Verify recorded reference evidence without importing algorithms."""
     folder = Path(folder)
     reconstructed = []
     documents, digests = {}, {}
@@ -71,12 +71,9 @@ def inspect_legacy_run(folder):
     frozen, models = documents['config'], documents['models']
     if frozen['train_manifest'] != models['train_manifest']:
         raise ValueError('Frozen models/config use different training data')
-    if 'selected' in frozen:
-        kind = 'legacy.stage4.v1'
-    elif 'experiment' in frozen:
-        kind = 'legacy.champion-unsupervised.v1'
-    else:
-        raise ValueError('Unsupported legacy run format')
+    if 'experiment' not in frozen:
+        raise ValueError('Unsupported run format')
+    kind = 'legacy.champion-unsupervised.v1'
     evaluation = json.loads((folder/'evaluation.json').read_bytes())
     if any(evaluation.get(key+'_sha256') != digest for key, digest in digests.items()):
         raise ValueError('Evaluation does not match frozen config/models')

@@ -1,16 +1,5 @@
-"""Unsupervised thresholding methods for Voiced/Unvoiced classification.
-Implements:
-1. Otsu's Thresholding (Maximizing between-class variance sigma_B^2)
-2. Bimodal Histogram Valley Detection (Smoothed histogram local minimum)
-3. Median / 50th Percentile Thresholding (Direct exploitation of P(V) ~ P(UV) ~ 0.5)
-4. 1D K-Means Clustering (Mid-point boundary between two cluster centroids)
-"""
-from typing import Dict
+"""Otsu and two-cluster one-dimensional threshold fitting."""
 import numpy as np
-from scipy.ndimage import gaussian_filter1d
-from scipy.signal import find_peaks
-
-
 
 def compute_otsu_threshold(values: np.ndarray, n_bins: int = 100) -> float:
     """Find optimal threshold using Otsu's method on the empirical histogram.
@@ -61,65 +50,6 @@ def compute_otsu_threshold(values: np.ndarray, n_bins: int = 100) -> float:
     # to the lower class while optimizing sigma_b_sq.
     return float(bin_edges[best_idx + 1])
 
-
-def compute_histogram_valley_threshold(
-    values: np.ndarray, n_bins: int = 100, smooth_sigma: float = 2.0
-) -> float:
-    """Find the valley (local minimum) between two bimodal peaks in the smoothed histogram.
-
-    Args:
-        values: 1D array of extracted periodicity metrics.
-        n_bins: Number of histogram bins.
-        smooth_sigma: Standard deviation of 1D Gaussian kernel for histogram smoothing.
-
-    Returns:
-        float: Optimal threshold corresponding to the histogram valley.
-    """
-    clean_vals = values[np.isfinite(values)]
-    if len(clean_vals) < 2:
-        return float(np.mean(clean_vals)) if len(clean_vals) == 1 else 0.5
-
-    hist, bin_edges = np.histogram(clean_vals, bins=n_bins)
-    bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2.0
-
-    # Smooth histogram using Gaussian filter to eliminate micro-ripples
-    smoothed = gaussian_filter1d(hist.astype(np.float64), sigma=smooth_sigma)
-
-    # Detect local peaks
-    peaks, _ = find_peaks(smoothed)
-
-    if len(peaks) >= 2:
-        # Sort detected peaks by height (descending) and select the two most prominent
-        sorted_by_height = sorted(peaks, key=lambda idx: smoothed[idx], reverse=True)
-        p1, p2 = sorted_by_height[0], sorted_by_height[1]
-        p_left, p_right = min(p1, p2), max(p1, p2)
-
-        # Ensure there is a gap between the peaks
-        if p_right - p_left > 1:
-            valley_offset = int(np.argmin(smoothed[p_left : p_right + 1]))
-            valley_idx = p_left + valley_offset
-            return float(bin_centers[valley_idx])
-
-    # Fallback to Otsu threshold if bimodal structure is not sharply separated
-    return compute_otsu_threshold(clean_vals, n_bins=n_bins)
-
-
-def compute_median_threshold(values: np.ndarray) -> float:
-    """Find threshold using the 50th percentile (Median), directly exploiting
-    the prior assumption P(V) ~ P(UV) ~ 0.5 on active speech frames.
-
-    Args:
-        values: 1D array of extracted periodicity metrics.
-
-    Returns:
-        float: Median threshold T.
-    """
-    clean_vals = values[np.isfinite(values)]
-    if len(clean_vals) == 0:
-        return 0.5
-    return float(np.median(clean_vals))
-
-
 def compute_kmeans_threshold(
     values: np.ndarray, k: int = 2, max_iter: int = 100, tol: float = 1e-5
 ) -> float:
@@ -134,6 +64,11 @@ def compute_kmeans_threshold(
     Returns:
         float: Boundary threshold T = (c0 + c1) / 2.
     """
+    if k != 2:
+        raise ValueError("Only two clusters are supported")
+    values = np.asarray(values, dtype=float)
+    if values.ndim != 1 or not isinstance(max_iter, (int, np.integer)) or max_iter < 1 or not np.isfinite(tol) or tol <= 0:
+        raise ValueError("Invalid K-means input or iteration settings")
     clean_vals = values[np.isfinite(values)]
     if len(clean_vals) < 2:
         return float(np.mean(clean_vals)) if len(clean_vals) == 1 else 0.5
@@ -167,19 +102,6 @@ def compute_kmeans_threshold(
     return float((c_low + c_high) / 2.0)
 
 
-def compute_all_unsupervised_thresholds(
-    values: np.ndarray, n_bins: int = 100, smooth_sigma: float = 2.0
-) -> Dict[str, float]:
-    """Compute all 4 unsupervised thresholds for a given metric array.
-
-    Returns:
-        dict: {'otsu': float, 'valley': float, 'median': float, 'kmeans': float}
-    """
-    return {
-        "otsu": compute_otsu_threshold(values, n_bins=n_bins),
-        "valley": compute_histogram_valley_threshold(
-            values, n_bins=n_bins, smooth_sigma=smooth_sigma
-        ),
-        "median": compute_median_threshold(values),
-        "kmeans": compute_kmeans_threshold(values),
-    }
+def compute_all_unsupervised_thresholds(values, n_bins=100):
+    return {'otsu': compute_otsu_threshold(values, n_bins=n_bins),
+            'kmeans': compute_kmeans_threshold(values)}

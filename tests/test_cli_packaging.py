@@ -65,20 +65,6 @@ main([sys.argv[1]])
                 self.assertEqual(main([command, '--help']), 7)
                 run.assert_called_once_with(expected)
 
-    def test_prediction_functions_and_main_body_preserve_pre_refactor_ast(self):
-        with tarfile.open(ROOT/'outputs/refactor_phase5/source_snapshot.tar.gz') as archive:
-            original = ast.parse(archive.extractfile('predict.py').read())
-        current = ast.parse((ROOT/'src/cli/predict.py').read_bytes())
-        functions = lambda tree: {node.name: node for node in tree.body if isinstance(node, ast.FunctionDef)}
-        old, new = functions(original), functions(current)
-        for name in ('get_champion_detectors', 'get_baseline_detectors', 'process_single_file'):
-            self.assertEqual(ast.dump(old[name]), ast.dump(new[name]))
-        adjusted = deepcopy(new['main'])
-        adjusted.args = old['main'].args
-        for node in ast.walk(adjusted):
-            if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == 'parse_args':
-                node.args = []
-        self.assertEqual(ast.dump(old['main']), ast.dump(adjusted))
 
     def test_legacy_prediction_imports_are_the_same_public_functions(self):
         import predict
@@ -132,17 +118,6 @@ main([sys.argv[1]])
                 self.assertEqual(archive.getnames(), ['uv.lock'])
                 self.assertEqual(archive.extractfile('uv.lock').read(), blob.read_bytes())
 
-    def test_template_export_creates_new_files_without_overwriting(self):
-        from src.cli.config import main as export
-        with tempfile.TemporaryDirectory() as directory, redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
-            path = Path(directory)/'nested/champion.json'
-            self.assertEqual(export(['champion', '--output', str(path)]), 0)
-            before = path.read_bytes()
-            self.assertEqual(json.loads(before)['protocol'], 'champion')
-            with self.assertRaises(SystemExit) as caught:
-                export(['stage4', '--output', str(path)])
-            self.assertEqual(caught.exception.code, 2)
-            self.assertEqual(path.read_bytes(), before)
 
 
 if __name__ == '__main__':

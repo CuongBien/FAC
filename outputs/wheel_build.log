@@ -1,0 +1,330 @@
+Building wheel...
+running egg_info
+creating fac_speech_f0.egg-info
+writing fac_speech_f0.egg-info\PKG-INFO
+writing dependency_links to fac_speech_f0.egg-info\dependency_links.txt
+writing entry points to fac_speech_f0.egg-info\entry_points.txt
+writing requirements to fac_speech_f0.egg-info\requires.txt
+writing top-level names to fac_speech_f0.egg-info\top_level.txt
+writing manifest file 'fac_speech_f0.egg-info\SOURCES.txt'
+reading manifest file 'fac_speech_f0.egg-info\SOURCES.txt'
+reading manifest template 'MANIFEST.in'
+warning: no previously-included files matching '__pycache__' found anywhere in distribution
+warning: no previously-included files matching '*.py[cod]' found anywhere in distribution
+no previously-included directories found matching 'outputs'
+no previously-included directories found matching 'archive'
+no previously-included directories found matching 'TinHieuHuanLuyen'
+no previously-included directories found matching 'TinHieuKiemThu'
+writing manifest file 'fac_speech_f0.egg-info\SOURCES.txt'
+running bdist_wheel
+running build
+running build_py
+creating build\lib\src
+copying src\calibrated_presets.py -> build\lib\src
+copying src\config.py -> build\lib\src
+copying src\pipelines.py -> build\lib\src
+copying src\__init__.py -> build\lib\src
+copying src\__main__.py -> build\lib\src
+creating build\lib\src\analysis
+copying src\analysis\advanced_unsupervised.py -> build\lib\src\analysis
+copying src\analysis\champion_unsupervised.py -> build\lib\src\analysis
+copying src\analysis\evaluation.py -> build\lib\src\analysis
+copying src\analysis\protocols.py -> build\lib\src\analysis
+copying src\analysis\ssl_pitch_shift.py -> build\lib\src\analysis
+copying src\analysis\ssl_pitch_shift_methods.py -> build\lib\src\analysis
+copying src\analysis\unsupervised_threshold.py -> build\lib\src\analysis
+copying src\analysis\__init__.py -> build\lib\src\analysis
+creating build\lib\src\cli
+copying src\cli\config.py -> build\lib\src\cli
+copying src\cli\main.py -> build\lib\src\cli
+copying src\cli\predict.py -> build\lib\src\cli
+copying src\cli\__init__.py -> build\lib\src\cli
+creating build\lib\src\core
+copying src\core\acf.py -> build\lib\src\core
+copying src\core\amdf.py -> build\lib\src\core
+copying src\core\audio.py -> build\lib\src\core
+copying src\core\cepstrum.py -> build\lib\src\core
+copying src\core\lab_parser.py -> build\lib\src\core
+copying src\core\pitch_detector.py -> build\lib\src\core
+copying src\core\processing.py -> build\lib\src\core
+copying src\core\__init__.py -> build\lib\src\core
+creating build\lib\src\experiments
+copying src\experiments\champion.py -> build\lib\src\experiments
+copying src\experiments\champion_report.py -> build\lib\src\experiments
+copying src\experiments\dependencies.py -> build\lib\src\experiments
+copying src\experiments\legacy.py -> build\lib\src\experiments
+copying src\experiments\manifest.py -> build\lib\src\experiments
+copying src\experiments\metric_artifacts.py -> build\lib\src\experiments
+copying src\experiments\paths.py -> build\lib\src\experiments
+copying src\experiments\protocol_specs.py -> build\lib\src\experiments
+copying src\experiments\registry.py -> build\lib\src\experiments
+copying src\experiments\resources.py -> build\lib\src\experiments
+copying src\experiments\runner.py -> build\lib\src\experiments
+copying src\experiments\serialization.py -> build\lib\src\experiments
+copying src\experiments\snapshots.py -> build\lib\src\experiments
+copying src\experiments\spec.py -> build\lib\src\experiments
+copying src\experiments\store.py -> build\lib\src\experiments
+copying src\experiments\transactions.py -> build\lib\src\experiments
+copying src\experiments\__init__.py -> build\lib\src\experiments
+copying src\experiments\__main__.py -> build\lib\src\experiments
+creating build\lib\src\metrics
+copying src\metrics\aggregation.py -> build\lib\src\metrics
+copying src\metrics\bundle.py -> build\lib\src\metrics
+copying src\metrics\comparison.py -> build\lib\src\metrics
+copying src\metrics\contracts.py -> build\lib\src\metrics
+copying src\metrics\evaluation.py -> build\lib\src\metrics
+copying src\metrics\formatting.py -> build\lib\src\metrics
+copying src\metrics\legacy.py -> build\lib\src\metrics
+copying src\metrics\numeric.py -> build\lib\src\metrics
+copying src\metrics\__init__.py -> build\lib\src\metrics
+copying src\metrics\__main__.py -> build\lib\src\metrics
+creating build\lib\src\pipeline
+copying src\pipeline\cache.py -> build\lib\src\pipeline
+copying src\pipeline\champion.py -> build\lib\src\pipeline
+copying src\pipeline\contracts.py -> build\lib\src\pipeline
+copying src\pipeline\engine.py -> build\lib\src\pipeline
+copying src\pipeline\features.py -> build\lib\src\pipeline
+copying src\pipeline\__init__.py -> build\lib\src\pipeline
+creating build\lib\src\plugins
+copying src\plugins\base.py -> build\lib\src\plugins
+copying src\plugins\plugin_detector.py -> build\lib\src\plugins
+copying src\plugins\__init__.py -> build\lib\src\plugins
+creating build\lib\src\reporting
+copying src\reporting\bundle.py -> build\lib\src\reporting
+copying src\reporting\catalog.py -> build\lib\src\reporting
+copying src\reporting\champion.py -> build\lib\src\reporting
+copying src\reporting\common.py -> build\lib\src\reporting
+copying src\reporting\plots.py -> build\lib\src\reporting
+copying src\reporting\publish.py -> build\lib\src\reporting
+copying src\reporting\source.py -> build\lib\src\reporting
+copying src\reporting\view.py -> build\lib\src\reporting
+copying src\reporting\__init__.py -> build\lib\src\reporting
+copying src\reporting\__main__.py -> build\lib\src\reporting
+creating build\lib\src\visualization
+copying src\visualization\plotter.py -> build\lib\src\visualization
+copying src\visualization\__init__.py -> build\lib\src\visualization
+creating build\lib\src\plugins\post_processing
+copying src\plugins\post_processing\energy_extension.py -> build\lib\src\plugins\post_processing
+copying src\plugins\post_processing\viterbi_tracking.py -> build\lib\src\plugins\post_processing
+copying src\plugins\post_processing\__init__.py -> build\lib\src\plugins\post_processing
+creating build\lib\src\plugins\pre_processing
+copying src\plugins\pre_processing\bandpass_filter.py -> build\lib\src\plugins\pre_processing
+copying src\plugins\pre_processing\center_clipping.py -> build\lib\src\plugins\pre_processing
+copying src\plugins\pre_processing\__init__.py -> build\lib\src\plugins\pre_processing
+running egg_info
+writing fac_speech_f0.egg-info\PKG-INFO
+writing dependency_links to fac_speech_f0.egg-info\dependency_links.txt
+writing entry points to fac_speech_f0.egg-info\entry_points.txt
+writing requirements to fac_speech_f0.egg-info\requires.txt
+writing top-level names to fac_speech_f0.egg-info\top_level.txt
+reading manifest file 'fac_speech_f0.egg-info\SOURCES.txt'
+reading manifest template 'MANIFEST.in'
+warning: no previously-included files matching '__pycache__' found anywhere in distribution
+warning: no previously-included files matching '*.py[cod]' found anywhere in distribution
+no previously-included directories found matching 'outputs'
+no previously-included directories found matching 'archive'
+no previously-included directories found matching 'TinHieuHuanLuyen'
+no previously-included directories found matching 'TinHieuKiemThu'
+writing manifest file 'fac_speech_f0.egg-info\SOURCES.txt'
+installing to build\bdist.win-amd64\wheel
+running install
+running install_lib
+creating build\bdist.win-amd64\wheel
+creating build\bdist.win-amd64\wheel\src
+creating build\bdist.win-amd64\wheel\src\analysis
+copying build\lib\src\analysis\advanced_unsupervised.py -> build\bdist.win-amd64\wheel\.\src\analysis
+copying build\lib\src\analysis\champion_unsupervised.py -> build\bdist.win-amd64\wheel\.\src\analysis
+copying build\lib\src\analysis\evaluation.py -> build\bdist.win-amd64\wheel\.\src\analysis
+copying build\lib\src\analysis\protocols.py -> build\bdist.win-amd64\wheel\.\src\analysis
+copying build\lib\src\analysis\ssl_pitch_shift.py -> build\bdist.win-amd64\wheel\.\src\analysis
+copying build\lib\src\analysis\ssl_pitch_shift_methods.py -> build\bdist.win-amd64\wheel\.\src\analysis
+copying build\lib\src\analysis\unsupervised_threshold.py -> build\bdist.win-amd64\wheel\.\src\analysis
+copying build\lib\src\analysis\__init__.py -> build\bdist.win-amd64\wheel\.\src\analysis
+copying build\lib\src\calibrated_presets.py -> build\bdist.win-amd64\wheel\.\src
+creating build\bdist.win-amd64\wheel\src\cli
+copying build\lib\src\cli\config.py -> build\bdist.win-amd64\wheel\.\src\cli
+copying build\lib\src\cli\main.py -> build\bdist.win-amd64\wheel\.\src\cli
+copying build\lib\src\cli\predict.py -> build\bdist.win-amd64\wheel\.\src\cli
+copying build\lib\src\cli\__init__.py -> build\bdist.win-amd64\wheel\.\src\cli
+copying build\lib\src\config.py -> build\bdist.win-amd64\wheel\.\src
+creating build\bdist.win-amd64\wheel\src\core
+copying build\lib\src\core\acf.py -> build\bdist.win-amd64\wheel\.\src\core
+copying build\lib\src\core\amdf.py -> build\bdist.win-amd64\wheel\.\src\core
+copying build\lib\src\core\audio.py -> build\bdist.win-amd64\wheel\.\src\core
+copying build\lib\src\core\cepstrum.py -> build\bdist.win-amd64\wheel\.\src\core
+copying build\lib\src\core\lab_parser.py -> build\bdist.win-amd64\wheel\.\src\core
+copying build\lib\src\core\pitch_detector.py -> build\bdist.win-amd64\wheel\.\src\core
+copying build\lib\src\core\processing.py -> build\bdist.win-amd64\wheel\.\src\core
+copying build\lib\src\core\__init__.py -> build\bdist.win-amd64\wheel\.\src\core
+creating build\bdist.win-amd64\wheel\src\experiments
+copying build\lib\src\experiments\champion.py -> build\bdist.win-amd64\wheel\.\src\experiments
+copying build\lib\src\experiments\champion_report.py -> build\bdist.win-amd64\wheel\.\src\experiments
+copying build\lib\src\experiments\dependencies.py -> build\bdist.win-amd64\wheel\.\src\experiments
+copying build\lib\src\experiments\legacy.py -> build\bdist.win-amd64\wheel\.\src\experiments
+copying build\lib\src\experiments\manifest.py -> build\bdist.win-amd64\wheel\.\src\experiments
+copying build\lib\src\experiments\metric_artifacts.py -> build\bdist.win-amd64\wheel\.\src\experiments
+copying build\lib\src\experiments\paths.py -> build\bdist.win-amd64\wheel\.\src\experiments
+copying build\lib\src\experiments\protocol_specs.py -> build\bdist.win-amd64\wheel\.\src\experiments
+copying build\lib\src\experiments\registry.py -> build\bdist.win-amd64\wheel\.\src\experiments
+copying build\lib\src\experiments\resources.py -> build\bdist.win-amd64\wheel\.\src\experiments
+copying build\lib\src\experiments\runner.py -> build\bdist.win-amd64\wheel\.\src\experiments
+copying build\lib\src\experiments\serialization.py -> build\bdist.win-amd64\wheel\.\src\experiments
+copying build\lib\src\experiments\snapshots.py -> build\bdist.win-amd64\wheel\.\src\experiments
+copying build\lib\src\experiments\spec.py -> build\bdist.win-amd64\wheel\.\src\experiments
+copying build\lib\src\experiments\store.py -> build\bdist.win-amd64\wheel\.\src\experiments
+copying build\lib\src\experiments\transactions.py -> build\bdist.win-amd64\wheel\.\src\experiments
+copying build\lib\src\experiments\__init__.py -> build\bdist.win-amd64\wheel\.\src\experiments
+copying build\lib\src\experiments\__main__.py -> build\bdist.win-amd64\wheel\.\src\experiments
+creating build\bdist.win-amd64\wheel\src\metrics
+copying build\lib\src\metrics\aggregation.py -> build\bdist.win-amd64\wheel\.\src\metrics
+copying build\lib\src\metrics\bundle.py -> build\bdist.win-amd64\wheel\.\src\metrics
+copying build\lib\src\metrics\comparison.py -> build\bdist.win-amd64\wheel\.\src\metrics
+copying build\lib\src\metrics\contracts.py -> build\bdist.win-amd64\wheel\.\src\metrics
+copying build\lib\src\metrics\evaluation.py -> build\bdist.win-amd64\wheel\.\src\metrics
+copying build\lib\src\metrics\formatting.py -> build\bdist.win-amd64\wheel\.\src\metrics
+copying build\lib\src\metrics\legacy.py -> build\bdist.win-amd64\wheel\.\src\metrics
+copying build\lib\src\metrics\numeric.py -> build\bdist.win-amd64\wheel\.\src\metrics
+copying build\lib\src\metrics\__init__.py -> build\bdist.win-amd64\wheel\.\src\metrics
+copying build\lib\src\metrics\__main__.py -> build\bdist.win-amd64\wheel\.\src\metrics
+creating build\bdist.win-amd64\wheel\src\pipeline
+copying build\lib\src\pipeline\cache.py -> build\bdist.win-amd64\wheel\.\src\pipeline
+copying build\lib\src\pipeline\champion.py -> build\bdist.win-amd64\wheel\.\src\pipeline
+copying build\lib\src\pipeline\contracts.py -> build\bdist.win-amd64\wheel\.\src\pipeline
+copying build\lib\src\pipeline\engine.py -> build\bdist.win-amd64\wheel\.\src\pipeline
+copying build\lib\src\pipeline\features.py -> build\bdist.win-amd64\wheel\.\src\pipeline
+copying build\lib\src\pipeline\__init__.py -> build\bdist.win-amd64\wheel\.\src\pipeline
+copying build\lib\src\pipelines.py -> build\bdist.win-amd64\wheel\.\src
+creating build\bdist.win-amd64\wheel\src\plugins
+copying build\lib\src\plugins\base.py -> build\bdist.win-amd64\wheel\.\src\plugins
+copying build\lib\src\plugins\plugin_detector.py -> build\bdist.win-amd64\wheel\.\src\plugins
+creating build\bdist.win-amd64\wheel\src\plugins\post_processing
+copying build\lib\src\plugins\post_processing\energy_extension.py -> build\bdist.win-amd64\wheel\.\src\plugins\post_processing
+copying build\lib\src\plugins\post_processing\viterbi_tracking.py -> build\bdist.win-amd64\wheel\.\src\plugins\post_processing
+copying build\lib\src\plugins\post_processing\__init__.py -> build\bdist.win-amd64\wheel\.\src\plugins\post_processing
+creating build\bdist.win-amd64\wheel\src\plugins\pre_processing
+copying build\lib\src\plugins\pre_processing\bandpass_filter.py -> build\bdist.win-amd64\wheel\.\src\plugins\pre_processing
+copying build\lib\src\plugins\pre_processing\center_clipping.py -> build\bdist.win-amd64\wheel\.\src\plugins\pre_processing
+copying build\lib\src\plugins\pre_processing\__init__.py -> build\bdist.win-amd64\wheel\.\src\plugins\pre_processing
+copying build\lib\src\plugins\__init__.py -> build\bdist.win-amd64\wheel\.\src\plugins
+creating build\bdist.win-amd64\wheel\src\reporting
+copying build\lib\src\reporting\bundle.py -> build\bdist.win-amd64\wheel\.\src\reporting
+copying build\lib\src\reporting\catalog.py -> build\bdist.win-amd64\wheel\.\src\reporting
+copying build\lib\src\reporting\champion.py -> build\bdist.win-amd64\wheel\.\src\reporting
+copying build\lib\src\reporting\common.py -> build\bdist.win-amd64\wheel\.\src\reporting
+copying build\lib\src\reporting\plots.py -> build\bdist.win-amd64\wheel\.\src\reporting
+copying build\lib\src\reporting\publish.py -> build\bdist.win-amd64\wheel\.\src\reporting
+copying build\lib\src\reporting\source.py -> build\bdist.win-amd64\wheel\.\src\reporting
+copying build\lib\src\reporting\view.py -> build\bdist.win-amd64\wheel\.\src\reporting
+copying build\lib\src\reporting\__init__.py -> build\bdist.win-amd64\wheel\.\src\reporting
+copying build\lib\src\reporting\__main__.py -> build\bdist.win-amd64\wheel\.\src\reporting
+creating build\bdist.win-amd64\wheel\src\visualization
+copying build\lib\src\visualization\plotter.py -> build\bdist.win-amd64\wheel\.\src\visualization
+copying build\lib\src\visualization\__init__.py -> build\bdist.win-amd64\wheel\.\src\visualization
+creating build\bdist.win-amd64\wheel\src\_runtime
+creating build\bdist.win-amd64\wheel\src\_runtime\files
+copying build\lib\src\_runtime\files\116d9ed85d1e96e0868d1e42fa08126a477ff6afe380c86231ff5bf4104af50b.txt -> build\bdist.win-amd64\wheel\.\src\_runtime\files
+copying build\lib\src\_runtime\files\74bf66b6652b78113b47842909c2d7234dbdb68741f38731714e845c6c4a13c8.txt -> build\bdist.win-amd64\wheel\.\src\_runtime\files
+copying build\lib\src\_runtime\files\8d7e5e8e5286843d9cf78c1b2e963539a356b432e3a10162051ddc79656bd99a.txt -> build\bdist.win-amd64\wheel\.\src\_runtime\files
+copying build\lib\src\_runtime\files\b72dab70863e63b3a2062057ff2102c6771a1301195000e9d59c370c03db798a.txt -> build\bdist.win-amd64\wheel\.\src\_runtime\files
+copying build\lib\src\_runtime\files\bc6eccaa4c901e6b72fcfe395fb3847e6cead58fda346d38eb982e0ca9e9ef5d.txt -> build\bdist.win-amd64\wheel\.\src\_runtime\files
+copying build\lib\src\_runtime\manifest.json -> build\bdist.win-amd64\wheel\.\src\_runtime
+copying build\lib\src\__init__.py -> build\bdist.win-amd64\wheel\.\src
+copying build\lib\src\__main__.py -> build\bdist.win-amd64\wheel\.\src
+running install_egg_info
+Copying fac_speech_f0.egg-info to build\bdist.win-amd64\wheel\.\fac_speech_f0-0.1.0-py3.15.egg-info
+running install_scripts
+creating build\bdist.win-amd64\wheel\fac_speech_f0-0.1.0.dist-info\WHEEL
+creating 'D:\\FAC\\dist\\.tmp-bl_xtpyh\\fac_speech_f0-0.1.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
+adding 'src/__init__.py'
+adding 'src/__main__.py'
+adding 'src/calibrated_presets.py'
+adding 'src/config.py'
+adding 'src/pipelines.py'
+adding 'src/_runtime/manifest.json'
+adding 'src/_runtime/files/116d9ed85d1e96e0868d1e42fa08126a477ff6afe380c86231ff5bf4104af50b.txt'
+adding 'src/_runtime/files/74bf66b6652b78113b47842909c2d7234dbdb68741f38731714e845c6c4a13c8.txt'
+adding 'src/_runtime/files/8d7e5e8e5286843d9cf78c1b2e963539a356b432e3a10162051ddc79656bd99a.txt'
+adding 'src/_runtime/files/b72dab70863e63b3a2062057ff2102c6771a1301195000e9d59c370c03db798a.txt'
+adding 'src/_runtime/files/bc6eccaa4c901e6b72fcfe395fb3847e6cead58fda346d38eb982e0ca9e9ef5d.txt'
+adding 'src/analysis/__init__.py'
+adding 'src/analysis/advanced_unsupervised.py'
+adding 'src/analysis/champion_unsupervised.py'
+adding 'src/analysis/evaluation.py'
+adding 'src/analysis/protocols.py'
+adding 'src/analysis/ssl_pitch_shift.py'
+adding 'src/analysis/ssl_pitch_shift_methods.py'
+adding 'src/analysis/unsupervised_threshold.py'
+adding 'src/cli/__init__.py'
+adding 'src/cli/config.py'
+adding 'src/cli/main.py'
+adding 'src/cli/predict.py'
+adding 'src/core/__init__.py'
+adding 'src/core/acf.py'
+adding 'src/core/amdf.py'
+adding 'src/core/audio.py'
+adding 'src/core/cepstrum.py'
+adding 'src/core/lab_parser.py'
+adding 'src/core/pitch_detector.py'
+adding 'src/core/processing.py'
+adding 'src/experiments/__init__.py'
+adding 'src/experiments/__main__.py'
+adding 'src/experiments/champion.py'
+adding 'src/experiments/champion_report.py'
+adding 'src/experiments/dependencies.py'
+adding 'src/experiments/legacy.py'
+adding 'src/experiments/manifest.py'
+adding 'src/experiments/metric_artifacts.py'
+adding 'src/experiments/paths.py'
+adding 'src/experiments/protocol_specs.py'
+adding 'src/experiments/registry.py'
+adding 'src/experiments/resources.py'
+adding 'src/experiments/runner.py'
+adding 'src/experiments/serialization.py'
+adding 'src/experiments/snapshots.py'
+adding 'src/experiments/spec.py'
+adding 'src/experiments/store.py'
+adding 'src/experiments/transactions.py'
+adding 'src/metrics/__init__.py'
+adding 'src/metrics/__main__.py'
+adding 'src/metrics/aggregation.py'
+adding 'src/metrics/bundle.py'
+adding 'src/metrics/comparison.py'
+adding 'src/metrics/contracts.py'
+adding 'src/metrics/evaluation.py'
+adding 'src/metrics/formatting.py'
+adding 'src/metrics/legacy.py'
+adding 'src/metrics/numeric.py'
+adding 'src/pipeline/__init__.py'
+adding 'src/pipeline/cache.py'
+adding 'src/pipeline/champion.py'
+adding 'src/pipeline/contracts.py'
+adding 'src/pipeline/engine.py'
+adding 'src/pipeline/features.py'
+adding 'src/plugins/__init__.py'
+adding 'src/plugins/base.py'
+adding 'src/plugins/plugin_detector.py'
+adding 'src/plugins/post_processing/__init__.py'
+adding 'src/plugins/post_processing/energy_extension.py'
+adding 'src/plugins/post_processing/viterbi_tracking.py'
+adding 'src/plugins/pre_processing/__init__.py'
+adding 'src/plugins/pre_processing/bandpass_filter.py'
+adding 'src/plugins/pre_processing/center_clipping.py'
+adding 'src/reporting/__init__.py'
+adding 'src/reporting/__main__.py'
+adding 'src/reporting/bundle.py'
+adding 'src/reporting/catalog.py'
+adding 'src/reporting/champion.py'
+adding 'src/reporting/common.py'
+adding 'src/reporting/plots.py'
+adding 'src/reporting/publish.py'
+adding 'src/reporting/source.py'
+adding 'src/reporting/view.py'
+adding 'src/visualization/__init__.py'
+adding 'src/visualization/plotter.py'
+adding 'fac_speech_f0-0.1.0.dist-info/METADATA'
+adding 'fac_speech_f0-0.1.0.dist-info/WHEEL'
+adding 'fac_speech_f0-0.1.0.dist-info/entry_points.txt'
+adding 'fac_speech_f0-0.1.0.dist-info/top_level.txt'
+adding 'fac_speech_f0-0.1.0.dist-info/RECORD'
+removing build\bdist.win-amd64\wheel
+Successfully built dist\fac_speech_f0-0.1.0-py3-none-any.whl

@@ -1,100 +1,53 @@
-# FAC — Ước lượng F0 và phân loại Voiced/Unvoiced
+# FAC — Ước lượng F0 và phân loại hữu thanh/vô thanh
 
-Dự án môn Xử lý tín hiệu tiếng nói, hiện tập trung vào **ACF, AMDF và Cepstrum**, pipeline plugin ba chặng và các phương pháp tìm ngưỡng không giám sát.
+So sánh ACF, AMDF và Real Cepstrum. Phạm vi hiện tại gồm **baseline/Champion**, **Otsu, K-means 1D, K-means 2D, ngưỡng động** và **Pitch-Shift không model**.
 
-## Bắt đầu
-
-Chạy các lệnh từ thư mục gốc dự án:
+## Chạy toàn bộ và tạo báo cáo
 
 ```powershell
 uv sync --locked
-uv run --locked fac predict -i TinHieuKiemThu -m champions -o outputs/predictions/current_test
+uv run python scripts/32_run_all_benchmarks.py --output-dir outputs/current_results
 ```
 
-Nếu đã có môi trường `.venv`, có thể chạy trực tiếp:
+Báo cáo chỉ gồm ba nhóm: baseline/Champion, không giám sát và Pitch-Shift. Thư mục kết quả chứa bảng train/test, CSV từng file, contour, ảnh dự đoán và log kiểm thử. Dùng thư mục mới cho mỗi run.
+
+## Pipeline Champion
+
+| Thuật toán | Plugin | Ngưỡng | Frame/hop |
+|---|---|---:|---:|
+| ACF | Bandpass + Energy extension + Viterbi | 0,45 | 30/10 ms |
+| AMDF | Energy extension + Viterbi | 0,50 | 30/10 ms |
+| Cepstrum | Bandpass + Center clipping + Energy extension + Viterbi | 0,10 | 30/10 ms |
+
+Giữ nguyên mọi plugin Champion đang dùng. Baseline dùng 25/10 ms. Các nhánh dùng cùng vùng F0 70–400 Hz, bỏ DC và gate năng lượng.
+
+## Không giám sát
 
 ```powershell
-.\.venv\Scripts\python.exe predict.py -i TinHieuKiemThu -m champions -o outputs/predictions/current_test
+uv run python scripts/21_benchmark_champion_unsupervised.py train --output-dir outputs/unsupervised_new_run
+uv run python scripts/21_benchmark_champion_unsupervised.py evaluate --output-dir outputs/unsupervised_new_run
+uv run python scripts/21_benchmark_champion_unsupervised.py report --output-dir outputs/unsupervised_new_run
 ```
 
-Xem [hướng dẫn kiểm thử](docs/TESTING.md) để chọn thuật toán, xử lý dữ liệu mới và chạy benchmark.
+Fit ngưỡng/tâm cụm trên train rồi đóng băng trước test; K-means 2D thích nghi từng input được báo cáo riêng. Ngưỡng động dùng Otsu train làm nền, median cục bộ và trọng số STE; không nối qua im lặng.
 
-[Kế hoạch refactor](docs/REFACTOR_PLAN.md) chia việc chuẩn hóa thí nghiệm và quản lý báo cáo thành sáu đợt. **Đã hoàn tất đợt 1–6**: có spec/store/registry, pipeline contract, runner với journal/resume, metric v1, report bundle/publisher và CLI/wheel độc lập. 217 test đạt; điểm số cũ được giữ nguyên. Xem [quản lý thí nghiệm](docs/EXPERIMENTS.md), [pipeline](docs/PIPELINE.md), [runner](docs/RUNNER.md) và [metric/đối sánh](docs/METRICS.md) và [reporting](docs/REPORTING.md), [CLI và đóng gói](docs/CLI_AND_PACKAGING.md).
+## Pitch-Shift
 
-## Dữ liệu và chỉ số
-
-- Train: `TinHieuHuanLuyen/` — phone_F1, phone_M1, studio_F1, studio_M1.
-- Test: `TinHieuKiemThu/` — phone_F2, phone_M2, studio_F2, studio_M2.
-- Phone dùng 16 kHz; studio dùng 44,1 kHz. Code sử dụng sample rate thực tế của WAV.
-- Baseline dùng khung 25 ms, Champion dùng 30 ms; hop 10 ms, tìm F0 trong 70–400 Hz.
-- LAB hiện hành chỉ chứa `F0mean`, `F0std`, `F0num`; không có timestamps hoặc contour F0 tham chiếu từng khung.
-
-Final Score là trung bình sai số phần trăm của **mean F0, std F0 và số khung voiced**, sau đó lấy trung bình giữa các file. Đây là chỉ số sai lệch thống kê toàn file; không phải Accuracy/F1 phân loại từng khung. Yêu cầu gốc được giữ tại [HuongDan.txt](HuongDan.txt).
-
-## Kết quả và trạng thái kiểm chứng
-
-Đã hoàn tất bốn đợt sửa và [rà soát main ngày 01/11/2026](docs/MAIN_REVIEW_FIXES.md): sửa Otsu, xử lý LAB thiếu thống kê và kiểm chứng artifact. Đợt 4 khảo sát 222 cấu hình chỉ trên train, đóng băng trước test; baseline vẫn là tham số lịch sử. Các Champion hiện dùng khung 30 ms, hop 10 ms.
-
-Đã hoàn tất [benchmark tám phương pháp không giám sát với Champion](docs/CHAMPION_UNSUPERVISED_RESULTS.md): 288 kết quả từng file, mô hình đóng băng trước test. Sau [ba sửa lỗi biên cuối](docs/FINAL_EDGE_CASE_FIXES.md), **120/120 test đạt** và cả 288 kết quả vẫn khớp chính xác. Cepstrum ngưỡng động đạt 16,480% test; 2D fit từng input đạt 10,375% nhưng thuộc nhóm thích nghi riêng. Các preset bên dưới được giữ nguyên.
-
-<!-- STAGE4_README_START -->
-| Champion | Ngưỡng | Train Final Score (%) | Test Final Score (%) |
-|---|---:|---:|---:|
-| ACF | 0.45 | 2.215 | 2.385 |
-| AMDF | 0.5 | 2.078 | 2.755 |
-| CEPSTRUM | 0.1 | 11.390 | 22.942 |
-<!-- STAGE4_README_END -->
-
-**ACF/AMDF cải thiện trên test; Cepstrum tăng sai số từ 21.203% lên 22.942% dù giảm trên train.** Không chọn lại tham số dựa vào test. Điểm thấp hơn tốt hơn; không phải Accuracy/F1 từng khung.
-
-Đã truy ra mốc Cepstrum lịch sử 4,43%/7,62% là pipeline lai: quyết định bằng ACF, hậu xử lý/Viterbi bằng Cepstrum. Không dùng mốc đó làm chất lượng Cepstrum đúng thuật toán.
-
-[Báo cáo đợt 4](docs/STAGE4_RESULTS.md) có raw result, 17 giao thức không giám sát, replay nhân quả và giới hạn tổng quát hóa. [Chương V](docs/05_unsupervised_thresholding_analysis.md) có bảng tích hợp Champion mới và phân biệt với các mốc lịch sử chưa đủ bằng chứng. [Đợt 1](docs/STAGE1_FIXES.md), [đợt 2](docs/STAGE2_FIXES.md), [đợt 3](docs/STAGE3_FIXES.md) giữ các mốc trước sửa. Các artifact lịch sử được bảo toàn.
-
-LAB hiện hành chỉ có thống kê toàn file nên chưa thể fit lại Gaussian V/UV có giám sát hoặc đánh giá Accuracy/F1. MAPE không xác định dùng N/A; Final Score yêu cầu đủ ba thành phần. [Vấn đề còn lại](docs/KNOWN_ISSUES.md).
-
-## Cấu trúc
-
-```text
-FAC/
-├── configs/                 # Spec JSON có phiên bản cho hạ tầng thí nghiệm mới
-├── TinHieuHuanLuyen/         # WAV/LAB train
-├── TinHieuKiemThu/           # WAV/LAB test
-├── src/
-│   ├── core/                # Audio, framing, LAB, ACF, AMDF, Cepstrum, detector
-│   ├── pipeline/            # Feature contract, engine, extractor và cache theo run
-│   ├── plugins/
-│   │   ├── pre_processing/  # Bandpass, center clipping
-│   │   ├── decision/        # Hysteresis
-│   │   └── post_processing/ # Energy extension, Viterbi
-│   ├── analysis/            # Thresholds và evaluation
-│   ├── experiments/         # Spec, manifest, store, registry và runner/lifecycle
-│   ├── metrics/             # Metric v1, profile tổng hợp, metadata và đối sánh
-│   ├── reporting/           # View, renderer, bundle, publish và danh mục báo cáo
-│   ├── cli/                 # Entry fac, predict và xuất spec mẫu
-│   └── visualization/       # Shim tương thích các API hình cũ
-├── scripts/                 # Demo và benchmark
-├── docs/                    # Năm chương báo cáo, hướng dẫn, vấn đề cần sửa
-├── outputs/
-│   ├── figures/             # Hình minh họa và benchmark được giữ
-│   ├── reports/             # JSON/CSV benchmark và ngưỡng đã lưu
-│   └── predictions/         # Kết quả CLI; tách train/test theo thư mục
-├── archive/                 # Snapshot và artifact cũ, có manifest SHA-256
-├── predict.py               # CLI dự đoán
-├── HuongDan.txt             # Yêu cầu môn học
-├── pyproject.toml
-├── requirements.txt
-└── uv.lock
+```powershell
+uv run python scripts/31_compare_native_pitch_shift.py --output-dir outputs/pitch_shift_new_run
 ```
 
-## Tài liệu
+Mỗi nhánh dùng bộ ước lượng riêng trên khung gốc và khung resample: **ACF–ACF, AMDF–AMDF, Cepstrum–Cepstrum**. Hệ số dịch 1,25; sigma 0,12; ngưỡng điểm 0,5. AMDF dùng độ mạnh 1-d_min; Cepstrum dùng c_positive/(c_positive+0,1), với 0,1 lấy từ preset đã chốt. F0 đầu ra và các plugin Champion giữ nguyên.
 
-1. [ACF: lý thuyết và thực nghiệm](docs/01_acf_theory_and_experiments.md).
-2. [AMDF: lý thuyết và thực nghiệm](docs/02_amdf_theory_and_experiments.md).
-3. [Cepstrum: lý thuyết và thực nghiệm](docs/03_cepstrum_theory_and_experiments.md).
-4. [Benchmark trên tập kiểm thử](docs/04_test_set_benchmark_and_analysis.md).
-5. [Tìm ngưỡng không giám sát](docs/05_unsupervised_thresholding_analysis.md).
-6. [Hướng dẫn kiểm thử](docs/TESTING.md), [sửa đợt 1](docs/STAGE1_FIXES.md), [sửa đợt 2](docs/STAGE2_FIXES.md), [sửa đợt 3](docs/STAGE3_FIXES.md), [vấn đề cần sửa](docs/KNOWN_ISSUES.md), [nhật ký dọn dẹp](docs/CLEANUP.md).
-7. [Danh mục kết quả](outputs/README.md), [bản lưu lịch sử](archive/2026-10-28-pre-cleanup/README.md).
+File `src/analysis/ssl_pitch_shift.py` giữ thuật toán ACF-only ban đầu làm đối chứng. Script 27 đánh giá bản ACF-only độc lập; script 28 dùng Pitch-Shift riêng theo thuật toán. Script 31 chỉ bật đối chứng lịch sử dùng chung ACF khi chỉ định rõ `--include-legacy-shared-acf`; bảng mặc định không dùng nhãn ACF chung. Pitch-Shift hiện là kiểm tra nhất quán dưới phép biến đổi, không có quá trình huấn luyện mạng.
 
-YIN, benchmark nhiễu AWGN và PTDB-TUG thuộc phiên bản trước, được lưu trong ZIP lịch sử; không phải tính năng của CLI hiện tại.
+## Dự đoán và kiểm thử
+
+```powershell
+uv run fac predict -i TinHieuKiemThu -m champions -o outputs/predictions
+uv run python -B -m unittest discover -s tests
+```
+
+Train/test có bốn WAV mỗi tập. LAB chỉ chứa F0mean/F0std/F0num. Final Score là trung bình sai số phần trăm ba thống kê, thấp hơn tốt hơn; không phải Accuracy/F1 từng khung.
+
+[Thuật toán](docs/METHODS.md) · [Hướng dẫn kiểm thử](docs/TESTING.md) · [Kết quả không giám sát](docs/CHAMPION_UNSUPERVISED_RESULTS.md).

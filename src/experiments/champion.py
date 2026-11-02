@@ -1,7 +1,7 @@
-"""Train/freeze, evaluate, and report eight decisions inside native Champions.
+"""Train/freeze, evaluate, and report four decisions on unmodified pitch frames.
 
-No preset is selected here. Primary models fit active train frames after the
-Champion's native pre-processing. Two per-input adaptive controls are separate.
+No preset is selected here. Primary models fit active train frames from the
+reference frame extraction. Two per-input adaptive controls are separate.
 """
 import csv
 from datetime import datetime, timezone

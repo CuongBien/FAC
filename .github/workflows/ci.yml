@@ -22,5 +22,7 @@ jobs:
           enable-cache: true
       - run: uv sync --locked
       - run: uv run --locked python -B -m unittest discover -s tests
-      - name: Build and exercise clean non-editable wheel outside Git
-        run: uv run --locked python -B scripts/26_verify_cli_packaging.py --skip-reference
+      - name: Build wheel
+        run: uv build --wheel
+      - name: Exercise wheel outside Git
+        run: uv run --locked python -B scripts/verify_wheel.py

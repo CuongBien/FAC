@@ -30,7 +30,7 @@ def renderer_record():
                'src/experiments/snapshots.py', 'src/experiments/spec.py', 'src/experiments/store.py',
                'src/experiments/transactions.py', 'src/experiments/metric_artifacts.py',
                'src/pipeline/__init__.py', 'src/pipeline/contracts.py')
-    files = sorted([*Path(__file__).parent.glob('*.py'), *(ROOT/name for name in support),
+    files = sorted([*Path(__file__).resolve().parent.glob('*.py'), *(ROOT/name for name in support),
                     *(ROOT/'src/metrics').glob('*.py')])
     raw = {path.relative_to(ROOT).as_posix(): sha256(path) for path in files}
     import hashlib
@@ -101,10 +101,7 @@ def _create(view, blobs, renderer, output, check):
         (work/'view.json').write_bytes(json_bytes(view.to_dict()))
         write_source_snapshot(ROOT, work/'renderer_source.tar.gz',
                               {'base_commit': 'unavailable', 'source_sha256': renderer['source_sha256']})
-        if view.to_dict()['protocol'] == 'champion':
-            from .champion import render
-        else:
-            from .stage4 import render
+        from .champion import render
         render(view, work)
         _export_csv(view, work)
         check()

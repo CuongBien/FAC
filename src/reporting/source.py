@@ -38,24 +38,8 @@ def load_source(folder):
         blobs[name] = pinned_bytes(folder/name, expected, text=not name.endswith('.gz'))[0]
     frozen, models, evaluation = [json.loads(blobs[name]) for name in
                                 ('frozen_config.json', 'frozen_models.json', 'evaluation.json')]
-    protocol = 'stage4' if 'selected' in frozen else 'champion'
+    protocol = 'champion'
     extras = {}
-    if protocol == 'stage4':
-        for name in ('train/all_trials_per_file.csv', 'train/plugin_sweep.json'):
-            if native and name not in manifest['artifacts']:
-                raise ValueError('Report input is not pinned: '+name)
-            blobs[name] = resolve_member(folder, name).read_bytes()
-        for method in ('acf', 'amdf', 'cepstrum'):
-            name = 'train/'+method+'_trials.json'
-            if native and name not in manifest['artifacts']:
-                raise ValueError('Report input is not pinned: '+name)
-            blobs[name] = resolve_member(folder, name).read_bytes()
-            extras[name] = json.loads(blobs[name])
-        # Historical tracing is optional and is never invented for a new run.
-        for name in ('cepstrum_trace.json', 'legacy_with_cepstrum_branch/cepstrum_trace.json'):
-            if (folder/name).is_file() and (not native or name in manifest['artifacts']):
-                blobs[name] = (folder/name).read_bytes()
-                extras[name] = json.loads(blobs[name])
     source = {'run_id': info['run_id'], 'format': info['format'], 'metric_version': 'legacy-v1',
               'config_sha256': evaluation['config_sha256'], 'models_sha256': evaluation['models_sha256'],
               'evaluation_sha256': sha256(folder/'evaluation.json'),

@@ -6,8 +6,8 @@ from setuptools.command.build_py import build_py
 
 
 RESOURCE_FILES = ('README.md', 'pyproject.toml', 'uv.lock',
-                  'scripts/17_validate_and_calibrate.py', 'scripts/21_benchmark_champion_unsupervised.py',
-                  'configs/experiments/champion_unsupervised.json', 'configs/experiments/stage4_calibration.json')
+                  'scripts/21_benchmark_champion_unsupervised.py',
+                  'configs/experiments/champion_unsupervised.json')
 
 
 class BuildPy(build_py):

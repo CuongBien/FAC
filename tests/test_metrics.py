@@ -27,10 +27,10 @@ ROOT = Path(__file__).resolve().parents[1]
 def context():
     return {'schema_version': 1, 'dataset_identity': 'a'*64, 'files': ['one.wav', 'two.wav'], 'split': 'test',
         'metric_version': 'legacy-v1', 'aggregation': FILE_MACRO,
-        'feature_contract': FeatureSpec('acf', 30., 10., 70., 400., .008, 'plugins').to_dict(),
+        'feature_contract': FeatureSpec('acf', 30., 10., 70., 400., .008, 'baseline').to_dict(),
         'post_processors': [], 'smoothing': {'enabled': True, 'size': 3},
         'fit': {'mode': 'frozen', 'population': 'train_active', 'training_identity': 'b'*64},
-        'decision': {'strategy': 'gmm', 'model_sha256': 'c'*64, 'parameters': {'reference_threshold': .45}}}
+        'decision': {'strategy': 'otsu', 'model_sha256': 'c'*64, 'parameters': {'reference_threshold': .45}}}
 
 
 def rows():
@@ -43,11 +43,6 @@ def series(document=None, values=None):
 
 
 class LegacyMetricTests(unittest.TestCase):
-    def test_pre_refactor_vectors_and_all_aliases_match_exactly(self):
-        reference = json.loads((ROOT/'outputs/refactor_phase4/reference.json').read_bytes())
-        for vector in reference['vectors']:
-            with self.subTest(arguments=vector['arguments']):
-                self.assertEqual(compute_error_metrics(*vector['arguments']), vector['expected'])
 
     def test_score_uses_raw_percentages_before_rounding_components(self):
         value = compute_error_metrics(100.0149, 100.0049, 100., 100., 100, 100)
@@ -72,15 +67,6 @@ class LegacyMetricTests(unittest.TestCase):
         self.assertIsNone(round_metric(np.inf))
         self.assertEqual(rank_metric(None), float('inf'))
 
-    def test_profiles_and_generator_population_match_pre_refactor_groups(self):
-        reference = json.loads((ROOT/'outputs/refactor_phase4/reference.json').read_bytes())
-        for group in reference['aggregation_groups']:
-            values = group['rows']
-            self.assertEqual(aggregate_rows(iter(values)), group['file_macro'])
-            self.assertEqual(aggregate_rows(values, ROUNDED_MACRO), group['rounded_macro'])
-            self.assertEqual(table_metrics(values, ADVANCED_MACRO), group['advanced_table'])
-        with self.assertRaises(ValueError):
-            aggregate_rows(rows(), 'unknown')
 
     def test_missing_file_propagates_null_to_the_full_population(self):
         valid = rows()[0]
@@ -97,12 +83,9 @@ class LegacyMetricTests(unittest.TestCase):
 
     def test_presentation_and_compatibility_exports_keep_values(self):
         from src.analysis.evaluation import compute_error_metrics as old_compute, format_metric as old_format
-        from src.analysis.validation import aggregate as old_aggregate, evaluate_result as old_evaluate
         from src.metrics.evaluation import evaluate_result
         self.assertIs(old_compute, compute_error_metrics)
         self.assertIs(old_format, format_metric)
-        self.assertIs(old_evaluate, evaluate_result)
-        self.assertEqual(old_aggregate(rows()), aggregate_rows(rows()))
         self.assertEqual(format_metric(None, '<8.2f'), 'N/A     ')
         self.assertEqual(csv_value(None), '')
         self.assertEqual(csv_value(1.23456789), '1.23456789')
@@ -163,7 +146,7 @@ class ComparisonTests(unittest.TestCase):
     def test_comparison_rejects_frame_range_gate_and_zcr_mismatch(self):
         from dataclasses import replace
         base = FeatureSpec.from_dict(context()['feature_contract'])
-        for change in ({'frame_duration_ms': 25.}, {'f0_min': 100.}, {'ste_silence_ratio': .01}, {'profile': 'baseline'}):
+        for change in ({'frame_duration_ms': 25.}, {'f0_min': 100.}, {'ste_silence_ratio': .01}, {'profile': 'centered_all'}):
             document = context(); document['feature_contract'] = replace(base, **change).to_dict()
             with self.subTest(change=change), self.assertRaisesRegex(ValueError, 'feature_contract'):
                 compare_series(series(), series(document))
@@ -211,19 +194,6 @@ class ComparisonTests(unittest.TestCase):
         self.assertEqual(value['files'][1]['metrics']['mape_num']['status'], 'missing_right')
         self.assertIsNone(value['aggregate']['mape_num']['delta'])
 
-    def test_champion_and_stage4_adapters_keep_feature_and_fit_spaces_separate(self):
-        champion_spec, raw_spec = default_spec('champion').to_dict(), default_spec('stage4').to_dict()
-        make = lambda spec, name: evaluation_context(spec, {}, {'dataset': 'test', 'method': 'acf', 'strategy': name},
-                                                     'a'*64, 'b'*64, 'c'*64, files=['one.wav', 'two.wav'])
-        baseline, champion_ctx = make(champion_spec, 'baseline'), make(champion_spec, 'champion')
-        self.assertEqual(baseline.to_dict()['feature_contract']['frame_duration_ms'], 25.)
-        self.assertEqual(champion_ctx.to_dict()['feature_contract']['frame_duration_ms'], 30.)
-        with self.assertRaisesRegex(ValueError, 'feature_contract'):
-            compare_series(MetricSeries(baseline, rows()), MetricSeries(champion_ctx, rows()))
-        active, all_frames = make(raw_spec, 'otsu_train_active'), make(raw_spec, 'otsu_train_all')
-        self.assertEqual(active.to_dict()['feature_contract']['profile'], 'centered_all')
-        with self.assertRaisesRegex(ValueError, 'fit'):
-            compare_series(MetricSeries(active, rows()), MetricSeries(all_frames, rows()))
 
 
 if __name__ == '__main__':

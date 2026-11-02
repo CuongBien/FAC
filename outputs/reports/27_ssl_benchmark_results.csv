@@ -1,0 +1,2 @@
+Method_ID,Method_Name,Diff_F0_Hz,MAPE_F0_Pct,Diff_Std_Hz,MAPE_Std_Pct,Diff_Num_Frames,MAPE_Num_Pct,Final_Score_Pct
+ssl_pitch_shift,Pitch-Shift original (ACF),1.642,1.114,1.786,5.484,24.25,15.045,7.214

@@ -51,7 +51,7 @@ def pitch_cache():
     """Compatibility context for old callers; new APIs accept cache explicitly.
 
     ContextVar keeps nested and concurrent contexts separate. Decisions,
-    smoothing, plugin state and Viterbi DP are never cached.
+    smoothing and frame decisions are never cached.
     """
     cache = PitchCache()
     token = _legacy_cache.set(cache)

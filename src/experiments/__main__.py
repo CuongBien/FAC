@@ -16,7 +16,7 @@ def main(argv=None):
     index = commands.add_parser('index')
     index.add_argument('--output', default='outputs/registry.json', help='Root-relative derived index path')
     run = commands.add_parser('run', help='Execute a fixed versioned protocol')
-    run.add_argument('protocol', choices=('champion', 'stage4'))
+    run.add_argument('protocol', choices=('champion',))
     run.add_argument('phase', choices=('prepare', 'train', 'evaluate', 'report'))
     run.add_argument('--train-dir')
     run.add_argument('--test-dir')

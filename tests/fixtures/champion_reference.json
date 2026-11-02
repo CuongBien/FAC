@@ -1,0 +1,260 @@
+[
+  {
+    "dataset": "train",
+    "method": "acf",
+    "metrics": {
+      "abs_error_mean": 1.1225,
+      "mape_f0": 0.6025,
+      "abs_error_std": 0.9550000000000001,
+      "mape_std": 4.720000000000001,
+      "abs_error_num": 1.75,
+      "mape_num": 1.3175,
+      "final_score": 2.2150000000000003
+    },
+    "files": [
+      {
+        "file": "phone_F1.wav",
+        "pred_f0_mean": 217.52,
+        "pred_f0_std": 21.88,
+        "pred_f0_num": 142,
+        "final_score": 3.72
+      },
+      {
+        "file": "phone_M1.wav",
+        "pred_f0_mean": 123.06,
+        "pred_f0_std": 18.38,
+        "pred_f0_num": 232,
+        "final_score": 3.31
+      },
+      {
+        "file": "studio_F1.wav",
+        "pred_f0_mean": 231.15,
+        "pred_f0_std": 36.46,
+        "pred_f0_num": 127,
+        "final_score": 0.53
+      },
+      {
+        "file": "studio_M1.wav",
+        "pred_f0_mean": 117.28,
+        "pred_f0_std": 25.78,
+        "pred_f0_num": 83,
+        "final_score": 1.3
+      }
+    ]
+  },
+  {
+    "dataset": "train",
+    "method": "amdf",
+    "metrics": {
+      "abs_error_mean": 1.3575,
+      "mape_f0": 0.7825,
+      "abs_error_std": 0.725,
+      "mape_std": 3.2925,
+      "abs_error_num": 3.5,
+      "mape_num": 2.165,
+      "final_score": 2.0775
+    },
+    "files": [
+      {
+        "file": "phone_F1.wav",
+        "pred_f0_mean": 216.7,
+        "pred_f0_std": 21.13,
+        "pred_f0_num": 146,
+        "final_score": 1.48
+      },
+      {
+        "file": "phone_M1.wav",
+        "pred_f0_mean": 122.1,
+        "pred_f0_std": 17.88,
+        "pred_f0_num": 226,
+        "final_score": 3.43
+      },
+      {
+        "file": "studio_F1.wav",
+        "pred_f0_mean": 231.99,
+        "pred_f0_std": 36.11,
+        "pred_f0_num": 121,
+        "final_score": 2.55
+      },
+      {
+        "file": "studio_M1.wav",
+        "pred_f0_mean": 117.24,
+        "pred_f0_std": 25.8,
+        "pred_f0_num": 82,
+        "final_score": 0.85
+      }
+    ]
+  },
+  {
+    "dataset": "train",
+    "method": "cepstrum",
+    "metrics": {
+      "abs_error_mean": 2.3375000000000004,
+      "mape_f0": 1.455,
+      "abs_error_std": 3.8499999999999996,
+      "mape_std": 17.5675,
+      "abs_error_num": 20.5,
+      "mape_num": 15.1425,
+      "final_score": 11.39
+    },
+    "files": [
+      {
+        "file": "phone_F1.wav",
+        "pred_f0_mean": 219.01,
+        "pred_f0_std": 26.89,
+        "pred_f0_num": 137,
+        "final_score": 13.19
+      },
+      {
+        "file": "phone_M1.wav",
+        "pred_f0_mean": 125.76,
+        "pred_f0_std": 20.53,
+        "pred_f0_num": 200,
+        "final_score": 12.55
+      },
+      {
+        "file": "studio_F1.wav",
+        "pred_f0_mean": 227.81,
+        "pred_f0_std": 39.48,
+        "pred_f0_num": 108,
+        "final_score": 7.68
+      },
+      {
+        "file": "studio_M1.wav",
+        "pred_f0_mean": 114.81,
+        "pred_f0_std": 23.7,
+        "pred_f0_num": 62,
+        "final_score": 12.14
+      }
+    ]
+  },
+  {
+    "dataset": "test",
+    "method": "acf",
+    "metrics": {
+      "abs_error_mean": 1.8025000000000002,
+      "mape_f0": 1.12,
+      "abs_error_std": 0.9025,
+      "mape_std": 2.6,
+      "abs_error_num": 6.0,
+      "mape_num": 3.4325,
+      "final_score": 2.3850000000000002
+    },
+    "files": [
+      {
+        "file": "phone_F2.wav",
+        "pred_f0_mean": 150.98,
+        "pred_f0_std": 31.38,
+        "pred_f0_num": 203,
+        "final_score": 3.35
+      },
+      {
+        "file": "phone_M2.wav",
+        "pred_f0_mean": 132.19,
+        "pred_f0_std": 15.83,
+        "pred_f0_num": 124,
+        "final_score": 1.71
+      },
+      {
+        "file": "studio_F2.wav",
+        "pred_f0_mean": 201.64,
+        "pred_f0_std": 45.45,
+        "pred_f0_num": 136,
+        "final_score": 2.87
+      },
+      {
+        "file": "studio_M2.wav",
+        "pred_f0_mean": 156.1,
+        "pred_f0_std": 30.15,
+        "pred_f0_num": 120,
+        "final_score": 1.61
+      }
+    ]
+  },
+  {
+    "dataset": "test",
+    "method": "amdf",
+    "metrics": {
+      "abs_error_mean": 0.5575,
+      "mape_f0": 0.32999999999999996,
+      "abs_error_std": 1.2975,
+      "mape_std": 3.7625,
+      "abs_error_num": 7.25,
+      "mape_num": 4.175000000000001,
+      "final_score": 2.7550000000000003
+    },
+    "files": [
+      {
+        "file": "phone_F2.wav",
+        "pred_f0_mean": 150.07,
+        "pred_f0_std": 30.86,
+        "pred_f0_num": 201,
+        "final_score": 2.94
+      },
+      {
+        "file": "phone_M2.wav",
+        "pred_f0_mean": 130.07,
+        "pred_f0_std": 16.23,
+        "pred_f0_num": 129,
+        "final_score": 3.45
+      },
+      {
+        "file": "studio_F2.wav",
+        "pred_f0_mean": 199.65,
+        "pred_f0_std": 43.92,
+        "pred_f0_num": 134,
+        "final_score": 4.08
+      },
+      {
+        "file": "studio_M2.wav",
+        "pred_f0_mean": 155.62,
+        "pred_f0_std": 30.62,
+        "pred_f0_num": 116,
+        "final_score": 0.55
+      }
+    ]
+  },
+  {
+    "dataset": "test",
+    "method": "cepstrum",
+    "metrics": {
+      "abs_error_mean": 6.12,
+      "mape_f0": 4.1274999999999995,
+      "abs_error_std": 9.615,
+      "mape_std": 51.6175,
+      "abs_error_num": 18.75,
+      "mape_num": 13.085,
+      "final_score": 22.9425
+    },
+    "files": [
+      {
+        "file": "phone_F2.wav",
+        "pred_f0_mean": 156.19,
+        "pred_f0_std": 35.54,
+        "pred_f0_num": 198,
+        "final_score": 9.78
+      },
+      {
+        "file": "phone_M2.wav",
+        "pred_f0_mean": 139.64,
+        "pred_f0_std": 41.04,
+        "pred_f0_num": 125,
+        "final_score": 58.46
+      },
+      {
+        "file": "studio_F2.wav",
+        "pred_f0_mean": 202.62,
+        "pred_f0_std": 49.58,
+        "pred_f0_num": 113,
+        "final_score": 8.15
+      },
+      {
+        "file": "studio_M2.wav",
+        "pred_f0_mean": 159.73,
+        "pred_f0_std": 36.5,
+        "pred_f0_num": 90,
+        "final_score": 15.38
+      }
+    ]
+  }
+]

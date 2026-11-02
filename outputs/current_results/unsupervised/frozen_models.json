@@ -1,0 +1,336 @@
+{
+  "schema_version": 1,
+  "frozen_at_utc": "2026-11-02T07:47:56.477881+00:00",
+  "train_manifest": {
+    "phone_F1.wav": {
+      "wav_sha256": "4209a6ffe642f93b89554000fa7766135faf7c6cd97ce99b912b44af5e39db12",
+      "lab_sha256": "048ca52ef826b482c399cba4600eba2d92fca49f2389c6185922b149bc9d0d1e"
+    },
+    "phone_M1.wav": {
+      "wav_sha256": "f6ec4c441948ea9e749ddfdf2ec88b5400261c2f7249c54baf42e00b485eab22",
+      "lab_sha256": "eb2c62ebf9c9fdac384934c865d8ba852db8bce5ca5fd0e072ba4f859bcba260"
+    },
+    "studio_F1.wav": {
+      "wav_sha256": "60deec10a9a1db91546503977892d17f34111d7090482b893dc46ebe09ec6fc5",
+      "lab_sha256": "ad9faae7147d35282e8a005e5ad267974403d9eb035ef3ac72f2e9a81efa2686"
+    },
+    "studio_M1.wav": {
+      "wav_sha256": "7ad0e8baff2c69e65f680842a7cda33744358111f7662d9b6d17702b2077be78",
+      "lab_sha256": "4caa1dcfe3dc948c8243e7e23d5b0e3ba0bf40a836b0dc7fc1e3961d5e669f05"
+    }
+  },
+  "provenance": {
+    "base_commit": "1544320aaa7e224f15efb4f2fc0cee5dbdfbc4d1",
+    "branch": "codex/retain-selected-unsupervised",
+    "source_sha256": {
+      "pyproject.toml": "6779be0bde625a919be35fca8570cb659fca047dc1bfc7d82d12bd68c534250b",
+      "scripts/21_benchmark_champion_unsupervised.py": "ce6879e2d70c947038b89374809fb214929db71366d478eb5cb8f241ffaf75e1",
+      "src/__init__.py": "c76a540c99439aaff56da1fe2fde0e74cc71407548d5b514c58eb5aba2f1ca96",
+      "src/analysis/__init__.py": "eb05a6b7813d4efa0d3ba724cdb1507252ffe303167dd1ed95bf331cb9bfaa8b",
+      "src/analysis/advanced_unsupervised.py": "54ff1f5b47d7b388fc28dcad4c54a129be22b3fed6503e07ec5915b8f09456e4",
+      "src/analysis/champion_unsupervised.py": "2d6a88c679d6797132106be6d22ecb3ebe020726f2d53b9da17ced484ea14dce",
+      "src/analysis/evaluation.py": "39002fe954aa7da40c32d9a476745de4b16694f38c53fc968361f8b74d32c8ad",
+      "src/analysis/protocols.py": "7b65f99d220f5acc33d70d2a87b3265b8fc88e54afc3427e3540e47893839cf1",
+      "src/analysis/ssl_pitch_shift.py": "18d00651656b60823a73b21893b99a74dc64c0bf6ff4a7347cd71f6da82ada92",
+      "src/analysis/ssl_pitch_shift_methods.py": "7c14c8991fbb0ea06537ce2f14d8c76a2c8c1f734a4a04792b6ca2784d028621",
+      "src/analysis/unsupervised_threshold.py": "740ceaf4052ecddfe5baca3a9dd5704664532ce416d48e63cecb7ef97fa7ced0",
+      "src/calibrated_presets.py": "638ce3c9e51fd99ecada048cb3d1fe8442765645cb4fb25086c2f9c8a8c3e527",
+      "src/config.py": "c6cecddeb9ab204cdea78c6a79e5d4b23a17e7947b190edfdefe54a90ac86a44",
+      "src/core/__init__.py": "082f63692717334d3d272025399bce83970bef6b4efd0ca0f2c23321f088b7c5",
+      "src/core/acf.py": "a6e48530b687c155187cb1ec7b756cab26b7238993f5169f4e5b13d53143ca6a",
+      "src/core/amdf.py": "7ac77c24cebe82a3947ddcb209171630fb692cf9c164273a3cf43857504b22d1",
+      "src/core/audio.py": "a79ddb11ee6d5744c83e2d2e6c5964864a307293549c07e3075cdf399e84e23f",
+      "src/core/cepstrum.py": "1be03aa8e58d107e162365a297e86d133bb223aad1594f5842dec8efa2e338db",
+      "src/core/lab_parser.py": "a537fda31b00df357485c8ea89d7a4e40cd6a51254bbf209f614cc602073de90",
+      "src/core/pitch_detector.py": "f0bcf93bb3a6d750f181dcd5ac7368ea0ad2a372e51d729f5bf60e67e1f8a50f",
+      "src/core/processing.py": "c5f5a6934b4a883d14e63a7dfd846c192b5bc0c36b1e2194783251fc5a73ea36",
+      "src/experiments/__init__.py": "1e64cc7f020b98e44ed0944dde3574b0c6b29103d6ed15af45617b783b85b81e",
+      "src/experiments/__main__.py": "b66b641c0064270d830474782ea1c50f9593090c8073314e0cb22b9a2765c16f",
+      "src/experiments/champion.py": "7893dffff7c0b7d21267c0c31e8dfd6c037a97d9c1f220853b524c51d757f713",
+      "src/experiments/dependencies.py": "a1e8363bbc512939952d3d765306e29945e79e95ca33e4a68e5db1c49e4e353e",
+      "src/experiments/legacy.py": "5c2f0e15983311fb2aaf7adc2e978dbeb046f4c3d4fe60ce7c378e6ba9897948",
+      "src/experiments/manifest.py": "daf2239f1adf36da9335d4b484150c97b324ade7b0d104c0d84141a9e5bdb93c",
+      "src/experiments/metric_artifacts.py": "356444623d643fa7a289c0e9d81b83e7feeb0121219eb59ca0cd6bd36576acfe",
+      "src/experiments/paths.py": "5b413ff707e199d315443b5ef5e1f3696fffcace5017df73537dcffd1c5604a3",
+      "src/experiments/protocol_specs.py": "fe5b0ed01dc2cc9a20a0046289f8014e906025a52c032e67917aff4866d8ad64",
+      "src/experiments/registry.py": "98e53d7b0222086db2d33641e7af7d70f11bc31d7439dfb65ec4dc9c517bad8e",
+      "src/experiments/resources.py": "3cb0fc91c54e51bd1536348b9483ad1de2a6d4a2990d5992cd38bf71f864a70a",
+      "src/experiments/runner.py": "33f3d17386c373a9ab07475c76565a26d7ef52f5d1b4803b4241f5fd03667683",
+      "src/experiments/serialization.py": "68a230146d42139ea6bc89196a9e006b8e08d2e74a1cb839501ca7ba8852d422",
+      "src/experiments/snapshots.py": "64b37e7ff4a2f95349f775c4cc3782e524a9a142557b66c3fd73b5f809cac2de",
+      "src/experiments/spec.py": "5c1e5a96a08dc4d014ba30c2334d7c1e3aa25126605f57e36d832a662b4a6d52",
+      "src/experiments/store.py": "c4b155fc78638bb52b2a5108487a9a7c7e81268227741901b79c6dad13bde666",
+      "src/experiments/transactions.py": "e4fa4c3373730b8f10ccaaa4e1d300606d6658ad133404a2e740e42fa4233d7c",
+      "src/metrics/__init__.py": "9bfc5eca262a8fc815c833ea8de0ded47df3ffee109ae20ca9a9bfb17b62cd40",
+      "src/metrics/__main__.py": "8f60aa27a7e1500de1d7e9c92f1832f06bf465c8b8d5f0bcabad7db8b0c61c6c",
+      "src/metrics/aggregation.py": "b5a20bbb534f21bf32f0100ed837c22db91a9a2286b5cbca88cab096cbd8b82d",
+      "src/metrics/bundle.py": "dfb639f1c16cba169b5f11704cc2adba889174651eff2a3287868496b1bcc7fd",
+      "src/metrics/comparison.py": "fdeef4e7181e84fe5d514046569b4c478ebc1cb320babf3b4e2e16f686ab3468",
+      "src/metrics/contracts.py": "aa34c864b0722f7e7302ed7b06c2c367d966c9f28f3e98948a600672dd1934b3",
+      "src/metrics/evaluation.py": "17e1361dd54a27fcab7891fc0b2b7e8593916106ed17c9c3c2c5895a96d0348e",
+      "src/metrics/legacy.py": "f4e2e2b017b17abb5c66b3639510c804e9a46b23643f68d112fe36e3ec6a77a2",
+      "src/metrics/numeric.py": "0e81f4569766e6efb2a43da9cf00881efdeb058fb9119237fc5d5833aa852191",
+      "src/pipeline/__init__.py": "1347158f628acef259a63cab0a8d7e7f55fafbadb973d0d65db8049fe02dd288",
+      "src/pipeline/cache.py": "574d44d6383b18014cdf26a1f506abf6beb8f5e791bada6bf433c65db5407b09",
+      "src/pipeline/champion.py": "31f03e2b5785cfe07f8b7099d789fad1b5f5b36cf702c69482d75725c017c554",
+      "src/pipeline/contracts.py": "80be7ca30a0dfdc355180faf32fabd9c3e2475fd2e8e4ab2d8fd425fa6b4a63f",
+      "src/pipeline/engine.py": "fde037b3f216b94ee436184a3db17c45903849eecc25a08834d0d9a0334ed963",
+      "src/pipeline/features.py": "69c636d7195159e833a4d742899180230a516758ae441ec346b5eddc8da91f4d",
+      "src/pipelines.py": "85281459cb451fd98068d07087a5a203841192020c45bd664a009ef209f5e7b2",
+      "src/plugins/__init__.py": "859776f98ac99ed165c6006b62b3ed0a59e41615795a177c8bf0520a70e3458f",
+      "src/plugins/base.py": "0d67bfed4c760a3d691da5ae7ba4564efc333d5916faef712999ea721fd6604a",
+      "src/plugins/plugin_detector.py": "3dd9a0735e9c2de7a29141ba639f483cb96e3a0dad5ed326d3a82b20612f453a",
+      "src/plugins/post_processing/__init__.py": "1a412bbf5130f94afd37ec1078035359902f0adf1e8371832face74b4e7477d9",
+      "src/plugins/post_processing/energy_extension.py": "ddfd6c48e796379a339b4b726a034aeddc96fe4e2c14da611399c65fd07b8812",
+      "src/plugins/post_processing/viterbi_tracking.py": "77644e4e3cda78b335d191f488914807002087dd186b8427764f4382eb8b06bf",
+      "src/plugins/pre_processing/__init__.py": "5895ad598c07f051ff6b783ee4676a16e541bbe072dfa075d5e19d1df90a1a4e",
+      "src/plugins/pre_processing/bandpass_filter.py": "5ff2e1085ac30a7b204b36c56b21ff828b9cfe0895f0e9ebb090d0ec9e6baf1d",
+      "src/plugins/pre_processing/center_clipping.py": "c1e9b624e15a230ddb96bec99bba63d8434b2a7f6ae97d12af9feac2330f25d1",
+      "uv.lock": "644ad9b3a9c135e7329b88748a56a9c1328a3b3d4298eb07edf1b5d24914337d",
+      "README.md": "f0f15da2423901e7484e3248d742e99fc681b5b5a5436ef19535a5f4308e8d8e",
+      "configs/experiments/champion_unsupervised.json": "30fdcfa67de3aad665f38e757c34006d105df81a2bdb3550c652763be5bc9dd9",
+      "src/experiments/champion_report.py": "183de855cd1963d4b4b524a6bf51c990ea342fa64ecc5cbdd466b01b7f91ba0a",
+      "src/metrics/formatting.py": "38c2fa88554652ea56c0393c43ef7407a22c5b91ad0dc5d55994ccd5665bf2a2",
+      "src/reporting/__init__.py": "9c41c618b3459269ca54f4a2f19fd36b6e146bf8089477d211588912c68e0498",
+      "src/reporting/__main__.py": "98d312d0bfe891a167ae2b2b9fccbd71c6cd3a464d4316b04ae36e0bfc1a1777",
+      "src/reporting/bundle.py": "2bf11f206c54eee598e3dbfd9fce8a6b1952440edc05c5d33bd6da7f3f35449f",
+      "src/reporting/catalog.py": "fa8e8bc9423236c252c752346a3ca6ee1f0167bfe17e0f2074b84ee8355294c9",
+      "src/reporting/champion.py": "2f3346f5448e6c08aef7925ddd0cc237f36992f5648d72fbd158d5de934fae5c",
+      "src/reporting/common.py": "400402b51d08e259fab1fdb188f120a7003aba5f5783922c6e437f1cf40ebc82",
+      "src/reporting/plots.py": "e152d5a82d4fd90a7a17118c035ac6da61bd3eeb8184f591b7bb51275f10b3e6",
+      "src/reporting/publish.py": "778489563e6d7ad13c88fba4aea96cbf1944ea2ab647320958dca17e3fab718e",
+      "src/reporting/source.py": "e1c811fc7985f551c995b47d1f20178ad5fd847ce750f10d91d793f90cbdab64",
+      "src/reporting/view.py": "80a3c7b2caa6d97ed7999476932a2eb5cfd698cc1e50d7418e55f40f92a0c37d"
+    }
+  },
+  "models": {
+    "acf": {
+      "method": "acf",
+      "feature_spec": {
+        "method": "acf",
+        "plugins": [
+          "BP"
+        ],
+        "frame_duration_ms": 30.0,
+        "hop_duration_ms": 10.0,
+        "clipping_ratio": 0.4,
+        "f0_min": 70.0,
+        "f0_max": 400.0,
+        "ste_silence_ratio": 0.008,
+        "bandpass_low": 70.0,
+        "bandpass_high": 900.0
+      },
+      "feature_contract": {
+        "schema_version": 1,
+        "method": "acf",
+        "frame_duration_ms": 30.0,
+        "hop_duration_ms": 10.0,
+        "f0_min": 70.0,
+        "f0_max": 400.0,
+        "ste_silence_ratio": 0.008,
+        "profile": "plugins",
+        "pre_processing": [
+          {
+            "name": "BandpassPreFilter",
+            "parameters": {
+              "high_cutoff": 900.0,
+              "low_cutoff": 70.0,
+              "order": 2
+            }
+          }
+        ],
+        "signal_source": "file_dc_removed",
+        "energy_source": "before_signal_plugins_dc_centered_frames",
+        "pitch_population": "active",
+        "center_before_pitch": true,
+        "zcr_source": "centered_pitch_active",
+        "window": "rectangular",
+        "cepstrum_window": "hamming",
+        "cepstrum_n_fft": 2048
+      },
+      "fit_population": "train_active",
+      "thresholds": {
+        "otsu": 0.5725636259135187,
+        "kmeans": 0.5741006077927666
+      },
+      "cluster_2d": {
+        "centroid_v": [
+          0.6872256443689001,
+          0.021518269665610122
+        ],
+        "centroid_uv": [
+          0.6016972774280763,
+          0.05087191452781528
+        ],
+        "centroid_v_normalized": [
+          0.19923108442641016,
+          -0.7015438058467133
+        ],
+        "centroid_uv_normalized": [
+          -0.28346481497434095,
+          0.9981524002304324
+        ],
+        "status": "ok",
+        "converged": true,
+        "num_iter": 10,
+        "p_mean": 0.6519241029305024,
+        "p_std": 0.17718892380690213,
+        "z_mean": 0.03363388636139132,
+        "z_std": 0.017269936096376073
+      },
+      "num_train_active": 659,
+      "num_train_frames": 1291
+    },
+    "amdf": {
+      "method": "amdf",
+      "feature_spec": {
+        "method": "amdf",
+        "plugins": [],
+        "frame_duration_ms": 30.0,
+        "hop_duration_ms": 10.0,
+        "clipping_ratio": 0.4,
+        "f0_min": 70.0,
+        "f0_max": 400.0,
+        "ste_silence_ratio": 0.008,
+        "bandpass_low": 70.0,
+        "bandpass_high": 900.0
+      },
+      "feature_contract": {
+        "schema_version": 1,
+        "method": "amdf",
+        "frame_duration_ms": 30.0,
+        "hop_duration_ms": 10.0,
+        "f0_min": 70.0,
+        "f0_max": 400.0,
+        "ste_silence_ratio": 0.008,
+        "profile": "plugins",
+        "pre_processing": [],
+        "signal_source": "file_dc_removed",
+        "energy_source": "before_signal_plugins_dc_centered_frames",
+        "pitch_population": "active",
+        "center_before_pitch": true,
+        "zcr_source": "centered_pitch_active",
+        "window": "rectangular",
+        "cepstrum_window": "hamming",
+        "cepstrum_n_fft": 2048
+      },
+      "fit_population": "train_active",
+      "thresholds": {
+        "otsu": 0.3595316586284222,
+        "kmeans": 0.36125087396166944
+      },
+      "cluster_2d": {
+        "centroid_v": [
+          0.2048266754138266,
+          0.05775431854479139
+        ],
+        "centroid_uv": [
+          0.5813737305404061,
+          0.17603624497370102
+        ],
+        "centroid_v_normalized": [
+          -0.41033633675979203,
+          -0.23995827333138453
+        ],
+        "centroid_uv_normalized": [
+          1.6538747008333605,
+          0.967160063503592
+        ],
+        "status": "ok",
+        "converged": true,
+        "num_iter": 10,
+        "p_mean": 0.2796789731704001,
+        "p_std": 0.18241693715853263,
+        "z_mean": 0.08126711423855043,
+        "z_std": 0.09798701818998197
+      },
+      "num_train_active": 659,
+      "num_train_frames": 1291
+    },
+    "cepstrum": {
+      "method": "cepstrum",
+      "feature_spec": {
+        "method": "cepstrum",
+        "plugins": [
+          "BP",
+          "Clip"
+        ],
+        "frame_duration_ms": 30.0,
+        "hop_duration_ms": 10.0,
+        "clipping_ratio": 0.4,
+        "f0_min": 70.0,
+        "f0_max": 400.0,
+        "ste_silence_ratio": 0.008,
+        "bandpass_low": 70.0,
+        "bandpass_high": 900.0
+      },
+      "feature_contract": {
+        "schema_version": 1,
+        "method": "cepstrum",
+        "frame_duration_ms": 30.0,
+        "hop_duration_ms": 10.0,
+        "f0_min": 70.0,
+        "f0_max": 400.0,
+        "ste_silence_ratio": 0.008,
+        "profile": "plugins",
+        "pre_processing": [
+          {
+            "name": "BandpassPreFilter",
+            "parameters": {
+              "high_cutoff": 900.0,
+              "low_cutoff": 70.0,
+              "order": 2
+            }
+          },
+          {
+            "name": "CenterClipping",
+            "parameters": {
+              "clipping_ratio": 0.4,
+              "mode": "standard"
+            }
+          }
+        ],
+        "signal_source": "file_dc_removed",
+        "energy_source": "before_signal_plugins_dc_centered_frames",
+        "pitch_population": "active",
+        "center_before_pitch": true,
+        "zcr_source": "centered_pitch_active",
+        "window": "rectangular",
+        "cepstrum_window": "hamming",
+        "cepstrum_n_fft": 2048
+      },
+      "fit_population": "train_active",
+      "thresholds": {
+        "otsu": 0.2540980685682122,
+        "kmeans": 0.25112662867660596
+      },
+      "cluster_2d": {
+        "centroid_v": [
+          0.13048658599061955,
+          0.013109782104731127
+        ],
+        "centroid_uv": [
+          0.2899544913912637,
+          0.034956896143314195
+        ],
+        "centroid_v_normalized": [
+          -0.414625847848731,
+          -0.5088838700568765
+        ],
+        "centroid_uv_normalized": [
+          0.9515663208128393,
+          1.1678884817805302
+        ],
+        "status": "ok",
+        "converged": true,
+        "num_iter": 9,
+        "p_mean": 0.17888352237928237,
+        "p_std": 0.11672435917772206,
+        "z_mean": 0.01974016572797334,
+        "z_std": 0.013029266623249727
+      },
+      "num_train_active": 659,
+      "num_train_frames": 1291
+    }
+  }
+}

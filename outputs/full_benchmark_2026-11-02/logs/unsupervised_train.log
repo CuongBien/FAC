@@ -1,0 +1,4 @@
+TRAIN FIT acf 659 active frames
+TRAIN FIT amdf 659 active frames
+TRAIN FIT cepstrum 659 active frames
+FROZEN before test evaluation: D:\FAC\outputs\full_benchmark_2026-11-02\unsupervised\.attempts\a1a72a360eac4d3785028c4ff97d643e

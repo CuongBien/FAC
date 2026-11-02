@@ -1,6 +1,6 @@
 """Plugin-enabled Pitch Detector wrapper coordinating the three pipeline stages:
 1. Pre-processing: Signal filtering & frame spectral flattening
-2. Detection & In-Loop Decision: Metric evaluation & adaptive hysteresis thresholding
+2. Detection & In-Loop Decision: Metric evaluation & optional frame decisions
 3. Post-processing: Boundary energy extension & Viterbi tracking
 """
 from typing import Dict, List, Optional
@@ -27,7 +27,7 @@ class PluginPitchDetector:
     """Wrapper that executes a pipeline of plugins around baseline PitchDetector logic,
     strictly organized by pipeline stages:
     - pre_processors: Stage 1 plugins (Bandpass filter, Center clipping)
-    - decision_modifiers: Stage 2 plugins (Hysteresis thresholding)
+    - decision_modifiers: Stage 2 plugins (optional frame decisions)
     - post_processors: Stage 3 plugins (Energy edge extension, Viterbi tracking)
     """
 

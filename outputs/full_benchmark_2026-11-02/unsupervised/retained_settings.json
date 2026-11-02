@@ -1,0 +1,58 @@
+{
+  "champions": {
+    "acf": {
+      "plugins": [
+        "BP",
+        "Energy",
+        "Viterbi"
+      ],
+      "threshold": 0.45,
+      "frame_duration_ms": 30.0,
+      "hop_duration_ms": 10.0,
+      "clipping_ratio": 0.4
+    },
+    "amdf": {
+      "plugins": [
+        "Energy",
+        "Viterbi"
+      ],
+      "threshold": 0.5,
+      "frame_duration_ms": 30.0,
+      "hop_duration_ms": 10.0,
+      "clipping_ratio": 0.4
+    },
+    "cepstrum": {
+      "plugins": [
+        "BP",
+        "Clip",
+        "Energy",
+        "Viterbi"
+      ],
+      "threshold": 0.1,
+      "frame_duration_ms": 30.0,
+      "hop_duration_ms": 10.0,
+      "clipping_ratio": 0.4
+    }
+  },
+  "fit_population": "train_active_after_champion_preprocessing",
+  "zcr_source": "DC-centered pitch frames after Champion preprocessing",
+  "bandpass_low": 70.0,
+  "bandpass_high": 900.0,
+  "f0_min": 70.0,
+  "f0_max": 400.0,
+  "ste_silence_ratio": 0.008,
+  "median_size": 3,
+  "dynamic_base": "otsu",
+  "dynamic_window_frames": 50,
+  "dynamic_alpha": 0.3,
+  "dynamic_context": "within active segments; offline centered window",
+  "primary_strategies": [
+    "otsu",
+    "kmeans",
+    "kmeans2d",
+    "dynamic"
+  ],
+  "input_adaptive_controls": [
+    "kmeans2d_input_active"
+  ]
+}

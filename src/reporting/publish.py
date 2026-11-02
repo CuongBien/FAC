@@ -13,12 +13,6 @@ from src.experiments.paths import resolve_member
 from src.experiments.manifest import sha256
 from .bundle import MANIFEST, verify_report
 
-CHAPTERS = ('01_acf_theory_and_experiments.md', '02_amdf_theory_and_experiments.md',
-            '03_cepstrum_theory_and_experiments.md', '04_test_set_benchmark_and_analysis.md',
-            '05_unsupervised_thresholding_analysis.md')
-README_MARKERS = ('<!-- STAGE4_README_START -->', '<!-- STAGE4_README_END -->')
-REPORT_MARKERS = ('<!-- STAGE4_REPORT_START -->', '<!-- STAGE4_REPORT_END -->')
-CHAPTER_MARKERS = ('<!-- STAGE4_CURRENT_START -->', '<!-- STAGE4_CURRENT_END -->')
 CHAMPION_MARKERS = ('<!-- CHAMPION_REPORT_START -->', '<!-- CHAMPION_REPORT_END -->')
 
 
@@ -67,11 +61,7 @@ def preview(bundle, root):
     bundle, root = Path(bundle).resolve(), Path(root).resolve()
     manifest = verify_report(bundle)
     sections = json.loads((bundle/'sections.json').read_bytes())
-    if manifest['protocol'] == 'stage4':
-        owned = {'README.md': README_MARKERS, 'docs/STAGE4_RESULTS.md': REPORT_MARKERS,
-                 **{'docs/'+name: CHAPTER_MARKERS for name in CHAPTERS}}
-    else:
-        owned = {'docs/CHAMPION_UNSUPERVISED_RESULTS.md': CHAMPION_MARKERS}
+    owned = {'docs/CHAMPION_UNSUPERVISED_RESULTS.md': CHAMPION_MARKERS}
     if set(sections) != set(owned):
         raise ValueError('Publication targets differ from the renderer contract')
     changes = []

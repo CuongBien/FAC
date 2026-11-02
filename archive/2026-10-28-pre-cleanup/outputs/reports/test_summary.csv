@@ -1,5 +1,0 @@
-File,Fs_Hz,Ref_F0mean,Pred_F0mean,AbsErr_F0mean,MAPE_F0_Pct,Ref_F0std,Pred_F0std,AbsErr_F0std,MAPE_Std_Pct,Ref_F0num,Pred_F0num,AbsErr_F0num,MAPE_Num_Pct,Final_Score_Pct,Accuracy_Pct,F1_Pct
-phone_F2.wav,16000,150.2,152.77,2.57,1.71,30.7,31.44,0.74,2.4,219,182,37,16.89,7.0,None,None
-phone_M2.wav,16000,130.2,131.92,1.72,1.32,15.4,14.07,1.33,8.63,123,108,15,12.2,7.38,None,None
-studio_F2.wav,44100,198.6,198.98,0.38,0.19,47.8,43.35,4.45,9.31,139,126,13,9.35,6.28,None,None
-studio_M2.wav,44100,154.7,155.97,1.27,0.82,30.3,30.24,0.06,0.19,116,112,4,3.45,1.49,None,None

@@ -1,0 +1,7 @@
+Method,Strategy_Key,Strategy_Name,Diff_F0_Hz,MAPE_F0_Pct,Diff_Std_Hz,MAPE_Std_Pct,Diff_Num_Frames,MAPE_Num_Pct,Final_Score_Pct
+ACF,champion_native,Champion gốc (Ngưỡng tĩnh),1.801,1.12,0.901,2.601,6.0,3.431,2.384
+ACF,ssl_pitch_shift,Champion + Pitch-Shift theo thuật toán,1.836,1.165,0.766,1.819,9.75,5.251,2.745
+AMDF,champion_native,Champion gốc (Ngưỡng tĩnh),0.56,0.329,1.296,3.762,7.25,4.174,2.755
+AMDF,ssl_pitch_shift,Champion + Pitch-Shift theo thuật toán,0.553,0.321,1.339,3.772,8.5,4.989,3.027
+CEPSTRUM,champion_native,Champion gốc (Ngưỡng tĩnh),6.119,4.128,9.616,51.617,18.75,13.083,22.943
+CEPSTRUM,ssl_pitch_shift,Champion + Pitch-Shift theo thuật toán,4.429,2.81,3.87,20.232,45.0,33.149,18.73

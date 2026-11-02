@@ -1,25 +1,12 @@
-#!/usr/bin/env python3
-"""PREDICT & TEST CLI TOOL - DÀNH CHO BUỔI BẢO VỆ / THỰC NGHIỆM TRÊN DỮ LIỆU CỦA THẦY
-Hỗ trợ kiểm thử tức thì trên 1 file .wav bất kỳ hoặc toàn bộ thư mục âm thanh.
-Tự động kích hoạt các cấu hình Champion đã chọn trên train (ACF, AMDF, Cepstrum).
-Tự động đối soát nhãn Ground Truth (.lab) nếu có cùng tên trong thư mục.
-
-Ví dụ sử dụng:
-1. Chạy trên 1 file âm thanh bất kỳ:
-   uv run python predict.py --input path/to/audio.wav
-
-2. Chạy trên toàn bộ thư mục âm thanh của thầy:
-   uv run python predict.py --input path/to/folder_thay/
-
-3. Chỉ chạy riêng thuật toán tốt nhất (Cepstrum hoặc ACF hoặc AMDF):
-   uv run python predict.py --input audio.wav --method cepstrum
-"""
+"""Predict F0 with baseline or the original frozen Champion pipelines."""
 import argparse
 import csv
 import glob
 import os
 import sys
 from typing import Dict
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -41,7 +28,7 @@ from src.metrics.formatting import format_metric, csv_value
 
 
 def get_champion_detectors() -> Dict[str, PitchDetector]:
-    """Frozen train-selected Champion configurations shared with benchmark 14."""
+    """Original frozen Champion configurations."""
     return {f"{method.title() if method == 'cepstrum' else method.upper()} Champion": build_champion(method)
             for method in ('acf', 'amdf', 'cepstrum')}
 
@@ -229,7 +216,7 @@ def process_single_file(
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Pitch Prediction & Testing CLI on Custom Data.")
     parser.add_argument("--input", "-i", type=str, required=True, help="Đường dẫn tới 1 file .wav hoặc thư mục chứa các file .wav")
-    parser.add_argument("--method", "-m", type=str, default="champions", choices=["champions", "all", "acf", "amdf", "cepstrum", "baseline"], help="Chế độ thuật toán (mặc định: 'champions' đã chọn trên train)")
+    parser.add_argument("--method", "-m", type=str, default="champions", choices=["champions", "all", "acf", "amdf", "cepstrum", "baseline"], help="Chế độ thuật toán (mặc định: 'champions', cấu hình đã chốt)")
     parser.add_argument("--output-dir", "-o", type=str, default="outputs/predictions", help="Thư mục xuất kết quả (ảnh PNG và bảng CSV)")
     args = parser.parse_args(argv)
 
