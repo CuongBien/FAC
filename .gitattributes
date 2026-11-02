@@ -35,3 +35,4 @@ tests/test_cli_packaging.py text eol=lf
 tests/wheel_smoke.py text eol=lf
 scripts/26_verify_cli_packaging.py text eol=lf
 outputs/refactor_phase6/** -text whitespace=cr-at-eol
+outputs/project_summary_2026-11-02/** -text

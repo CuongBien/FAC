@@ -1,5 +1,7 @@
 # Các vấn đề cần xử lý
 
+> Cập nhật 02/11/2026: sáu đợt refactor đã merge main tại `12ec529`; **217 test đạt**. Wheel non-editable đã chạy ngoài repo/Git trên Windows Python 3.11 và 3.12; mục kiểm chứng wheel đã hoàn tất. CI Windows/Linux đã cấu hình nhưng chưa chạy remote. Xem [báo cáo tổng hợp kết quả](PROJECT_RESULTS_2026-11-02.md). Các ghi chú ngày 01/11 dưới đây là mốc lịch sử.
+
 > Cập nhật 01/11/2026: [rà soát main](MAIN_REVIEW_FIXES.md) đã sửa Otsu và CLI với LAB thiếu F0std; đồng bộ preset/checksum/snapshot và thêm kiểm tra artifact. Bảng tích hợp tám phương pháp chưa có đủ bằng chứng đã được tách khỏi kết luận hiện hành. Các giới hạn dưới đây vẫn áp dụng.
 
 > Cùng ngày, [benchmark 21](CHAMPION_UNSUPERVISED_RESULTS.md) đã hoàn tất tích hợp tám phương pháp với đúng đặc trưng Champion, lưu 288 kết quả/file và tách đối chứng fit từng input. Giao thức mới không được xem là tái lập các mốc cũ chưa lưu. Bộ hồi quy hiện đạt 108 test.
@@ -14,7 +16,6 @@ Ghi nhận ngày 28/10/2026, cập nhật ngày 30/10 sau đợt 4 trên nhánh 
 | Cao | Thiếu nhãn thời gian để huấn luyện/đánh giá từng khung | Tám LAB chỉ có F0mean/std/num. Đợt 3 đã chặn fit Gaussian với V=0/UV=0 và giữ Accuracy/F1 là N/A; vẫn cần nguồn nhãn thời gian để huấn luyện/đánh giá từng khung. |
 | Vừa | Dữ liệu ít và test đã được quan sát trong lịch sử | Đợt 4 đã đối chứng train_all/train_active và 2D/HMM fit trên train so với thích nghi từng input. Chỉ có bốn file train và bốn file test; cần một tập mới độc lập để đo khả năng tổng quát. |
 | Sau | CLI chưa có lựa chọn tám phương pháp mới | Benchmark 21 đã tích hợp đủ với hậu xử lý native của Champion; chưa thêm tùy chọn tương ứng vào `predict.py`. Preset mặc định được giữ nguyên, không chọn theo thứ hạng test mới. |
-| Sau | Phát hành wheel cần kiểm chứng thêm | Package discovery đã bao gồm các plugin con; chưa kiểm thử cài wheel trong môi trường hoàn toàn mới. |
 | Sau | Đầu ra môn học | Chưa thấy Word, slide và bằng chứng đo T0 thủ công trong checkout. Hoàn thiện theo `HuongDan.txt`. |
 
 ## Giới hạn diễn giải
