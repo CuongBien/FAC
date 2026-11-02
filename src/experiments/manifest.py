@@ -5,6 +5,7 @@ import subprocess
 import re
 from .paths import resolve_member
 from .serialization import json_digest
+from .resources import source_path
 
 SOURCE_POLICY = 'utf8-lf-v1'
 DATA_POLICY = 'raw-sha256-v1'
@@ -18,7 +19,7 @@ def canonical_source_bytes(data):
 def source_fingerprint(root, files):
     records = {}
     for name in sorted(set(files)):
-        data = resolve_member(root, name, 'source').read_bytes()
+        data = source_path(root, name).read_bytes()
         records[name] = {'raw_sha256': hashlib.sha256(data).hexdigest(),
                          'canonical_sha256': hashlib.sha256(canonical_source_bytes(data)).hexdigest()}
     if not records:

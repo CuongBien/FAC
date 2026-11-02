@@ -88,7 +88,7 @@ Danh mục dựng từ run registry và report manifest đã xác minh; liên k�
 | `publish.py` | Preview và thay marker |
 | `catalog.py`, `__main__.py` | Danh mục và CLI reporting |
 
-Numeric metric vẫn thuộc `src/metrics`. Source reporting thuộc scope report; sửa renderer/format không vô hiệu train/predict. Reader/store chung còn nằm trong scientific scope bảo thủ. Packaging và CLI toàn dự án tiếp tục ở đợt 6.
+Numeric metric vẫn thuộc `src/metrics`. Source reporting thuộc scope report; sửa renderer/format không vô hiệu train/predict. Reader/store chung còn nằm trong scientific scope bảo thủ. Đợt 6 đã có [CLI/wheel](CLI_AND_PACKAGING.md); `fac report` gọi cùng các service này.
 
 206 test đạt, gồm 17 test reporting mới và cập nhật hồi quy wrapper/publisher. [Bằng chứng đợt 5](../outputs/refactor_phase5/README.md) đối chiếu 105 dòng bảng và summary Stage 4 với bản chụp trước refactor, dựng lại hai gói độc lập, kiểm tra marker idempotent và byte ngoài marker, bảo toàn run cũ. Sáu hàm vẽ khớp AST với snapshot đợt 4.
 

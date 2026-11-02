@@ -26,6 +26,7 @@ def renderer_record():
     support = ('src/__init__.py', 'src/experiments/__init__.py', 'src/experiments/legacy.py',
                'src/experiments/manifest.py', 'src/experiments/paths.py', 'src/experiments/serialization.py',
                'src/experiments/registry.py',
+               'src/experiments/resources.py',
                'src/experiments/snapshots.py', 'src/experiments/spec.py', 'src/experiments/store.py',
                'src/experiments/transactions.py', 'src/experiments/metric_artifacts.py',
                'src/pipeline/__init__.py', 'src/pipeline/contracts.py')

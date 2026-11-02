@@ -33,7 +33,9 @@ def main(argv=None):
             if args.phase == 'evaluate' and not args.test_dir:
                 raise ValueError('Evaluation requires --test-dir')
             from .runner import run_phase
-            run_phase(args.protocol, args.phase, args)
+            result = run_phase(args.protocol, args.phase, args)
+            if args.phase == 'report':
+                print('REPORT:', result/'README.md')
             return 0
         if args.command == 'index':
             print(registry.write_index(args.output))

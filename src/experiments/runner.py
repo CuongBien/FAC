@@ -16,6 +16,7 @@ from .snapshots import write_source_snapshot, verify_source_snapshot
 from .spec import ExperimentSpec
 from .store import RunStore, verify_run
 from .transactions import execute_stage
+from .resources import source_path
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -29,8 +30,8 @@ def dataset_record(folder):
 def runtime_record(root):
     return {'python': sys.version.split()[0],
             **{name: version(name) for name in ('numpy', 'scipy', 'matplotlib')},
-            'lock_sha256': sha256(root/'uv.lock'),
-            'lock_canonical_sha256': hashlib.sha256(canonical_source_bytes((root/'uv.lock').read_bytes())).hexdigest()}
+            'lock_sha256': sha256(source_path(root, 'uv.lock')),
+            'lock_canonical_sha256': hashlib.sha256(canonical_source_bytes(source_path(root, 'uv.lock').read_bytes())).hexdigest()}
 
 
 def runtime_identity(record):
@@ -220,6 +221,8 @@ def legacy_cli(protocol, argv=None):
     parser.add_argument('--resume', action='store_true', help='Verify completed stages or recover an interrupted phase')
     args = parser.parse_args(argv)
     try:
-        run_phase(protocol, args.phase, args)
+        result = run_phase(protocol, args.phase, args)
+        if args.phase == 'report':
+            print('REPORT:', result/'README.md')
     except (ValueError, OSError) as exc:
         parser.exit(2, str(exc)+'\n')

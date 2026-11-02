@@ -1,0 +1,22 @@
+{
+  "dependencies": {
+    "matplotlib": "3.11.2",
+    "numpy": "2.4.6",
+    "scipy": "1.17.1"
+  },
+  "evaluation_sha256": "dc41b86dfb7a9ccabd720a7d21cd1437a1a18efd510b55c084f2574419f9394b",
+  "frozen_model_sha256": "e3a29b9026e4ed60d5fa6001b0c963d2dc0249d00ef0877e6c775c3e72e6106d",
+  "git_unavailable": true,
+  "metric_version": "legacy-v1",
+  "native_metric_series": 72,
+  "platform": "win32",
+  "pre_refactor_prediction_exact": false,
+  "prediction_cases": 12,
+  "prediction_digest": "b4b9c9675b5edcdb85723e8c61a7eaa99fd7f6f6962e9dd429125fc2a63bf718",
+  "python": "3.11.16",
+  "report_id": "report-d324d98bbe0f5f7166dce466",
+  "report_rebuild_matched": true,
+  "resume_without_rewrite": true,
+  "source_outside_checkout": true,
+  "train_without_test": true
+}

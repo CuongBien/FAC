@@ -16,7 +16,7 @@ Có thể thay `uv run python` bằng `.\.venv\Scripts\python.exe` nếu môi tr
 uv run python -B -m unittest discover -s tests -v
 ```
 
-Có 206 test: 120 test các đợt sửa trước, 17 test hạ tầng thí nghiệm, 15 test pipeline, 18 test runner và 19 test metric/đối sánh và 17 test reporting trong `tests/test_reporting.py`. Bằng chứng hiện tại nằm trong `outputs/refactor_phase5/`; validation cũ giữ mốc lịch sử của nó. Detector yêu cầu audio dài ít nhất một khung; CLI thoát mã 2 với thông báo rõ nếu input không đủ dài.
+Có 217 test: 120 test các đợt sửa trước, 17 test hạ tầng thí nghiệm, 15 test pipeline, 18 test runner và 19 test metric/đối sánh, 17 test reporting và 11 test CLI/resource trong `tests/test_cli_packaging.py`. Bằng chứng hiện tại nằm trong `outputs/refactor_phase6/`; validation cũ giữ mốc lịch sử của nó. Detector yêu cầu audio dài ít nhất một khung; CLI thoát mã 2 với thông báo rõ nếu input không đủ dài.
 
 Đối chiếu số học với mốc trước refactor và mô hình Champion đã freeze:
 
@@ -45,6 +45,14 @@ uv run python -B scripts/24_verify_metric_refactor.py verify
 ```
 
 So 89 vector, 72 nhóm tổng hợp, 48 baseline/Champion và 288 bộ metric từ contour cũ; không fit lại model. Xem [hợp đồng rounding và kiểm tra metadata](METRICS.md).
+
+## Gói cài đặt độc lập
+
+```powershell
+uv run --locked python -B scripts/26_verify_cli_packaging.py --offline
+```
+
+Build wheel từ sdist, cài dependency đúng lock vào venv sạch và chạy CLI ngoài repo/Git. Python 3.12 so chính xác 12 trường hợp predict với reference trước refactor; runtime khác dùng `--python 3.11 --skip-reference`. Bỏ `--offline` khi cache chưa có dependency cần thiết. Kiểm tra thêm `uv sync --locked` trong venv tạm riêng, không thay `.venv` đang dùng. Xem [CLI/đóng gói và CI](CLI_AND_PACKAGING.md).
 
 ## Dự đoán file hoặc thư mục
 

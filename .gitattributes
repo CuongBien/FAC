@@ -25,3 +25,13 @@ scripts/25_verify_reporting_refactor.py text eol=lf
 outputs/refactor_phase5/** -text
 # Unified diffs intentionally contain a one-space blank context line.
 outputs/refactor_phase5/*.diff whitespace=-blank-at-eol
+src/cli/** text eol=lf
+src/__main__.py text eol=lf
+build_support.py text eol=lf
+setup.py text eol=lf
+MANIFEST.in text eol=lf
+.github/** text eol=lf
+tests/test_cli_packaging.py text eol=lf
+tests/wheel_smoke.py text eol=lf
+scripts/26_verify_cli_packaging.py text eol=lf
+outputs/refactor_phase6/** -text whitespace=cr-at-eol

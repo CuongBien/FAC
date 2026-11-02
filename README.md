@@ -7,8 +7,8 @@ Dự án môn Xử lý tín hiệu tiếng nói, hiện tập trung vào **ACF, 
 Chạy các lệnh từ thư mục gốc dự án:
 
 ```powershell
-uv sync
-uv run python predict.py -i TinHieuKiemThu -m champions -o outputs/predictions/current_test
+uv sync --locked
+uv run --locked fac predict -i TinHieuKiemThu -m champions -o outputs/predictions/current_test
 ```
 
 Nếu đã có môi trường `.venv`, có thể chạy trực tiếp:
@@ -19,7 +19,7 @@ Nếu đã có môi trường `.venv`, có thể chạy trực tiếp:
 
 Xem [hướng dẫn kiểm thử](docs/TESTING.md) để chọn thuật toán, xử lý dữ liệu mới và chạy benchmark.
 
-[Kế hoạch refactor](docs/REFACTOR_PLAN.md) chia việc chuẩn hóa thí nghiệm và quản lý báo cáo thành sáu đợt. **Đã hoàn tất đợt 1–5**: có spec/store/registry, pipeline contract, runner với journal/resume, metric v1 và report bundle/publisher riêng. 206 test đạt; điểm số cũ được giữ nguyên. Xem [quản lý thí nghiệm](docs/EXPERIMENTS.md), [pipeline](docs/PIPELINE.md), [runner](docs/RUNNER.md) và [metric/đối sánh](docs/METRICS.md) và [reporting](docs/REPORTING.md).
+[Kế hoạch refactor](docs/REFACTOR_PLAN.md) chia việc chuẩn hóa thí nghiệm và quản lý báo cáo thành sáu đợt. **Đã hoàn tất đợt 1–6**: có spec/store/registry, pipeline contract, runner với journal/resume, metric v1, report bundle/publisher và CLI/wheel độc lập. 217 test đạt; điểm số cũ được giữ nguyên. Xem [quản lý thí nghiệm](docs/EXPERIMENTS.md), [pipeline](docs/PIPELINE.md), [runner](docs/RUNNER.md) và [metric/đối sánh](docs/METRICS.md) và [reporting](docs/REPORTING.md), [CLI và đóng gói](docs/CLI_AND_PACKAGING.md).
 
 ## Dữ liệu và chỉ số
 
@@ -71,6 +71,7 @@ FAC/
 │   ├── experiments/         # Spec, manifest, store, registry và runner/lifecycle
 │   ├── metrics/             # Metric v1, profile tổng hợp, metadata và đối sánh
 │   ├── reporting/           # View, renderer, bundle, publish và danh mục báo cáo
+│   ├── cli/                 # Entry fac, predict và xuất spec mẫu
 │   └── visualization/       # Shim tương thích các API hình cũ
 ├── scripts/                 # Demo và benchmark
 ├── docs/                    # Năm chương báo cáo, hướng dẫn, vấn đề cần sửa

@@ -5,10 +5,11 @@ from pathlib import Path
 import subprocess
 import tarfile
 from .paths import resolve_member
+from .resources import source_path
 
 
 def _source_path(root, name):
-    return resolve_member(root, name, label='source snapshot')
+    return source_path(root, name, label='source snapshot')
 
 
 

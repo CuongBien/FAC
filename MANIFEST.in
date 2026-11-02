@@ -1,0 +1,10 @@
+include build_support.py uv.lock
+include predict.py requirements.txt HuongDan.txt
+recursive-include scripts *.py
+recursive-include configs/experiments *.json
+recursive-include docs *.md
+global-exclude __pycache__ *.py[cod]
+prune outputs
+prune archive
+prune TinHieuHuanLuyen
+prune TinHieuKiemThu

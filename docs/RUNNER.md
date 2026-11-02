@@ -88,3 +88,5 @@ Script 23 từ chối ghi đè proof cũ; run mới chạy trong thư mục tạ
 Bundle đã được giải nén vào thư mục ngoài Git và chạy CLI từ chính source snapshot: resume cả train/evaluate/report thành công, 336 artifact được xác minh, manifest giữ nguyên. Kết quả bổ sung ở [portable_snapshot.json](../outputs/refactor_phase3/portable_snapshot.json).
 
 Từ đợt 5, `RunService.report()` chỉ cần run đã evaluate; không đọc dataset/source khoa học hiện hành hoặc yêu cầu đúng runtime từng train. Gói report có renderer snapshot/runtime riêng. Run `reported` đợt 3 và journal report cũ vẫn đọc được; lần dựng mới luôn vào revision riêng.
+
+Đợt 6: `fac experiment` chuyển tiếp tới cùng lifecycle. Trong wheel, lock và các source hỗ trợ được đọc theo tên logic qua resource index có SHA; không cần Git hoặc checkout. [Hướng dẫn CLI/đóng gói](CLI_AND_PACKAGING.md).
