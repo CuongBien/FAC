@@ -168,7 +168,7 @@ class BenchmarkIntegrationTests(unittest.TestCase):
             wavfile.write(test/'b.wav', 16000, (signal()*30000).astype(np.int16))
             (test/'b.lab').write_text('F0mean 181\nF0std 11\nF0num 19\n', encoding='utf-8')
             runner.evaluate(args)
-            runner.report(args)
+            report_folder = runner.report(args)
             self.assertEqual(sha256(output/'frozen_models.json'), frozen_hash)
             result = json.loads((output/'evaluation.json').read_text(encoding='utf-8'))
             from src.metrics.comparison import read_series, compare_series
@@ -207,7 +207,9 @@ class BenchmarkIntegrationTests(unittest.TestCase):
             self.assertEqual(len(rows), 72)
             for row in rows:
                 self.assertTrue((output/row['contour_path']).is_file())
-            self.assertTrue((output/'figures/score_matrix.png').is_file())
+            self.assertTrue((report_folder/'figures/score_matrix.png').is_file())
+            self.assertEqual(verify_run(output)['phase'], 'evaluated')
+            self.assertFalse((output/'README.md').exists())
             self.assertEqual(len(list((output/'input_models').rglob('*.json'))), 6)
             with self.assertRaises(FileExistsError):
                 runner.evaluate(args)

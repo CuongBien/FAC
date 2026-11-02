@@ -72,4 +72,4 @@ uv run python -B -m unittest discover -s tests
 uv run python -B scripts/24_verify_metric_refactor.py verify
 ```
 
-[Bằng chứng đợt 4](../outputs/refactor_phase4/README.md) nằm riêng; model/preset/dataset và các run cũ giữ nguyên. Đây là refactor hợp đồng v1, không thêm metric raw/v2, không chọn lại mô hình theo test. Đợt 5 sẽ tách report view model/bundle/publisher và cho renderer dùng metric đã xác minh.
+[Bằng chứng đợt 4](../outputs/refactor_phase4/README.md) nằm riêng; model/preset/dataset và các run cũ giữ nguyên. Đây là refactor hợp đồng v1, không thêm metric raw/v2, không chọn lại mô hình theo test. Đợt 5 đã có [report view/bundle/publisher](REPORTING.md); renderer chỉ dùng metric đã xác minh và không chạy lại mô hình.

@@ -16,7 +16,7 @@ Có thể thay `uv run python` bằng `.\.venv\Scripts\python.exe` nếu môi tr
 uv run python -B -m unittest discover -s tests -v
 ```
 
-Có 189 test: 120 test các đợt sửa trước, 17 test hạ tầng thí nghiệm, 15 test pipeline, 18 test runner và 19 test metric/đối sánh trong `tests/test_metrics.py`. Bằng chứng hiện tại nằm trong `outputs/refactor_phase4/`; validation cũ giữ mốc lịch sử của nó. Detector yêu cầu audio dài ít nhất một khung; CLI thoát mã 2 với thông báo rõ nếu input không đủ dài.
+Có 206 test: 120 test các đợt sửa trước, 17 test hạ tầng thí nghiệm, 15 test pipeline, 18 test runner và 19 test metric/đối sánh và 17 test reporting trong `tests/test_reporting.py`. Bằng chứng hiện tại nằm trong `outputs/refactor_phase5/`; validation cũ giữ mốc lịch sử của nó. Detector yêu cầu audio dài ít nhất một khung; CLI thoát mã 2 với thông báo rõ nếu input không đủ dài.
 
 Đối chiếu số học với mốc trước refactor và mô hình Champion đã freeze:
 
@@ -28,11 +28,15 @@ Lệnh chỉ đọc dữ liệu/kết quả cũ, không đổi expected hoặc m
 
 Kiểm chứng runner thực tế, tạo proof ở thư mục mới:
 
+Mốc [runner đợt 3](../outputs/refactor_phase3/README.md) giữ phép đối chiếu train/evaluate/model/contour. Script 23 thuộc snapshot đợt 3, có kiểm tra AST renderer cũ; muốn tái lập mốc đó phải dùng đúng snapshot, không chạy như kiểm chứng HEAD sau đợt reporting.
+
+Kiểm chứng reporting hiện hành không fit mô hình:
+
 ```powershell
-uv run python -B scripts/23_verify_runner_refactor.py --output outputs/refactor_phase3-recheck
+uv run python -B scripts/25_verify_reporting_refactor.py
 ```
 
-Lần này có fit lại ba model Champion **chỉ từ train**, không quét/chọn lại preset; chạy đầy đủ prepare/train/evaluate/report và resume, đối chiếu model, metric, contour, feature và bảng report với run cũ. Replay Stage 4 dùng model đã freeze, không lặp sweep 222 cấu hình. Xem [lifecycle và giới hạn resume](RUNNER.md).
+Đối chiếu 105 dòng bảng với bản chụp trước refactor, dựng lại hai bundle và thử publisher trên bản sao. Xem [reporting](REPORTING.md).
 
 Đối chiếu metric đợt 4 với mốc trước refactor:
 

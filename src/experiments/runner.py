@@ -51,7 +51,7 @@ class RunContext:
                 'source_sha256': {name: record['raw_sha256'] for stage in source['stages'].values()
                                   for name, record in stage['files'].items()}}
 
-    def check_source(self, stages, *, renderer=False):
+    def check_source(self, stages):
         actual = capture_runtime_source(self.root, self.manifest['source'])
         for stage in stages:
             verify_source_scope(self.manifest['source'], actual, stage)
@@ -59,7 +59,7 @@ class RunContext:
             # A relocated source root may differ in EOL, but must describe the
             # code this interpreter actually executes, not an arbitrary copy.
             loaded = capture_runtime_source(ROOT, self.manifest['source'])
-            for stage in (*stages, *(('report',) if renderer else ())):
+            for stage in stages:
                 verify_source_scope(actual, loaded, stage)
         return actual
 
@@ -100,14 +100,14 @@ class RunService:
 
     def _inputs(self, train_dir, stage, test_dir=None):
         manifest = verify_run(self.folder)
-        prerequisite = {'train': 'prepare', 'evaluate': 'train', 'report': 'evaluate'}[stage]
+        prerequisite = {'train': 'prepare', 'evaluate': 'train'}[stage]
         if prerequisite not in manifest.get('completed_stages', {}):
             raise ValueError('Stage requires completed '+prerequisite)
         spec = ExperimentSpec(json.loads((self.folder/'config.json').read_bytes()))
         protocol = validate_protocol(spec)
         context = RunContext(self.root, manifest)
         stages = ('train', 'predict', 'evaluate') if stage != 'train' else ('train', 'predict')
-        current_source = context.check_source(stages, renderer=stage == 'report')
+        current_source = context.check_source(stages)
         train = dataset_record(train_dir)
         if train != manifest['datasets']['train']:
             raise ValueError('Training data changed since preparation')
@@ -124,11 +124,6 @@ class RunService:
                                 for name in ('frozen_config.json', 'frozen_models.json')}
         if test_dir is not None:
             inputs['test_dataset'] = dataset_record(test_dir)
-        if stage == 'report':
-            if inputs['test_dataset'] != manifest['completed_stages']['evaluate']['inputs']['test_dataset']:
-                raise ValueError('Test data changed since evaluation')
-            inputs['evaluation_sha256'] = manifest['artifacts']['evaluation.json']['sha256']
-            inputs['renderer_sha256'] = current_source['stages']['report']['canonical_sha256']
         return inputs, context
 
     def train(self, train_dir, *, resume=False):
@@ -152,16 +147,11 @@ class RunService:
                 raise ValueError('Evaluation inputs changed during execution')
         return execute_stage(self.folder, 'evaluate', inputs, compute, resume=resume)
 
-    def report(self, train_dir, test_dir, *, resume=False):
-        inputs, _ = self._inputs(train_dir, 'report', test_dir)
-        if inputs['protocol'] != 'champion':
-            raise ValueError('Stage 4 publishing remains in script 19 until the reporting refactor')
-        from .champion_report import report
-        def compute(work):
-            report(SimpleNamespace(output_dir=str(work)))
-            if self._inputs(train_dir, 'report', test_dir)[0] != inputs:
-                raise ValueError('Report inputs changed during execution')
-        return execute_stage(self.folder, 'report', inputs, compute, resume=resume)
+    def report(self, train_dir=None, test_dir=None, *, resume=False, output=None):
+        # Reports consume the verified evaluation, not the original data or the
+        # current scientific runtime. Revisions never change the run manifest.
+        from src.reporting.bundle import create_report
+        return create_report(self.folder, output)
 
 
 def _backend(protocol):
@@ -180,8 +170,6 @@ def run_phase(protocol, phase, args):
     resume = getattr(args, 'resume', False)
     if protocol not in ('champion', 'stage4') or phase not in ('prepare', 'train', 'evaluate', 'report'):
         raise ValueError('Unknown run protocol/phase')
-    if phase == 'report' and protocol != 'champion':
-        raise ValueError('Stage 4 publishing remains in script 19')
     if (service.folder/'manifest.json').exists():
         stored_spec = ExperimentSpec(json.loads((service.folder/'config.json').read_bytes()))
         if stored_spec.to_dict().get('protocol') != protocol:
@@ -208,26 +196,27 @@ def run_phase(protocol, phase, args):
     if not (service.folder/'manifest.json').exists():
         # Existing historical runs keep their original readers/guards. New runs
         # always use the manifest lifecycle; never upgrade old evidence in place.
-        if phase == 'report' and protocol == 'champion':
-            from .champion_report import report
-            return report(args)
+        if phase == 'report':
+            from src.reporting.bundle import create_report
+            return create_report(service.folder, getattr(args, 'report_dir', None))
         return _backend(protocol).evaluate(args)
     if phase == 'evaluate':
         return service.evaluate(args.train_dir, args.test_dir, resume=resume)
     if phase == 'report':
-        return service.report(args.train_dir, args.test_dir, resume=resume)
+        return service.report(output=getattr(args, 'report_dir', None), resume=resume)
     raise ValueError('Unknown run phase')
 
 
 def legacy_cli(protocol, argv=None):
     parser = argparse.ArgumentParser(description='Versioned '+protocol+' experiment runner')
-    phases = ['prepare', 'train', 'evaluate']+(['report'] if protocol == 'champion' else [])
+    phases = ['prepare', 'train', 'evaluate', 'report']
     parser.add_argument('phase', choices=phases)
     parser.add_argument('--train-dir', default=str(ROOT/'TinHieuHuanLuyen'))
     parser.add_argument('--test-dir', default=str(ROOT/'TinHieuKiemThu'))
     parser.add_argument('--output-dir', default=str(ROOT/'outputs'/('stage4_validation' if protocol == 'stage4'
                                                                 else 'champion_unsupervised_2026-11-01')))
     parser.add_argument('--spec', type=Path, help='Explicit fixed v1 protocol JSON; unsupported overrides are rejected')
+    parser.add_argument('--report-dir', type=Path, help='Separate immutable report revision destination')
     parser.add_argument('--resume', action='store_true', help='Verify completed stages or recover an interrupted phase')
     args = parser.parse_args(argv)
     try:

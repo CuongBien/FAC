@@ -17,7 +17,10 @@ class RunRegistry:
         folders = ({p.parent for p in outputs.rglob('frozen_config.json')}
                    | {p.parent for p in outputs.rglob('manifest.json')
                       if 'runs' in p.relative_to(outputs).parts or (p.parent/'config.json').is_file()})
-        folders = {folder for folder in folders if '.attempts' not in folder.relative_to(outputs).parts}
+        # Report bundles contain copied input freezes; those are not new runs.
+        folders = {folder for folder in folders if not any(part.startswith('.') for part in folder.relative_to(outputs).parts)
+                   and not any((parent/'report_manifest.json').is_file()
+                               and parent != folder for parent in folder.parents if parent != outputs)}
         entries = []
         for folder in sorted(folders):
             relative = folder.relative_to(self.root).as_posix()

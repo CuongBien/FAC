@@ -19,3 +19,9 @@ src/metrics/** text eol=lf
 tests/test_metrics.py text eol=lf
 scripts/24_verify_metric_refactor.py text eol=lf
 outputs/refactor_phase4/** -text
+src/reporting/** text eol=lf
+tests/test_reporting.py text eol=lf
+scripts/25_verify_reporting_refactor.py text eol=lf
+outputs/refactor_phase5/** -text
+# Unified diffs intentionally contain a one-space blank context line.
+outputs/refactor_phase5/*.diff whitespace=-blank-at-eol

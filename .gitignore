@@ -22,3 +22,5 @@ Desktop.ini
 
 # Local submission archives; the cleanup manifest records their checksums
 *.zip
+# OS-owned coordination files contain no experiment or report data.
+.run.lock

@@ -68,7 +68,7 @@ from src.experiments.manifest import capture_dataset, capture_source
 
 Cấu hình hiện có: [champion_unsupervised.json](../configs/experiments/champion_unsupervised.json), [stage4_calibration.json](../configs/experiments/stage4_calibration.json). Từ đợt 3, runner 17/21 đã đọc/ghim spec và dùng lifecycle chung cho run mới. Hai giao thức v1 cố định được kiểm tra đầy đủ; cấu hình chưa hỗ trợ bị từ chối. Scope runtime còn bảo thủ nhưng renderer Champion đã tách riêng. Xem [runner/resume và giới hạn](RUNNER.md).
 
-Run mới không ghi đè artifact đã tồn tại. Từ đợt 3, manifest theo dõi prepare/train/evaluate/report; OS lock và journal bảo vệ việc công bố, resume kiểm tra input/SHA trước khi tiếp tục. Không tự cướp lock hoặc gắn nhãn complete cho run ghi dở. RunStore cấp thấp vẫn tạo manifest prepared chỉ có config; runner yêu cầu prepare hoàn tất trước train.
+Run mới không ghi đè artifact đã tồn tại. Từ đợt 3, manifest theo dõi prepare/train/evaluate (và report lịch sử đợt 3); OS lock và journal bảo vệ việc công bố, resume kiểm tra input/SHA trước khi tiếp tục. Không tự cướp lock hoặc gắn nhãn complete cho run ghi dở. RunStore cấp thấp vẫn tạo manifest prepared chỉ có config; runner yêu cầu prepare hoàn tất trước train.
 
 ## Kiểm chứng đợt này
 
@@ -79,4 +79,4 @@ Run mới không ghi đè artifact đã tồn tại. Từ đợt 3, manifest the
 
 Nguồn kiểm chứng lịch sử của đợt 1: [outputs/refactor_phase1](../outputs/refactor_phase1/README.md). Đợt 2 có [feature contract/engine/cache](PIPELINE.md) dùng chung; `pitch_cache` được re-export từ `pipeline.cache` bằng ContextVar để tương thích caller cũ. Đợt 3 có [runner chung](RUNNER.md), 170 test tại thời điểm đó và [bộ bằng chứng riêng](../outputs/refactor_phase3/README.md).
 
-**Đợt 4 đã hoàn tất:** [metric v1/đối sánh](METRICS.md) thuộc `src/metrics`, 189 test và [bằng chứng riêng](../outputs/refactor_phase4/README.md). Run mới có sidecar metric với context/dataset/file population; run cũ không được sửa. Format thuộc scope report, không tham gia tính metric. Bước tiếp theo là reporting ở đợt 5.
+**Đợt 4 đã hoàn tất:** [metric v1/đối sánh](METRICS.md) thuộc `src/metrics`, 189 test và [bằng chứng riêng](../outputs/refactor_phase4/README.md). Run mới có sidecar metric với context/dataset/file population; run cũ không được sửa. Format thuộc scope report, không tham gia tính metric. Đợt 5 đã có [reporting](REPORTING.md), 206 test và [bằng chứng riêng](../outputs/refactor_phase5/README.md). Báo cáo là revision riêng, không thay manifest khoa học; registry bỏ qua bản sao input trong report. Bước tiếp theo là CLI/đóng gói ở đợt 6.

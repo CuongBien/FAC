@@ -19,7 +19,8 @@ def source_scopes(root):
     return {'train': files, 'predict': files, 'evaluate': files,
             # Snapshot support files are outside scientific fingerprints: the
             # actual executable spec is already pinned as config.json per run.
-            'report': ['src/experiments/champion_report.py', 'src/metrics/formatting.py', 'README.md',
+            'report': [*(path.relative_to(root).as_posix() for path in (root/'src/reporting').glob('*.py')),
+                       'src/experiments/champion_report.py', 'src/metrics/formatting.py', 'README.md',
                        'configs/experiments/champion_unsupervised.json',
                        'configs/experiments/stage4_calibration.json']}
 

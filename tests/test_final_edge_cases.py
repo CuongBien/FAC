@@ -141,7 +141,7 @@ class ReportOwnershipTests(unittest.TestCase):
                         'metrics': {'final_score': .2}, 'files': [{'file': 'a.wav', 'pred_f0_mean': 180.,
                             'pred_f0_std': 10., 'pred_f0_num': 20, 'final_score': .2}]})
                 protocols.append({'dataset': dataset, 'method': method, 'strategy': 'median_train_active',
-                                  'metrics': {'final_score': .3}})
+                                  'metrics': {'final_score': .3}, 'files': []})
         write_json(folder/'evaluation.json', {'config_sha256': sha256(folder/'frozen_config.json'),
             'models_sha256': sha256(folder/'frozen_models.json'), 'pipelines': pipelines, 'protocols': protocols})
         write_source_snapshot(root, folder/'training_source_snapshot.tar.gz', provenance)
@@ -152,6 +152,9 @@ class ReportOwnershipTests(unittest.TestCase):
         write_json(folder/'legacy_with_cepstrum_branch/cepstrum_trace.json', trace)
         for method in chosen:
             write_json(folder/'train'/f'{method}_trials.json', [{'spec': chosen[method], 'metrics': {'final_score': .2}}])
+        for name in ('evaluation_pipelines_per_file.csv', 'evaluation_protocols_per_file.csv', 'train/all_trials_per_file.csv'):
+            (folder/name).write_text('file,final_score\na.wav,0.2\n', encoding='utf-8')
+        write_json(folder/'train/plugin_sweep.json', [])
         (root/'docs').mkdir()
         owned = {root/'README.md': report.README_MARKERS, root/'docs/STAGE4_RESULTS.md': report.REPORT_MARKERS,
                  **{root/'docs'/name: report.CHAPTER_MARKERS for name in report.CHAPTERS}}
@@ -161,33 +164,38 @@ class ReportOwnershipTests(unittest.TestCase):
         return report, root, folder, owned
 
     def test_regeneration_preserves_every_manual_region_and_is_idempotent(self):
+        from src.reporting.publish import preview, apply
         with tempfile.TemporaryDirectory() as directory, contextlib.redirect_stdout(io.StringIO()):
             report, root, folder, owned = self.fixture(directory)
             before = {path: path.read_text(encoding='utf-8') for path in owned}
-            with patch.object(report, 'ROOT', root), patch.object(sys, 'argv', ['report', '--output-dir', str(folder)]), \
-                 patch.object(report.plt.Figure, 'savefig'):
-                report.main()
-                after = {path: path.read_text(encoding='utf-8') for path in owned}
-                report.main()
+            bundle = report.main(['--output-dir', str(folder), '--report-dir', str(root/'report')])
+            self.assertEqual(before, {path: path.read_text(encoding='utf-8') for path in owned})
+            plan = preview(bundle, root)
+            self.assertTrue(plan.diff())
+            apply(plan)
+            after = {path: path.read_text(encoding='utf-8') for path in owned}
+            apply(preview(bundle, root))
+            self.assertEqual(bundle, report.main(['--output-dir', str(folder), '--report-dir', str(bundle)]))
             for path, (start, end) in owned.items():
                 self.assertEqual(before[path].split(start)[0], after[path].split(start)[0])
                 self.assertEqual(before[path].split(end)[1], after[path].split(end)[1])
                 self.assertEqual(after[path], path.read_text(encoding='utf-8'))
             self.assertIn('CHAMPION_UNSUPERVISED_RESULTS.md', after[root/'README.md'])
             self.assertNotIn('phần tích hợp Champion còn thiếu bằng chứng', after[root/'README.md'])
-            self.assertTrue((folder/'report_generation.json').is_file())
+            self.assertTrue((bundle/'summary.json').is_file())
+            self.assertFalse((folder/'report_generation.json').exists())
 
-    def test_missing_markers_fail_before_any_artifact_is_modified(self):
+    def test_missing_markers_fail_before_any_document_is_modified(self):
+        from src.reporting.publish import preview
         with tempfile.TemporaryDirectory() as directory, contextlib.redirect_stdout(io.StringIO()):
             report, root, folder, owned = self.fixture(directory)
+            bundle = report.main(['--output-dir', str(folder), '--report-dir', str(root/'report')])
             path = root/'README.md'
             path.write_text(path.read_text(encoding='utf-8').replace(report.README_MARKERS[1], ''), encoding='utf-8')
-            before = {p.relative_to(root): p.read_bytes() for p in root.rglob('*') if p.is_file()}
-            with patch.object(report, 'ROOT', root), patch.object(sys, 'argv', ['report', '--output-dir', str(folder)]):
-                with self.assertRaisesRegex(ValueError, 'generated block'):
-                    report.main()
-            after = {p.relative_to(root): p.read_bytes() for p in root.rglob('*') if p.is_file()}
-            self.assertEqual(before, after)
+            before = {p: p.read_bytes() for p in owned}
+            with self.assertRaisesRegex(ValueError, 'generated block'):
+                preview(bundle, root)
+            self.assertEqual(before, {p: p.read_bytes() for p in owned})
             self.assertFalse((folder/'figures').exists())
 
     def test_ambiguous_and_reversed_markers_are_rejected(self):

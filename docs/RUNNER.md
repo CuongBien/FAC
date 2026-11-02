@@ -13,7 +13,7 @@ scripts/17,21 hoặc python -m src.experiments run
                 pipeline + analysis
 ```
 
-`transactions.py` quản lý khóa và công bố artifact; `protocol_specs.py` mô tả hai giao thức; `dependencies.py` khai báo scope nguồn. `champion_report.py` giữ nguyên renderer cũ trong thời gian chờ đợt 5. Backend chỉ điều phối thí nghiệm, không chứa công thức ACF/AMDF/Cepstrum hoặc phép fit mới.
+`transactions.py` quản lý khóa và công bố artifact; `protocol_specs.py` mô tả hai giao thức; `dependencies.py` khai báo scope nguồn. `champion_report.py` là shim gọi `src/reporting`; từ đợt 5, report revision không ghi vào manifest khoa học. Xem [reporting](REPORTING.md). Backend chỉ điều phối thí nghiệm, không chứa công thức ACF/AMDF/Cepstrum hoặc phép fit mới.
 
 ## Chạy một run mới
 
@@ -24,7 +24,7 @@ uv run python -B scripts/21_benchmark_champion_unsupervised.py evaluate --output
 uv run python -B scripts/21_benchmark_champion_unsupervised.py report --output-dir outputs/runs/champion-recheck
 ```
 
-Pha `train` tự prepare khi thư mục run chưa tồn tại. Có thể dùng thư mục đầu ra rỗng; không dùng lại thư mục chứa bằng chứng cũ. Script 17 dùng cùng lifecycle và [stage4_calibration.json](../configs/experiments/stage4_calibration.json); các pha của nó là prepare/train/evaluate, còn publish Stage 4 tiếp tục thuộc script 19.
+Pha `train` tự prepare khi thư mục run chưa tồn tại. Có thể dùng thư mục đầu ra rỗng; không dùng lại thư mục chứa bằng chứng cũ. Script 17 dùng cùng lifecycle và [stage4_calibration.json](../configs/experiments/stage4_calibration.json); các pha của nó là prepare/train/evaluate/report. Script 19 cũng gọi report bundle; publish tài liệu là bước riêng có preview.
 
 CLI chung tương đương:
 
@@ -43,7 +43,7 @@ Hai JSON hiện là **giao thức v1 cố định có thể thực thi**, không
 | Prepare | `prepared`, có `completed_stages.prepare` | Config, source snapshot và runtime |
 | Train/freeze | `trained` | Frozen config/model cùng SHA sidecar; train features/trials |
 | Evaluate | `evaluated` | Evaluation, CSV, contour và input-adaptive models |
-| Report Champion | `reported` | README, PNG và report manifest ghim nguồn |
+| Report revision (từ đợt 5) | Giữ `evaluated` hoặc `reported` lịch sử | Gói riêng dưới `reports/<id>` hoặc destination chỉ định |
 
 `RunStore.create()` cấp thấp vẫn tạo được manifest prepared chỉ có config như đợt 1; runner yêu cầu prepare hoàn tất trước train. Mỗi stage có input identity, danh sách artifact, checksum kết quả và thời điểm công bố. Verify kiểm tra checksum, stage order, train manifest, liên kết source/freeze/evaluation/report. Trạng thái verified nói về tính toàn vẹn của bằng chứng, không chứng minh chất lượng mô hình.
 
@@ -60,7 +60,7 @@ uv run python -B scripts/21_benchmark_champion_unsupervised.py evaluate --resume
 - Tính toán ghi vào `.attempts/<id>/`. Trước khi công bố, runner xác minh source/data/runtime và mọi input đã commit. Backend làm thay đổi input hoặc thiếu output bắt buộc sẽ không được gắn trạng thái hoàn tất.
 - Journal `.transaction.json` ghi trước khi chuyển artifact ra đường chính. Nếu bị ngắt lúc công bố, `--resume` kiểm tra SHA và hoàn tất journal, không fit/evaluate lại. Xung đột hoặc artifact bị hỏng sẽ bị từ chối.
 - Nếu lỗi xảy ra trước journal, chưa có checkpoint khoa học được công bố: lần tiếp tục bắt đầu lại **pha chưa hoàn tất** trong attempt mới. Không resume theo từng frame/trial. Attempt lỗi giữ lại để kiểm tra; registry không xem nó là một run.
-- Pha đã hoàn tất chỉ được xác minh khi dùng `--resume`; không đổi manifest, không refit hoặc ghi lại report. Không dùng resume để đổi config, dataset, code hoặc runtime.
+- Pha đã hoàn tất chỉ được xác minh khi dùng `--resume`; không đổi manifest, không refit. Report revision được xác minh/tái dùng theo ID riêng. Không dùng resume để đổi config, dataset, code hoặc runtime.
 
 Việc công bố nhiều file dựa vào journal và manifest được thay atomically cuối cùng; không giả định toàn thư mục file được đổi atomically. Trong khoảng bị ngắt, một số file mới có thể đã xuất hiện nhưng chưa thuộc stage hoàn tất.
 
@@ -86,3 +86,5 @@ uv run python -B scripts/23_verify_runner_refactor.py --output outputs/refactor_
 Script 23 từ chối ghi đè proof cũ; run mới chạy trong thư mục tạm và được lưu thành bundle nén cùng manifest/SHA. Các artifact gốc và preset không được sửa. Test đã có lịch sử quan sát; run mới không chọn lại preset theo điểm test.
 
 Bundle đã được giải nén vào thư mục ngoài Git và chạy CLI từ chính source snapshot: resume cả train/evaluate/report thành công, 336 artifact được xác minh, manifest giữ nguyên. Kết quả bổ sung ở [portable_snapshot.json](../outputs/refactor_phase3/portable_snapshot.json).
+
+Từ đợt 5, `RunService.report()` chỉ cần run đã evaluate; không đọc dataset/source khoa học hiện hành hoặc yêu cầu đúng runtime từng train. Gói report có renderer snapshot/runtime riêng. Run `reported` đợt 3 và journal report cũ vẫn đọc được; lần dựng mới luôn vào revision riêng.

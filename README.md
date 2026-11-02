@@ -19,7 +19,7 @@ Nếu đã có môi trường `.venv`, có thể chạy trực tiếp:
 
 Xem [hướng dẫn kiểm thử](docs/TESTING.md) để chọn thuật toán, xử lý dữ liệu mới và chạy benchmark.
 
-[Kế hoạch refactor](docs/REFACTOR_PLAN.md) chia việc chuẩn hóa thí nghiệm và quản lý báo cáo thành sáu đợt. **Đã hoàn tất đợt 1–4**: có spec/store/registry, pipeline contract, runner với journal/resume và API metric v1/đối sánh có metadata. 189 test đạt; điểm số cũ được giữ nguyên. Xem [quản lý thí nghiệm](docs/EXPERIMENTS.md), [pipeline](docs/PIPELINE.md), [runner](docs/RUNNER.md) và [metric/đối sánh](docs/METRICS.md).
+[Kế hoạch refactor](docs/REFACTOR_PLAN.md) chia việc chuẩn hóa thí nghiệm và quản lý báo cáo thành sáu đợt. **Đã hoàn tất đợt 1–5**: có spec/store/registry, pipeline contract, runner với journal/resume, metric v1 và report bundle/publisher riêng. 206 test đạt; điểm số cũ được giữ nguyên. Xem [quản lý thí nghiệm](docs/EXPERIMENTS.md), [pipeline](docs/PIPELINE.md), [runner](docs/RUNNER.md) và [metric/đối sánh](docs/METRICS.md) và [reporting](docs/REPORTING.md).
 
 ## Dữ liệu và chỉ số
 
@@ -70,7 +70,8 @@ FAC/
 │   ├── analysis/            # Thresholds và evaluation
 │   ├── experiments/         # Spec, manifest, store, registry và runner/lifecycle
 │   ├── metrics/             # Metric v1, profile tổng hợp, metadata và đối sánh
-│   └── visualization/       # Plotter dùng chung
+│   ├── reporting/           # View, renderer, bundle, publish và danh mục báo cáo
+│   └── visualization/       # Shim tương thích các API hình cũ
 ├── scripts/                 # Demo và benchmark
 ├── docs/                    # Năm chương báo cáo, hướng dẫn, vấn đề cần sửa
 ├── outputs/

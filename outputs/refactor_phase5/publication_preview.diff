@@ -1,0 +1,220 @@
+--- README.md
++++ README.md
+@@ -38,6 +38,8 @@
+ Đã hoàn tất [benchmark tám phương pháp không giám sát với Champion](docs/CHAMPION_UNSUPERVISED_RESULTS.md): 288 kết quả từng file, mô hình đóng băng trước test. Sau [ba sửa lỗi biên cuối](docs/FINAL_EDGE_CASE_FIXES.md), **120/120 test đạt** và cả 288 kết quả vẫn khớp chính xác. Cepstrum ngưỡng động đạt 16,480% test; 2D fit từng input đạt 10,375% nhưng thuộc nhóm thích nghi riêng. Các preset bên dưới được giữ nguyên.
+ 
+ <!-- STAGE4_README_START -->
++Nguồn: run `stage4-71a151c01ece1311`; metric `legacy-v1`; [evaluation](outputs/reports/stage4/inputs/evaluation.json) SHA `6cb3ec647409e04bb7527730c903a89703f6745878dbc0af4abcaa67684661ae`; [config](outputs/reports/stage4/inputs/frozen_config.json) SHA `83dfda76c5a2ce34846a8c4eff9132296e2c09846e4d8e2cf44bbac5be884dc5`; [model](outputs/reports/stage4/inputs/frozen_models.json) SHA `132f49c80d3f0973424a237a4a7cf83bab82f14f1dd03663f3af720b6f09084f`.
++
+ | Champion | Ngưỡng | Train Final Score (%) | Test Final Score (%) |
+ |---|---:|---:|---:|
+ | ACF | 0.45 | 2.215 | 2.385 |
+--- docs/STAGE4_RESULTS.md
++++ docs/STAGE4_RESULTS.md
+@@ -3,14 +3,16 @@
+ > Cập nhật 01/11/2026: đây là kết quả Stage 4 đã lưu. Snapshot nguồn đã được phục dựng đúng checksum của lần tạo lại ngày 31/10; bản snapshot/runtime/validation ngày 30/10 được giữ riêng. Các điểm/giao thức cũ không tự thay đổi khi sửa Otsu. Xem [rà soát main](MAIN_REVIEW_FIXES.md) và [benchmark 15/16 sau sửa](../outputs/main_review_2026-11-01/README.md).
+ 
+ <!-- STAGE4_REPORT_START -->
+-Ngày 30/10/2026. Kết quả sinh từ `scripts/19_report_validation.py`, cấu hình đóng băng và dữ liệu đánh giá đã lưu.
++Nguồn: run `stage4-71a151c01ece1311`; metric `legacy-v1`; [evaluation](../outputs/reports/stage4/inputs/evaluation.json) SHA `6cb3ec647409e04bb7527730c903a89703f6745878dbc0af4abcaa67684661ae`; [config](../outputs/reports/stage4/inputs/frozen_config.json) SHA `83dfda76c5a2ce34846a8c4eff9132296e2c09846e4d8e2cf44bbac5be884dc5`; [model](../outputs/reports/stage4/inputs/frozen_models.json) SHA `132f49c80d3f0973424a237a4a7cf83bab82f14f1dd03663f3af720b6f09084f`.
++
++Kết quả từ cấu hình đóng băng và dữ liệu đánh giá đã lưu; không chạy lại thí nghiệm khi dựng báo cáo.
+ 
+ ## Phạm vi và giao thức
+ 
+-- Khảo sát 222 cấu hình, 888 lượt cấu hình/file trên bốn WAV train.
++- Khảo sát 222 cấu hình, 888 lượt cấu hình/file trên 4 WAV train.
+ - Pha 1: đủ 16 tổ hợp BP/Clip/Energy/Viterbi ở cấu hình lịch sử. Pha 2: hai tổ hợp tốt nhất cộng Champion lịch sử, khung 20/25/30 ms và lưới ngưỡng định trước.
+ - Hop cố định 10 ms, F0 70–400 Hz, clipping 40%, hệ số Energy/Viterbi giữ nguyên. Không khẳng định đã tìm tối ưu toàn bộ không gian tham số.
+-- Tiêu chí: trung bình Final Score của bốn file train; hòa điểm ưu tiên sai số file tệ nhất, số plugin, khoảng cách tới khung 25 ms, tên plugin và ngưỡng.
++- Tiêu chí: trung bình Final Score các file train; hòa điểm ưu tiên sai số file tệ nhất, số plugin, khoảng cách tới khung 25 ms, tên plugin và ngưỡng.
+ - Dùng tham chiếu thống kê toàn file để hiệu chỉnh; không gọi đây là huấn luyện Gaussian từ nhãn V/UV. Accuracy/F1 từng khung vẫn không có.
+ - `frozen_config.json` và `frozen_models.json` có checksum, được ghi trước bước đọc/evaluate test. Các tham số không được chọn lại theo điểm test.
+ - Test từng được xem trong các lần rà soát trước; đây là lựa chọn theo train với cấu hình cố định khi đánh giá, không phải một test set hoàn toàn chưa từng được quan sát.
+@@ -23,21 +25,11 @@
+ | AMDF | Energy + Viterbi | 30/10 | 0.5 | 3.757 → 2.078 | 4.125 → 2.755 |
+ | CEPSTRUM | BP + Clip + Energy + Viterbi | 30/10 | 0.1 | 15.160 → 11.390 | 21.203 → 22.942 |
+ 
+-**ACF và AMDF giảm sai số test; Cepstrum tăng sai số test dù giảm trên train.** Giữ preset đã chốt, không đảo lại sau khi xem test. Chỉ có bốn file train nên khả năng tổng quát còn hạn chế.
++Bảng giữ đúng điểm trước/sau đã lưu. Không đổi lựa chọn trên train sau khi xem test; số liệu của một tập nhỏ chưa chứng minh khả năng tổng quát.
+ 
+-![So sánh train/test](../outputs/stage4_validation/figures/pipelines_train_test.png)
++![So sánh train/test](../outputs/reports/stage4/figures/pipelines_train_test.png)
+ 
+-![Khảo sát trên train](../outputs/stage4_validation/figures/train_threshold_curves.png)
+-
+-## Truy vết Cepstrum lịch sử
+-
+-Replay commit `caaf751` đã tái lập đúng 4,43% train / 7,62% test trong artifact. Bộ đếm xác nhận 3247 lời gọi ACF và 0 lời gọi Cepstrum khi plugin detector báo method là Cepstrum.
+-
+-Commit này thiếu nhánh `elif method == "cepstrum"` trong `src/plugins/plugin_detector.py`: ứng viên pitch và quyết định V/UV rơi vào nhánh ACF, sau đó hậu xử lý/Viterbi lại dùng Cepstrum. Kết quả cũ là một pipeline lai, không phải Cepstrum thuần theo mô tả.
+-
+-Chỉ thay `plugin_detector.py` bằng bản có nhánh Cepstrum từ commit `427c0a4`, giữ mọi mã/dữ liệu khác, đổi số lời gọi thành ACF=0, Cepstrum=3247. Điểm thành 6,84% / 13,24%, khớp mốc trước sửa đợt 1.
+-
+-Vì vậy không dùng 4,43%/7,62% làm mốc chất lượng Cepstrum đúng thuật toán. Các artifact cũ được giữ nguyên để truy vết; không phục hồi lỗi nhánh ACF để lấy lại điểm thấp.
++![Khảo sát trên train](../outputs/reports/stage4/figures/train_threshold_curves.png)
+ 
+ ## Đối chứng các giao thức không giám sát
+ 
+@@ -65,14 +57,13 @@
+ 
+ Các dòng này là đối chứng mô tả; không dùng thứ hạng test để chọn lại preset. Mô hình 2D/HMM fit trên train có kết quả riêng với bản thích nghi theo input.
+ 
+-![Đối chứng giao thức](../outputs/stage4_validation/figures/protocols_test.png)
++![Đối chứng giao thức](../outputs/reports/stage4/figures/protocols_test.png)
+ 
+ ## Artifact và tái lập
+ 
+-- [Cấu hình đã đóng băng](../outputs/stage4_validation/frozen_config.json), [mô hình đã fit trên train](../outputs/stage4_validation/frozen_models.json).
+-- [Toàn bộ trial theo file](../outputs/stage4_validation/train/all_trials_per_file.csv), [16 tổ hợp mỗi thuật toán](../outputs/stage4_validation/train/plugin_sweep.json).
+-- [Đánh giá đầy đủ](../outputs/stage4_validation/evaluation.json), [pipeline theo file](../outputs/stage4_validation/evaluation_pipelines_per_file.csv), [giao thức theo file](../outputs/stage4_validation/evaluation_protocols_per_file.csv).
+-- [Replay gốc](../outputs/stage4_validation/cepstrum_trace.json), [replay chỉ sửa nhánh Cepstrum](../outputs/stage4_validation/legacy_with_cepstrum_branch/cepstrum_trace.json).
++- [Cấu hình đã đóng băng](../outputs/reports/stage4/inputs/frozen_config.json), [mô hình đã fit trên train](../outputs/reports/stage4/inputs/frozen_models.json).
++- [Toàn bộ trial theo file](../outputs/reports/stage4/inputs/train/all_trials_per_file.csv), [16 tổ hợp mỗi thuật toán](../outputs/reports/stage4/inputs/train/plugin_sweep.json).
++- [Đánh giá đầy đủ](../outputs/reports/stage4/inputs/evaluation.json), [pipeline theo file](../outputs/reports/stage4/inputs/evaluation_pipelines_per_file.csv), [giao thức theo file](../outputs/reports/stage4/inputs/evaluation_protocols_per_file.csv).
+ - `training_source_snapshot.tar.gz` chứa đúng source theo checksum lúc bắt đầu train; `runtime.json` ghi phiên bản thư viện. Base commit, branch, checksum WAV/LAB và mã đang dùng nằm trong provenance.
+ 
+ ```powershell
+@@ -88,4 +79,12 @@
+ - Kết quả tốt về mean/std/count không chứng minh đúng contour hoặc hết octave errors. Việc tự gán nhãn dữ liệu cũ không thể thay bằng chứng tham chiếu.
+ - Chưa có tập kiểm thử mới độc lập sau các vòng phát triển; chưa đủ cơ sở khẳng định preset tối ưu trên mọi giọng/môi trường.
+ - Word, slide và phép đo T0 thủ công là các đầu ra môn học riêng, chưa được tạo trong đợt sửa code này.
++
++
++## Truy vết Cepstrum lịch sử
++
++Hai replay là bằng chứng riêng đã lưu; không chạy lại khi render.
++- Replay `caaf75109d7388bd70b5fb09261b7fe9987a095f`: {'acf': 3247, 'cepstrum': 0}
++- Chỉ sửa nhánh `427c0a4`: {'acf': 0, 'cepstrum': 3247}
++- [Replay gốc](../outputs/reports/stage4/inputs/cepstrum_trace.json), [replay sửa nhánh](../outputs/reports/stage4/inputs/legacy_with_cepstrum_branch/cepstrum_trace.json).
+ <!-- STAGE4_REPORT_END -->
+--- docs/01_acf_theory_and_experiments.md
++++ docs/01_acf_theory_and_experiments.md
+@@ -276,9 +276,11 @@
+ **Dẫn hướng:** [Trang chủ README](../README.md) | [Chương II: Thuật toán AMDF →](02_amdf_theory_and_experiments.md)
+ 
+ <!-- STAGE4_CURRENT_START -->
+-## Kết quả kiểm chứng hiện hành — 30/10/2026
+-
+-Nguồn: cấu hình đóng băng và `outputs/stage4_validation/evaluation.json`. Final Score là sai số thống kê toàn file; thấp hơn tốt hơn. Accuracy/F1 từng khung không xác định vì thiếu nhãn thời gian.
++Nguồn: run `stage4-71a151c01ece1311`; metric `legacy-v1`; [evaluation](../outputs/reports/stage4/inputs/evaluation.json) SHA `6cb3ec647409e04bb7527730c903a89703f6745878dbc0af4abcaa67684661ae`; [config](../outputs/reports/stage4/inputs/frozen_config.json) SHA `83dfda76c5a2ce34846a8c4eff9132296e2c09846e4d8e2cf44bbac5be884dc5`; [model](../outputs/reports/stage4/inputs/frozen_models.json) SHA `132f49c80d3f0973424a237a4a7cf83bab82f14f1dd03663f3af720b6f09084f`.
++
++## Kết quả từ run đã xác minh
++
++Nguồn: cấu hình đóng băng và evaluation đã ghim trong gói báo cáo. Final Score là sai số thống kê toàn file; thấp hơn tốt hơn. Accuracy/F1 từng khung không xác định vì thiếu nhãn thời gian.
+ 
+ Preset: BP + Energy + Viterbi, frame/hop 30/10 ms, T=0.45.
+ 
+@@ -295,5 +297,5 @@
+ | studio_F2.wav | 201.64 | 45.45 | 136 | 2.87 |
+ | studio_M2.wav | 156.10 | 30.15 | 120 | 1.61 |
+ 
+-[Chi tiết và giới hạn kiểm chứng](STAGE4_RESULTS.md).
++[Chi tiết và giới hạn kiểm chứng](../outputs/reports/stage4/README.md).
+ <!-- STAGE4_CURRENT_END -->
+--- docs/02_amdf_theory_and_experiments.md
++++ docs/02_amdf_theory_and_experiments.md
+@@ -235,9 +235,11 @@
+ **Dẫn hướng:** [← Chương I: Thuật toán ACF](01_acf_theory_and_experiments.md) | [Trang chủ README](../README.md) | [Chương III: Thuật toán Cepstrum →](03_cepstrum_theory_and_experiments.md)
+ 
+ <!-- STAGE4_CURRENT_START -->
+-## Kết quả kiểm chứng hiện hành — 30/10/2026
+-
+-Nguồn: cấu hình đóng băng và `outputs/stage4_validation/evaluation.json`. Final Score là sai số thống kê toàn file; thấp hơn tốt hơn. Accuracy/F1 từng khung không xác định vì thiếu nhãn thời gian.
++Nguồn: run `stage4-71a151c01ece1311`; metric `legacy-v1`; [evaluation](../outputs/reports/stage4/inputs/evaluation.json) SHA `6cb3ec647409e04bb7527730c903a89703f6745878dbc0af4abcaa67684661ae`; [config](../outputs/reports/stage4/inputs/frozen_config.json) SHA `83dfda76c5a2ce34846a8c4eff9132296e2c09846e4d8e2cf44bbac5be884dc5`; [model](../outputs/reports/stage4/inputs/frozen_models.json) SHA `132f49c80d3f0973424a237a4a7cf83bab82f14f1dd03663f3af720b6f09084f`.
++
++## Kết quả từ run đã xác minh
++
++Nguồn: cấu hình đóng băng và evaluation đã ghim trong gói báo cáo. Final Score là sai số thống kê toàn file; thấp hơn tốt hơn. Accuracy/F1 từng khung không xác định vì thiếu nhãn thời gian.
+ 
+ Preset: Energy + Viterbi, frame/hop 30/10 ms, T=0.5.
+ 
+@@ -254,5 +256,5 @@
+ | studio_F2.wav | 199.65 | 43.92 | 134 | 4.08 |
+ | studio_M2.wav | 155.62 | 30.62 | 116 | 0.55 |
+ 
+-[Chi tiết và giới hạn kiểm chứng](STAGE4_RESULTS.md).
++[Chi tiết và giới hạn kiểm chứng](../outputs/reports/stage4/README.md).
+ <!-- STAGE4_CURRENT_END -->
+--- docs/03_cepstrum_theory_and_experiments.md
++++ docs/03_cepstrum_theory_and_experiments.md
+@@ -233,9 +233,11 @@
+ **Dẫn hướng:** [← Chương II: Thuật toán AMDF](02_amdf_theory_and_experiments.md) | [Trang chủ README](../README.md) | [Chương IV: Đánh Giá & Đối Sánh Trên Tập Kiểm Thử →](04_test_set_benchmark_and_analysis.md)
+ 
+ <!-- STAGE4_CURRENT_START -->
+-## Kết quả kiểm chứng hiện hành — 30/10/2026
+-
+-Nguồn: cấu hình đóng băng và `outputs/stage4_validation/evaluation.json`. Final Score là sai số thống kê toàn file; thấp hơn tốt hơn. Accuracy/F1 từng khung không xác định vì thiếu nhãn thời gian.
++Nguồn: run `stage4-71a151c01ece1311`; metric `legacy-v1`; [evaluation](../outputs/reports/stage4/inputs/evaluation.json) SHA `6cb3ec647409e04bb7527730c903a89703f6745878dbc0af4abcaa67684661ae`; [config](../outputs/reports/stage4/inputs/frozen_config.json) SHA `83dfda76c5a2ce34846a8c4eff9132296e2c09846e4d8e2cf44bbac5be884dc5`; [model](../outputs/reports/stage4/inputs/frozen_models.json) SHA `132f49c80d3f0973424a237a4a7cf83bab82f14f1dd03663f3af720b6f09084f`.
++
++## Kết quả từ run đã xác minh
++
++Nguồn: cấu hình đóng băng và evaluation đã ghim trong gói báo cáo. Final Score là sai số thống kê toàn file; thấp hơn tốt hơn. Accuracy/F1 từng khung không xác định vì thiếu nhãn thời gian.
+ 
+ Preset: BP + Clip + Energy + Viterbi, frame/hop 30/10 ms, T=0.1.
+ 
+@@ -254,5 +256,5 @@
+ 
+ **Đính chính:** mốc 4,43%/7,62% lịch sử được tạo khi detector rơi vào ACF nhưng Viterbi dùng Cepstrum. Replay đúng commit và chỉ thay nhánh Cepstrum đã xác nhận nguyên nhân. Preset hiện hành giảm lỗi train nhưng tăng lỗi test so với trước hiệu chỉnh; không gọi đây là cải thiện tổng quát.
+ 
+-[Chi tiết và giới hạn kiểm chứng](STAGE4_RESULTS.md).
++[Chi tiết và giới hạn kiểm chứng](../outputs/reports/stage4/README.md).
+ <!-- STAGE4_CURRENT_END -->
+--- docs/04_test_set_benchmark_and_analysis.md
++++ docs/04_test_set_benchmark_and_analysis.md
+@@ -168,9 +168,11 @@
+ **Dẫn hướng:** [← Chương III: Thuật toán Cepstrum](03_cepstrum_theory_and_experiments.md) | [Trang chủ README](../README.md)
+ 
+ <!-- STAGE4_CURRENT_START -->
+-## Kết quả kiểm chứng hiện hành — 30/10/2026
++Nguồn: run `stage4-71a151c01ece1311`; metric `legacy-v1`; [evaluation](../outputs/reports/stage4/inputs/evaluation.json) SHA `6cb3ec647409e04bb7527730c903a89703f6745878dbc0af4abcaa67684661ae`; [config](../outputs/reports/stage4/inputs/frozen_config.json) SHA `83dfda76c5a2ce34846a8c4eff9132296e2c09846e4d8e2cf44bbac5be884dc5`; [model](../outputs/reports/stage4/inputs/frozen_models.json) SHA `132f49c80d3f0973424a237a4a7cf83bab82f14f1dd03663f3af720b6f09084f`.
+ 
+-Nguồn: cấu hình đóng băng và `outputs/stage4_validation/evaluation.json`. Final Score là sai số thống kê toàn file; thấp hơn tốt hơn. Accuracy/F1 từng khung không xác định vì thiếu nhãn thời gian.
++## Kết quả từ run đã xác minh
++
++Nguồn: cấu hình đóng băng và evaluation đã ghim trong gói báo cáo. Final Score là sai số thống kê toàn file; thấp hơn tốt hơn. Accuracy/F1 từng khung không xác định vì thiếu nhãn thời gian.
+ 
+ | Thuật toán | Baseline test (%) | Trước hiệu chỉnh (%) | Sau chọn trên train (%) |
+ |---|---:|---:|---:|
+@@ -178,7 +180,7 @@
+ | AMDF | 6.357 | 4.125 | 2.755 |
+ | CEPSTRUM | 48.185 | 21.203 | 22.942 |
+ 
+-![Kết quả hiện hành](../outputs/stage4_validation/figures/pipelines_train_test.png)
++![Kết quả hiện hành](../outputs/reports/stage4/figures/pipelines_train_test.png)
+ 
+-[Chi tiết và giới hạn kiểm chứng](STAGE4_RESULTS.md).
++[Chi tiết và giới hạn kiểm chứng](../outputs/reports/stage4/README.md).
+ <!-- STAGE4_CURRENT_END -->
+--- docs/05_unsupervised_thresholding_analysis.md
++++ docs/05_unsupervised_thresholding_analysis.md
+@@ -410,11 +410,13 @@
+ ---
+ 
+ <!-- STAGE4_CURRENT_START -->
+-## Kết quả kiểm chứng hiện hành — 30/10/2026
+-
+-Nguồn: cấu hình đóng băng và `outputs/stage4_validation/evaluation.json`. Final Score là sai số thống kê toàn file; thấp hơn tốt hơn. Accuracy/F1 từng khung không xác định vì thiếu nhãn thời gian.
+-
+-> Đây là snapshot 17 giao thức Stage 4, gồm Otsu trước sửa ngày 01/11. Benchmark 15/16 sau sửa được liên kết trong [rà soát main](MAIN_REVIEW_FIXES.md).
++Nguồn: run `stage4-71a151c01ece1311`; metric `legacy-v1`; [evaluation](../outputs/reports/stage4/inputs/evaluation.json) SHA `6cb3ec647409e04bb7527730c903a89703f6745878dbc0af4abcaa67684661ae`; [config](../outputs/reports/stage4/inputs/frozen_config.json) SHA `83dfda76c5a2ce34846a8c4eff9132296e2c09846e4d8e2cf44bbac5be884dc5`; [model](../outputs/reports/stage4/inputs/frozen_models.json) SHA `132f49c80d3f0973424a237a4a7cf83bab82f14f1dd03663f3af720b6f09084f`.
++
++## Kết quả từ run đã xác minh
++
++Nguồn: cấu hình đóng băng và evaluation đã ghim trong gói báo cáo. Final Score là sai số thống kê toàn file; thấp hơn tốt hơn. Accuracy/F1 từng khung không xác định vì thiếu nhãn thời gian.
++
++Các giao thức dưới đây thuộc evaluation đã lưu; không chạy lại Otsu hoặc các mô hình bằng mã hiện tại.
+ 
+ Giao thức `train_all` gồm silence, `train_active` chỉ active train, `input_active` fit riêng từng file đầu vào. Tất cả dùng cùng frame/hop 25/10 ms, silence gate và median theo đoạn.
+ 
+@@ -440,7 +442,7 @@
+ 
+ Các thứ hạng test là mô tả; không được dùng để chọn lại tham số.
+ 
+-![Giao thức hiện hành](../outputs/stage4_validation/figures/protocols_test.png)
+-
+-[Chi tiết và giới hạn kiểm chứng](STAGE4_RESULTS.md).
++![Giao thức hiện hành](../outputs/reports/stage4/figures/protocols_test.png)
++
++[Chi tiết và giới hạn kiểm chứng](../outputs/reports/stage4/README.md).
+ <!-- STAGE4_CURRENT_END -->
